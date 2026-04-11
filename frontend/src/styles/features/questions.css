@@ -1,0 +1,402 @@
+.filters-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(240px, 1.5fr)
+    minmax(180px, 0.6fr)
+    minmax(260px, 1fr)
+    minmax(180px, 0.5fr);
+  gap: 12px;
+}
+
+.questions-list {
+  display: grid;
+  gap: 8px;
+}
+
+.list-row--pending {
+  background: color-mix(in srgb, var(--color-ivory) 78%, var(--color-paper));
+}
+
+.question-cell {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.question-cell--interactive {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.question-cell--interactive:hover .question-cell__content,
+.question-cell--interactive:focus-visible .question-cell__content {
+  --question-content-code-bg: color-mix(in srgb, var(--color-ivory) 80%, var(--color-paper));
+}
+
+.question-cell--interactive:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-cyan) 72%, transparent);
+  outline-offset: 8px;
+  border-radius: var(--control-radius);
+}
+
+.question-cell__section {
+  display: grid;
+  gap: 6px;
+}
+
+.question-cell__label {
+  color: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.question-cell__content {
+  --question-content-code-bg: color-mix(in srgb, var(--color-paper) 90%, var(--color-ivory));
+}
+
+.question-encounter-cell {
+  justify-content: flex-start;
+}
+
+.editor-layout {
+  display: grid;
+  gap: var(--frame-gap);
+  width: min(960px, 100%);
+  justify-self: center;
+}
+
+.editor-panel {
+  padding: var(--panel-padding);
+}
+
+.editor-form {
+  display: grid;
+  gap: var(--panel-padding-compact);
+  margin-top: var(--panel-padding-compact);
+}
+
+.editor-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--panel-padding-compact);
+}
+
+.editor-preview-card {
+  display: grid;
+  gap: 10px;
+  padding: var(--panel-padding-compact);
+  border: 1px solid var(--panel-border);
+  border-radius: calc(var(--panel-radius) - 6px);
+  background: color-mix(in srgb, var(--color-paper) 90%, var(--color-ivory));
+}
+
+.editor-preview-card__label {
+  color: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--panel-padding-compact);
+}
+
+.difficulty-toggle {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--control-radius);
+  background: transparent;
+}
+
+.difficulty-toggle__option.v-btn {
+  justify-content: center;
+}
+
+.question-dialog {
+  display: grid;
+  gap: var(--panel-padding-compact);
+}
+
+.question-dialog__header {
+  align-items: flex-start;
+}
+
+.question-dialog__body {
+  display: grid;
+  gap: var(--panel-padding-compact);
+}
+
+.question-dialog__encounter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: var(--panel-padding-compact);
+  border: 1px solid var(--panel-border);
+  border-radius: calc(var(--panel-radius) - 6px);
+  background: color-mix(in srgb, var(--color-paper) 90%, var(--color-ivory));
+}
+
+.question-dialog__encounter-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.question-dialog__encounter-copy strong {
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: var(--font-size-h2);
+  line-height: 1.05;
+}
+
+.question-dialog__meta {
+  display: grid;
+  gap: 12px;
+}
+
+.csv-import-dialog {
+  display: grid;
+  gap: var(--panel-padding-compact);
+}
+
+.csv-import-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--panel-padding-compact);
+}
+
+.csv-import-dialog__intro {
+  display: grid;
+  gap: 8px;
+}
+
+.csv-import-dialog__intro p {
+  max-width: 72ch;
+  color: var(--color-ink-muted);
+}
+
+.csv-import-dialog__header-actions,
+.csv-import-dialog__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.csv-import-dialog__file-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: var(--panel-padding-compact);
+  border: 1px solid var(--panel-border);
+  border-radius: calc(var(--panel-radius) - 6px);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--color-paper) 92%, var(--color-ivory)), color-mix(in srgb, var(--color-paper) 84%, var(--color-ivory)));
+}
+
+.csv-import-dialog__file-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.csv-import-dialog__file-copy strong {
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.csv-import-dialog__file-copy small {
+  color: var(--color-ink-muted);
+}
+
+.csv-import-dialog__eyebrow,
+.csv-import-row__eyebrow {
+  color: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.csv-import-dialog__input {
+  display: none;
+}
+
+.csv-import-summary-grid,
+.csv-import-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.csv-import-summary-card,
+.csv-import-meta-card,
+.csv-import-row {
+  border: 1px solid var(--panel-border);
+  border-radius: calc(var(--panel-radius) - 6px);
+}
+
+.csv-import-summary-card {
+  display: grid;
+  gap: 6px;
+  padding: var(--panel-padding-compact);
+  background: color-mix(in srgb, var(--color-paper) 94%, var(--color-ivory));
+}
+
+.csv-import-summary-card span {
+  color: var(--color-ink-muted);
+  font-size: 0.84rem;
+}
+
+.csv-import-summary-card strong {
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.csv-import-summary-card--create {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-success) 24%, transparent);
+}
+
+.csv-import-summary-card--update {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-cyan) 24%, transparent);
+}
+
+.csv-import-summary-card--error {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-danger) 28%, transparent);
+}
+
+.csv-import-meta-card {
+  display: grid;
+  gap: 10px;
+}
+
+.csv-import-meta-card h3,
+.csv-import-rows__header h3 {
+  color: var(--color-ink);
+  font-size: 0.98rem;
+}
+
+.csv-import-chip-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.csv-import-rows {
+  display: grid;
+  gap: 12px;
+}
+
+.csv-import-rows__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.csv-import-rows__header p {
+  color: var(--color-ink-muted);
+}
+
+.csv-import-rows__list {
+  display: grid;
+  gap: 10px;
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.csv-import-row {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  background: color-mix(in srgb, var(--color-paper) 92%, var(--color-ivory));
+}
+
+.csv-import-row--create {
+  border-color: color-mix(in srgb, var(--color-success) 26%, var(--panel-border));
+}
+
+.csv-import-row--update {
+  border-color: color-mix(in srgb, var(--color-cyan) 24%, var(--panel-border));
+}
+
+.csv-import-row--error {
+  border-color: color-mix(in srgb, var(--color-danger) 38%, var(--panel-border));
+  background: color-mix(in srgb, var(--color-paper) 86%, var(--color-danger));
+}
+
+.csv-import-row__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.csv-import-row__identity {
+  display: grid;
+  gap: 4px;
+}
+
+.csv-import-row__question {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.csv-import-row__issues {
+  display: grid;
+  gap: 6px;
+}
+
+.csv-import-row__issue {
+  padding: 8px 10px;
+  border-radius: calc(var(--control-radius) - 6px);
+  font-size: 0.92rem;
+}
+
+.csv-import-row__issue--error {
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-paper));
+  color: var(--color-danger);
+}
+
+.csv-import-row__issue--warning {
+  background: color-mix(in srgb, var(--color-warning) 14%, var(--color-paper));
+  color: color-mix(in srgb, var(--color-ink) 82%, var(--color-warning));
+}
+
+@media (max-width: 900px) {
+  .filters-grid,
+  .form-row,
+  .editor-preview-grid,
+  .csv-import-summary-grid,
+  .csv-import-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .question-dialog__encounter,
+  .csv-import-dialog__header,
+  .csv-import-dialog__file-strip,
+  .csv-import-rows__header,
+  .csv-import-row__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

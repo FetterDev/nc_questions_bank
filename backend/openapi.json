@@ -1,0 +1,5541 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Локальный вход по login и password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/me": {
+      "get": {
+        "operationId": "UsersController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Текущий пользователь",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users": {
+      "get": {
+        "operationId": "UsersController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Поиск по login, displayName или email",
+            "schema": {
+              "example": "nord",
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "USER",
+                "MANAGER",
+                "ADMIN"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "DISABLED"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListUsersResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Список пользователей",
+        "tags": [
+          "users"
+        ]
+      },
+      "post": {
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Создать пользователя",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/{id}": {
+      "patch": {
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Обновить пользователя",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/{id}/reset-password": {
+      "post": {
+        "operationId": "UsersController_resetPassword",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetUserPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Сбросить пароль пользователя",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/{id}/deactivate": {
+      "post": {
+        "operationId": "UsersController_deactivate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Деактивировать пользователя",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/{id}/activate": {
+      "post": {
+        "operationId": "UsersController_activate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Активировать пользователя",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/analytics/growth": {
+      "get": {
+        "operationId": "AnalyticsController_getGrowthAnalytics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrowthAnalyticsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Точки роста текущего пользователя по истории тренировок",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
+    "/api/analytics/bank": {
+      "get": {
+        "operationId": "AnalyticsController_getBankAnalytics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankAnalyticsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Анализ текущего опубликованного банка вопросов",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
+    "/api/companies": {
+      "get": {
+        "operationId": "CompaniesController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Поиск по названию компании",
+            "schema": {
+              "example": "google",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCompaniesResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Список компаний",
+        "tags": [
+          "companies"
+        ]
+      },
+      "post": {
+        "operationId": "CompaniesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompanyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Создать компанию",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/api/companies/{id}": {
+      "patch": {
+        "operationId": "CompaniesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Переименовать компанию",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "HealthController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/api/interviews/cycles": {
+      "post": {
+        "operationId": "InterviewsController_createCycle",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInterviewCycleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewCycleDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Создать weekly cycle и автосгенерировать draft-пары",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/interviews/cycles/{id}": {
+      "get": {
+        "operationId": "InterviewsController_getCycleDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewCycleDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Детали interview cycle",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/interviews/cycles/{id}/pairs": {
+      "post": {
+        "operationId": "InterviewsController_createPair",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInterviewPairDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewItemDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Ручное создание пары в cycle",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/interviews/{id}": {
+      "patch": {
+        "operationId": "InterviewsController_updateInterview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInterviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewItemDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Обновить интервью",
+        "tags": [
+          "interviews"
+        ]
+      },
+      "delete": {
+        "operationId": "InterviewsController_removeInterview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Удалить интервью",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/interviews/admin-calendar": {
+      "get": {
+        "operationId": "InterviewsController_getAdminCalendar",
+        "parameters": [
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "По умолчанию текущий UTC-месяц",
+            "schema": {
+              "example": "2026-03",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminInterviewCalendarResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Админский month calendar интервью",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/interviews/my-calendar": {
+      "get": {
+        "operationId": "InterviewsController_getMyCalendar",
+        "parameters": [
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "По умолчанию текущий UTC-месяц",
+            "schema": {
+              "example": "2026-03",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyInterviewCalendarResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Личный month calendar интервью",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/interviews/{id}/runtime": {
+      "get": {
+        "operationId": "InterviewsController_getRuntime",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewRuntimeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Runtime payload интервью для interviewer",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/interviews/{id}/complete": {
+      "post": {
+        "operationId": "InterviewsController_completeInterview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteInterviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewItemDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Завершить интервью как interviewer",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/interviews/admin-dashboard": {
+      "get": {
+        "operationId": "InterviewsController_getAdminDashboard",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "example": "2026-02-16",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "example": "2026-04-12",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminInterviewDashboardResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Admin dashboard по интервью",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/interviews/my-dashboard": {
+      "get": {
+        "operationId": "InterviewsController_getMyDashboard",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "example": "2026-02-16",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "example": "2026-04-12",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyInterviewDashboardResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "User dashboard по интервью",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/topics": {
+      "get": {
+        "operationId": "TopicsController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Поиск по name или slug",
+            "schema": {
+              "example": "react",
+              "type": "string"
+            }
+          },
+          {
+            "name": "usedOnly",
+            "required": false,
+            "in": "query",
+            "description": "Вернуть только темы, связанные хотя бы с одним вопросом",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListTopicsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Список тем",
+        "tags": [
+          "topics"
+        ]
+      },
+      "post": {
+        "operationId": "TopicsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTopicDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Создать тему",
+        "tags": [
+          "topics"
+        ]
+      }
+    },
+    "/api/topics/{id}": {
+      "patch": {
+        "operationId": "TopicsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTopicDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Переименовать тему",
+        "tags": [
+          "topics"
+        ]
+      }
+    },
+    "/api/questions": {
+      "post": {
+        "operationId": "QuestionsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuestionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Создать вопрос",
+        "tags": [
+          "questions"
+        ]
+      },
+      "get": {
+        "operationId": "QuestionsController_findAll",
+        "parameters": [
+          {
+            "name": "difficulty",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "middle",
+              "type": "string",
+              "enum": [
+                "junior",
+                "middle",
+                "senior",
+                "lead"
+              ]
+            }
+          },
+          {
+            "name": "topic",
+            "required": false,
+            "in": "query",
+            "description": "Имя темы (name или slug)",
+            "schema": {
+              "example": "js",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QuestionDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Список вопросов (CRUD-выборка)",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/questions/export": {
+      "get": {
+        "operationId": "QuestionsController_exportCsv",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Поисковый запрос",
+            "schema": {
+              "example": "scope",
+              "type": "string"
+            }
+          },
+          {
+            "name": "difficulty",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр по сложности (CSV или repeatable query)",
+            "schema": {
+              "example": [
+                "junior",
+                "middle"
+              ],
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "junior",
+                  "middle",
+                  "senior",
+                  "lead"
+                ]
+              }
+            }
+          },
+          {
+            "name": "topicIds",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр по topicId (CSV или repeatable query)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "companyQuery",
+            "required": false,
+            "in": "query",
+            "description": "Строковый поиск по названию компании",
+            "schema": {
+              "example": "google",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "relevance",
+              "type": "string",
+              "enum": [
+                "relevance",
+                "newest",
+                "popular"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Экспорт вопросов в CSV",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/questions/{id}": {
+      "get": {
+        "operationId": "QuestionsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Получить вопрос по id",
+        "tags": [
+          "questions"
+        ]
+      },
+      "patch": {
+        "operationId": "QuestionsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateQuestionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Обновить вопрос",
+        "tags": [
+          "questions"
+        ]
+      },
+      "delete": {
+        "operationId": "QuestionsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Удалить вопрос",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/questions/import/preview": {
+      "post": {
+        "operationId": "QuestionsController_previewImport",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionCsvImportReportDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Preview CSV import for questions",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/questions/import/commit": {
+      "post": {
+        "operationId": "QuestionsController_commitImport",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionCsvImportReportDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Commit CSV import for questions",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/questions/{id}/interview-encounter": {
+      "put": {
+        "operationId": "QuestionsController_markInterviewEncounter",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionInterviewEncounterDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Отметить вопрос как встреченный на собеседовании",
+        "tags": [
+          "questions"
+        ]
+      },
+      "delete": {
+        "operationId": "QuestionsController_unmarkInterviewEncounter",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionInterviewEncounterDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Снять отметку вопроса как встреченного на собеседовании",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/search/questions": {
+      "get": {
+        "operationId": "SearchController_searchQuestions",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Поисковый запрос",
+            "schema": {
+              "example": "scope",
+              "type": "string"
+            }
+          },
+          {
+            "name": "difficulty",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр по сложности (CSV или repeatable query)",
+            "schema": {
+              "example": [
+                "junior",
+                "middle"
+              ],
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "junior",
+                  "middle",
+                  "senior",
+                  "lead"
+                ]
+              }
+            }
+          },
+          {
+            "name": "topicIds",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр по topicId (CSV или repeatable query)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "companyQuery",
+            "required": false,
+            "in": "query",
+            "description": "Строковый поиск по названию компании",
+            "schema": {
+              "example": "google",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "relevance",
+              "type": "string",
+              "enum": [
+                "relevance",
+                "newest",
+                "popular"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchQuestionsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Поиск вопросов (raw SQL)",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/api/question-change-requests": {
+      "post": {
+        "operationId": "QuestionChangeRequestsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuestionChangeRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionChangeRequestDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Создать заявку на изменение вопроса",
+        "tags": [
+          "question-change-requests"
+        ]
+      }
+    },
+    "/api/question-change-requests/my": {
+      "get": {
+        "operationId": "QuestionChangeRequestsController_listMine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QuestionChangeRequestSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Список моих заявок",
+        "tags": [
+          "question-change-requests"
+        ]
+      }
+    },
+    "/api/question-change-requests/review": {
+      "get": {
+        "operationId": "QuestionChangeRequestsController_listReviewQueue",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QuestionChangeRequestSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Очередь заявок на ревью",
+        "tags": [
+          "question-change-requests"
+        ]
+      }
+    },
+    "/api/question-change-requests/{id}": {
+      "get": {
+        "operationId": "QuestionChangeRequestsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionChangeRequestDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Детали заявки на изменение вопроса",
+        "tags": [
+          "question-change-requests"
+        ]
+      }
+    },
+    "/api/question-change-requests/{id}/approve": {
+      "post": {
+        "operationId": "QuestionChangeRequestsController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionChangeRequestDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Одобрить заявку",
+        "tags": [
+          "question-change-requests"
+        ]
+      }
+    },
+    "/api/question-change-requests/{id}/reject": {
+      "post": {
+        "operationId": "QuestionChangeRequestsController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectQuestionChangeRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionChangeRequestDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Отклонить заявку",
+        "tags": [
+          "question-change-requests"
+        ]
+      }
+    },
+    "/api/training/presets": {
+      "get": {
+        "operationId": "TrainingController_listPresets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingPresetDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Список тренировочных пресетов",
+        "tags": [
+          "training"
+        ]
+      },
+      "post": {
+        "operationId": "TrainingController_createPreset",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTrainingPresetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPresetDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Создать тренировочный пресет",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/api/training/participants": {
+      "get": {
+        "operationId": "TrainingController_listParticipants",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListTrainingParticipantsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Список участников для взаимной тренировки",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/api/training/presets/{id}": {
+      "patch": {
+        "operationId": "TrainingController_updatePreset",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTrainingPresetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingPresetDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Обновить тренировочный пресет",
+        "tags": [
+          "training"
+        ]
+      },
+      "delete": {
+        "operationId": "TrainingController_removePreset",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Удалить тренировочный пресет",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/api/training/prepare": {
+      "post": {
+        "operationId": "TrainingController_prepareTraining",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrepareTrainingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrepareTrainingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Подготовить тренировку по темам",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/api/training/history": {
+      "get": {
+        "operationId": "TrainingController_listHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListTrainingHistoryResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "История сохранённых тренировок текущего пользователя",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/api/training/history/{id}": {
+      "get": {
+        "operationId": "TrainingController_getHistoryDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingHistoryDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Детали сохранённой тренировки текущего пользователя",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "/api/training/results": {
+      "post": {
+        "operationId": "TrainingController_saveTrainingResults",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveTrainingResultsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveTrainingResultsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Сохранить результаты тренировки",
+        "tags": [
+          "training"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Nord API",
+    "description": "Backend API for interview questions bank",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "example": "nord.admin"
+          },
+          "password": {
+            "type": "string",
+            "example": "admin-password-2026",
+            "minLength": 12,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "login",
+          "password"
+        ]
+      },
+      "MeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "login": {
+            "type": "string",
+            "example": "nord.admin"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "example": "nord.admin@example.com"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Nord Admin"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "MANAGER",
+              "ADMIN"
+            ],
+            "example": "ADMIN"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "DISABLED"
+            ],
+            "example": "ACTIVE"
+          }
+        },
+        "required": [
+          "id",
+          "login",
+          "email",
+          "displayName",
+          "role",
+          "status"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/MeDto"
+          }
+        },
+        "required": [
+          "accessToken",
+          "expiresAt",
+          "profile"
+        ]
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "login": {
+            "type": "string",
+            "example": "nord.admin"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "example": "nord.admin@example.com"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Nord Admin"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "MANAGER",
+              "ADMIN"
+            ],
+            "example": "ADMIN"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "DISABLED"
+            ],
+            "example": "ACTIVE"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "login",
+          "email",
+          "displayName",
+          "role",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ListUsersAppliedFiltersDto": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string",
+            "nullable": true,
+            "example": "nord"
+          },
+          "role": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "USER",
+              "MANAGER",
+              "ADMIN"
+            ],
+            "example": "ADMIN"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "ACTIVE",
+              "DISABLED"
+            ],
+            "example": "ACTIVE"
+          }
+        },
+        "required": [
+          "q",
+          "role",
+          "status"
+        ]
+      },
+      "ListUsersMetaDto": {
+        "type": "object",
+        "properties": {
+          "tookMs": {
+            "type": "number",
+            "example": 7
+          },
+          "appliedFilters": {
+            "$ref": "#/components/schemas/ListUsersAppliedFiltersDto"
+          }
+        },
+        "required": [
+          "tookMs",
+          "appliedFilters"
+        ]
+      },
+      "ListUsersResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 2
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ListUsersMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "meta"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "example": "nord.user"
+          },
+          "password": {
+            "type": "string",
+            "example": "user-password-2026",
+            "minLength": 12,
+            "maxLength": 128
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Nord User"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "example": "nord.user@example.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "MANAGER",
+              "ADMIN"
+            ],
+            "example": "USER"
+          }
+        },
+        "required": [
+          "login",
+          "password",
+          "displayName",
+          "role"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "example": "Nord User"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "example": "nord.user@example.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "MANAGER",
+              "ADMIN"
+            ],
+            "example": "USER"
+          }
+        }
+      },
+      "ResetUserPasswordDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "new-password-2026",
+            "minLength": 12,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "password"
+        ]
+      },
+      "GrowthAnalyticsSummaryDto": {
+        "type": "object",
+        "properties": {
+          "totalResults": {
+            "type": "number",
+            "example": 42
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 25
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 17
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 6
+          },
+          "accuracy": {
+            "type": "number",
+            "example": 60
+          }
+        },
+        "required": [
+          "totalResults",
+          "correctCount",
+          "incorrectCount",
+          "partialCount",
+          "accuracy"
+        ]
+      },
+      "GrowthAnalyticsFeedbackTrainerDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Nord Admin"
+          },
+          "login": {
+            "type": "string",
+            "example": "nord.admin"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "login"
+        ]
+      },
+      "GrowthAnalyticsFeedbackItemDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "example": "cm7y5z8qv0003x4f2w7sn1session"
+          },
+          "trainer": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GrowthAnalyticsFeedbackTrainerDto"
+              }
+            ]
+          },
+          "feedback": {
+            "type": "string",
+            "example": "Нужно подтянуть аргументацию по Angular change detection и RxJS error handling."
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "sessionId",
+          "trainer",
+          "feedback",
+          "finishedAt"
+        ]
+      },
+      "GrowthAnalyticsTopicStatDto": {
+        "type": "object",
+        "properties": {
+          "topicId": {
+            "type": "string",
+            "example": "seed-topic-angular"
+          },
+          "name": {
+            "type": "string",
+            "example": "Angular"
+          },
+          "slug": {
+            "type": "string",
+            "example": "angular"
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 9
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 14
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 5
+          },
+          "accuracy": {
+            "type": "number",
+            "example": 39
+          }
+        },
+        "required": [
+          "topicId",
+          "name",
+          "slug",
+          "correctCount",
+          "incorrectCount",
+          "partialCount",
+          "accuracy"
+        ]
+      },
+      "QuestionStructuredContentDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "example": "Что выведет этот код?",
+            "maxLength": 5000
+          },
+          "code": {
+            "type": "string",
+            "example": "const answer: number = 42;",
+            "maxLength": 5000
+          },
+          "codeLanguage": {
+            "type": "string",
+            "enum": [
+              "javascript",
+              "jsx",
+              "typescript",
+              "tsx"
+            ],
+            "example": "typescript"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
+      "QuestionTopicDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm7y5z8qv0003x4f2w7sn1abc"
+          },
+          "name": {
+            "type": "string",
+            "example": "JS"
+          },
+          "slug": {
+            "type": "string",
+            "example": "js"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ]
+      },
+      "GrowthAnalyticsQuestionStatDto": {
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "string",
+            "example": "seed-question-bank-123456789abc"
+          },
+          "text": {
+            "type": "string",
+            "example": "Когда нужен составной индекс?"
+          },
+          "textContent": {
+            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "middle"
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionTopicDto"
+            }
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 3
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 5
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 2
+          },
+          "lastResult": {
+            "type": "string",
+            "enum": [
+              "correct",
+              "incorrect",
+              "partial"
+            ],
+            "example": "partial"
+          },
+          "lastAnsweredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "questionId",
+          "text",
+          "textContent",
+          "difficulty",
+          "topics",
+          "correctCount",
+          "incorrectCount",
+          "partialCount",
+          "lastResult",
+          "lastAnsweredAt"
+        ]
+      },
+      "GrowthAnalyticsResponseDto": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/GrowthAnalyticsSummaryDto"
+          },
+          "feedbackEntries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrowthAnalyticsFeedbackItemDto"
+            }
+          },
+          "weakTopics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrowthAnalyticsTopicStatDto"
+            }
+          },
+          "failedQuestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrowthAnalyticsQuestionStatDto"
+            }
+          },
+          "answeredQuestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrowthAnalyticsQuestionStatDto"
+            }
+          }
+        },
+        "required": [
+          "summary",
+          "feedbackEntries",
+          "weakTopics",
+          "failedQuestions",
+          "answeredQuestions"
+        ]
+      },
+      "BankAnalyticsDifficultyMixItemDto": {
+        "type": "object",
+        "properties": {
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "middle"
+          },
+          "count": {
+            "type": "number",
+            "example": 24
+          },
+          "share": {
+            "type": "number",
+            "example": 38
+          }
+        },
+        "required": [
+          "difficulty",
+          "count",
+          "share"
+        ]
+      },
+      "BankAnalyticsTopicStatDto": {
+        "type": "object",
+        "properties": {
+          "topicId": {
+            "type": "string",
+            "example": "seed-topic-angular"
+          },
+          "name": {
+            "type": "string",
+            "example": "Angular"
+          },
+          "slug": {
+            "type": "string",
+            "example": "angular"
+          },
+          "count": {
+            "type": "number",
+            "example": 12
+          }
+        },
+        "required": [
+          "topicId",
+          "name",
+          "slug",
+          "count"
+        ]
+      },
+      "BankAnalyticsResponseDto": {
+        "type": "object",
+        "properties": {
+          "totalQuestions": {
+            "type": "number",
+            "example": 64
+          },
+          "dominantDifficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "middle",
+            "nullable": true
+          },
+          "difficultyMix": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BankAnalyticsDifficultyMixItemDto"
+            }
+          },
+          "topTopics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BankAnalyticsTopicStatDto"
+            }
+          },
+          "sparseTopics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BankAnalyticsTopicStatDto"
+            }
+          }
+        },
+        "required": [
+          "totalQuestions",
+          "dominantDifficulty",
+          "difficultyMix",
+          "topTopics",
+          "sparseTopics"
+        ]
+      },
+      "CompanyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm7y5z8qv0003x4f2w7sn1abc"
+          },
+          "name": {
+            "type": "string",
+            "example": "Google"
+          },
+          "questionsCount": {
+            "type": "number",
+            "example": 12
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "questionsCount"
+        ]
+      },
+      "ListCompaniesAppliedFiltersDto": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "object",
+            "nullable": true,
+            "example": "google"
+          }
+        },
+        "required": [
+          "q"
+        ]
+      },
+      "ListCompaniesMetaDto": {
+        "type": "object",
+        "properties": {
+          "tookMs": {
+            "type": "number",
+            "example": 9
+          },
+          "appliedFilters": {
+            "$ref": "#/components/schemas/ListCompaniesAppliedFiltersDto"
+          }
+        },
+        "required": [
+          "tookMs",
+          "appliedFilters"
+        ]
+      },
+      "ListCompaniesResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompanyDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 15
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ListCompaniesMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "meta"
+        ]
+      },
+      "CreateCompanyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Название компании",
+            "maxLength": 100,
+            "example": "Google"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateCompanyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Новое название компании",
+            "maxLength": 100,
+            "example": "Google Cloud"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateInterviewCycleDto": {
+        "type": "object",
+        "properties": {
+          "periodStart": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-09"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-15"
+          },
+          "participantIds": {
+            "example": [
+              "cm8user1",
+              "cm8user2",
+              "cm8user3"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "periodStart",
+          "periodEnd",
+          "participantIds"
+        ]
+      },
+      "InterviewUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "login": {
+            "type": "string",
+            "example": "ivan.petrov"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Иван Петров"
+          }
+        },
+        "required": [
+          "id",
+          "login",
+          "displayName"
+        ]
+      },
+      "InterviewPresetDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001preset"
+          },
+          "name": {
+            "type": "string",
+            "example": "Angular Developer"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "InterviewItemDto": {
+        "type": "object",
+        "properties": {
+          "resultsCount": {
+            "type": "number",
+            "example": 10
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 4
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 3
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 3
+          },
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001interview"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PLANNED",
+              "SCHEDULED",
+              "COMPLETED"
+            ],
+            "example": "SCHEDULED"
+          },
+          "plannedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "example": "2026-03-11"
+          },
+          "preset": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InterviewPresetDto"
+              }
+            ]
+          },
+          "interviewer": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "interviewee": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "resultsCount",
+          "correctCount",
+          "incorrectCount",
+          "partialCount",
+          "id",
+          "status",
+          "plannedDate",
+          "preset",
+          "interviewer",
+          "interviewee",
+          "completedAt"
+        ]
+      },
+      "InterviewCycleDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001cycle"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "AUTO",
+              "MANUAL"
+            ],
+            "example": "AUTO"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-09"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-15"
+          },
+          "createdByAdmin": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "interviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewItemDto"
+            }
+          },
+          "draftCount": {
+            "type": "number",
+            "example": 2
+          },
+          "plannedCount": {
+            "type": "number",
+            "example": 1
+          },
+          "scheduledCount": {
+            "type": "number",
+            "example": 3
+          },
+          "completedCount": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "id",
+          "mode",
+          "periodStart",
+          "periodEnd",
+          "createdByAdmin",
+          "interviews",
+          "draftCount",
+          "plannedCount",
+          "scheduledCount",
+          "completedCount"
+        ]
+      },
+      "CreateInterviewPairDto": {
+        "type": "object",
+        "properties": {
+          "interviewerId": {
+            "type": "string",
+            "example": "cm8user1"
+          },
+          "intervieweeId": {
+            "type": "string",
+            "example": "cm8user2"
+          }
+        },
+        "required": [
+          "interviewerId",
+          "intervieweeId"
+        ]
+      },
+      "UpdateInterviewDto": {
+        "type": "object",
+        "properties": {
+          "interviewerId": {
+            "type": "object",
+            "example": "cm8user1",
+            "nullable": true
+          },
+          "intervieweeId": {
+            "type": "object",
+            "example": "cm8user2",
+            "nullable": true
+          },
+          "plannedDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-11",
+            "nullable": true
+          },
+          "presetId": {
+            "type": "object",
+            "example": "cm8preset1",
+            "nullable": true
+          },
+          "feedback": {
+            "type": "object",
+            "example": "Нужно точнее формулировать компромиссы.",
+            "nullable": true
+          }
+        }
+      },
+      "InterviewCalendarDayDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-11"
+          }
+        },
+        "required": [
+          "date"
+        ]
+      },
+      "InterviewCycleDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001cycle"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "AUTO",
+              "MANUAL"
+            ],
+            "example": "AUTO"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-09"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-15"
+          },
+          "createdByAdmin": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "interviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewItemDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "mode",
+          "periodStart",
+          "periodEnd",
+          "createdByAdmin",
+          "interviews"
+        ]
+      },
+      "AdminInterviewCalendarResponseDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-03"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewCalendarDayDto"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewItemDto"
+            }
+          },
+          "activeCycle": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InterviewCycleDetailDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "month",
+          "days",
+          "items",
+          "activeCycle"
+        ]
+      },
+      "MyInterviewCalendarItemDto": {
+        "type": "object",
+        "properties": {
+          "resultsCount": {
+            "type": "number",
+            "example": 10
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 4
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 3
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 3
+          },
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001interview"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PLANNED",
+              "SCHEDULED",
+              "COMPLETED"
+            ],
+            "example": "SCHEDULED"
+          },
+          "plannedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "example": "2026-03-11"
+          },
+          "preset": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InterviewPresetDto"
+              }
+            ]
+          },
+          "interviewer": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "interviewee": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "myRole": {
+            "type": "string",
+            "enum": [
+              "interviewer",
+              "interviewee"
+            ],
+            "example": "interviewer"
+          }
+        },
+        "required": [
+          "resultsCount",
+          "correctCount",
+          "incorrectCount",
+          "partialCount",
+          "id",
+          "status",
+          "plannedDate",
+          "preset",
+          "interviewer",
+          "interviewee",
+          "completedAt",
+          "myRole"
+        ]
+      },
+      "MyInterviewCalendarResponseDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-03"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewCalendarDayDto"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyInterviewCalendarItemDto"
+            }
+          }
+        },
+        "required": [
+          "month",
+          "days",
+          "items"
+        ]
+      },
+      "InterviewRuntimeQuestionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8interviewquestion1"
+          },
+          "questionId": {
+            "type": "string",
+            "example": "seed-question-bank-123456789abc"
+          },
+          "questionText": {
+            "type": "string",
+            "example": "Когда нужен составной индекс?"
+          },
+          "questionTextContent": {
+            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+          },
+          "answer": {
+            "type": "string",
+            "example": "Нужно, когда фильтруешь и сортируешь по нескольким полям."
+          },
+          "answerContent": {
+            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "middle"
+          },
+          "position": {
+            "type": "number",
+            "example": 0
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionTopicDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "questionId",
+          "questionText",
+          "questionTextContent",
+          "answer",
+          "answerContent",
+          "difficulty",
+          "position",
+          "topics"
+        ]
+      },
+      "InterviewRuntimeResponseDto": {
+        "type": "object",
+        "properties": {
+          "interview": {
+            "$ref": "#/components/schemas/InterviewItemDto"
+          },
+          "counterpart": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewRuntimeQuestionDto"
+            }
+          }
+        },
+        "required": [
+          "interview",
+          "counterpart",
+          "items"
+        ]
+      },
+      "CompleteInterviewItemDto": {
+        "type": "object",
+        "properties": {
+          "interviewQuestionId": {
+            "type": "string",
+            "example": "cm8interviewquestion1"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "correct",
+              "incorrect",
+              "partial"
+            ],
+            "example": "partial"
+          }
+        },
+        "required": [
+          "interviewQuestionId",
+          "result"
+        ]
+      },
+      "CompleteInterviewDto": {
+        "type": "object",
+        "properties": {
+          "feedback": {
+            "type": "string",
+            "example": "Нужно точнее формулировать компромиссы и быстрее структурировать ответ."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompleteInterviewItemDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "InterviewDashboardSummaryDto": {
+        "type": "object",
+        "properties": {
+          "resultsCount": {
+            "type": "number",
+            "example": 10
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 4
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 3
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 3
+          },
+          "totalInterviews": {
+            "type": "number",
+            "example": 12
+          },
+          "draftCount": {
+            "type": "number",
+            "example": 2
+          },
+          "plannedCount": {
+            "type": "number",
+            "example": 3
+          },
+          "scheduledCount": {
+            "type": "number",
+            "example": 4
+          },
+          "completedCount": {
+            "type": "number",
+            "example": 3
+          }
+        },
+        "required": [
+          "resultsCount",
+          "correctCount",
+          "incorrectCount",
+          "partialCount",
+          "totalInterviews",
+          "draftCount",
+          "plannedCount",
+          "scheduledCount",
+          "completedCount"
+        ]
+      },
+      "InterviewDashboardScheduleSeriesItemDto": {
+        "type": "object",
+        "properties": {
+          "bucketStart": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-09"
+          },
+          "draftCount": {
+            "type": "number",
+            "example": 2
+          },
+          "plannedCount": {
+            "type": "number",
+            "example": 1
+          },
+          "scheduledCount": {
+            "type": "number",
+            "example": 3
+          },
+          "completedCount": {
+            "type": "number",
+            "example": 2
+          },
+          "overdueCount": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "bucketStart",
+          "draftCount",
+          "plannedCount",
+          "scheduledCount",
+          "completedCount",
+          "overdueCount"
+        ]
+      },
+      "InterviewDashboardOutcomeMixDto": {
+        "type": "object",
+        "properties": {
+          "correctCount": {
+            "type": "number",
+            "example": 12
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 8
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 5
+          }
+        },
+        "required": [
+          "correctCount",
+          "partialCount",
+          "incorrectCount"
+        ]
+      },
+      "InterviewDashboardInterviewerLoadItemDto": {
+        "type": "object",
+        "properties": {
+          "interviewer": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "assignedCount": {
+            "type": "number",
+            "example": 4
+          },
+          "completedCount": {
+            "type": "number",
+            "example": 3
+          }
+        },
+        "required": [
+          "interviewer",
+          "assignedCount",
+          "completedCount"
+        ]
+      },
+      "InterviewWeakTopicDto": {
+        "type": "object",
+        "properties": {
+          "topicId": {
+            "type": "string",
+            "example": "seed-topic-angular"
+          },
+          "name": {
+            "type": "string",
+            "example": "Angular"
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 4
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 3
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 2
+          },
+          "accuracy": {
+            "type": "number",
+            "example": 44
+          }
+        },
+        "required": [
+          "topicId",
+          "name",
+          "correctCount",
+          "partialCount",
+          "incorrectCount",
+          "accuracy"
+        ]
+      },
+      "InterviewDashboardRecentItemDto": {
+        "type": "object",
+        "properties": {
+          "resultsCount": {
+            "type": "number",
+            "example": 10
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 4
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 3
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 3
+          },
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001interview"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PLANNED",
+              "SCHEDULED",
+              "COMPLETED"
+            ],
+            "example": "SCHEDULED"
+          },
+          "plannedDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "example": "2026-03-11"
+          },
+          "preset": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InterviewPresetDto"
+              }
+            ]
+          },
+          "interviewer": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "interviewee": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "resultsCount",
+          "correctCount",
+          "incorrectCount",
+          "partialCount",
+          "id",
+          "status",
+          "plannedDate",
+          "preset",
+          "interviewer",
+          "interviewee",
+          "completedAt"
+        ]
+      },
+      "AdminInterviewDashboardResponseDto": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/InterviewDashboardSummaryDto"
+          },
+          "scheduleSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewDashboardScheduleSeriesItemDto"
+            }
+          },
+          "outcomeMix": {
+            "$ref": "#/components/schemas/InterviewDashboardOutcomeMixDto"
+          },
+          "interviewerLoad": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewDashboardInterviewerLoadItemDto"
+            }
+          },
+          "weakTopics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewWeakTopicDto"
+            }
+          },
+          "upcoming": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewDashboardRecentItemDto"
+            }
+          },
+          "recentCompleted": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewDashboardRecentItemDto"
+            }
+          }
+        },
+        "required": [
+          "summary",
+          "scheduleSeries",
+          "outcomeMix",
+          "interviewerLoad",
+          "weakTopics",
+          "upcoming",
+          "recentCompleted"
+        ]
+      },
+      "MyInterviewDashboardOutcomeSeriesItemDto": {
+        "type": "object",
+        "properties": {
+          "bucketStart": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-09"
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 2
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 1
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "bucketStart",
+          "correctCount",
+          "partialCount",
+          "incorrectCount"
+        ]
+      },
+      "InterviewFeedbackEntryDto": {
+        "type": "object",
+        "properties": {
+          "interviewId": {
+            "type": "string",
+            "example": "cm8q4x7r10001interview"
+          },
+          "interviewer": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InterviewUserDto"
+              }
+            ]
+          },
+          "feedback": {
+            "type": "string",
+            "example": "Нужно точнее объяснять компромиссы."
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "interviewId",
+          "interviewer",
+          "feedback",
+          "completedAt"
+        ]
+      },
+      "MyInterviewDashboardResponseDto": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/InterviewDashboardSummaryDto"
+          },
+          "outcomeSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyInterviewDashboardOutcomeSeriesItemDto"
+            }
+          },
+          "weakTopics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewWeakTopicDto"
+            }
+          },
+          "feedbackEntries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewFeedbackEntryDto"
+            }
+          },
+          "recentInterviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewDashboardRecentItemDto"
+            }
+          }
+        },
+        "required": [
+          "summary",
+          "outcomeSeries",
+          "weakTopics",
+          "feedbackEntries",
+          "recentInterviews"
+        ]
+      },
+      "TopicDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm7y5z8qv0003x4f2w7sn1abc"
+          },
+          "name": {
+            "type": "string",
+            "example": "JavaScript"
+          },
+          "slug": {
+            "type": "string",
+            "example": "javascript"
+          },
+          "questionsCount": {
+            "type": "number",
+            "example": 42
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "questionsCount"
+        ]
+      },
+      "ListTopicsAppliedFiltersDto": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "object",
+            "nullable": true,
+            "example": "react"
+          },
+          "usedOnly": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "q",
+          "usedOnly"
+        ]
+      },
+      "ListTopicsMetaDto": {
+        "type": "object",
+        "properties": {
+          "tookMs": {
+            "type": "number",
+            "example": 7
+          },
+          "appliedFilters": {
+            "$ref": "#/components/schemas/ListTopicsAppliedFiltersDto"
+          }
+        },
+        "required": [
+          "tookMs",
+          "appliedFilters"
+        ]
+      },
+      "ListTopicsResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopicDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 25
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ListTopicsMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "meta"
+        ]
+      },
+      "CreateTopicDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Название темы",
+            "maxLength": 100,
+            "example": "Vue"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateTopicDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Новое название темы",
+            "maxLength": 100,
+            "example": "React Router"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateQuestionDto": {
+        "type": "object",
+        "properties": {
+          "textContent": {
+            "description": "Структурированное содержимое вопроса",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionStructuredContentDto"
+              }
+            ]
+          },
+          "answerContent": {
+            "description": "Структурированное содержимое ответа",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionStructuredContentDto"
+              }
+            ]
+          },
+          "difficulty": {
+            "type": "string",
+            "description": "Сложность вопроса",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "junior"
+          },
+          "topicIds": {
+            "description": "Список topicId",
+            "minItems": 1,
+            "example": [
+              "cm7y5z8qv0003x4f2w7sn1abc"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "companyId": {
+            "type": "string",
+            "description": "Опциональный companyId, если вопрос встречался на собеседовании в компании",
+            "nullable": true,
+            "example": "cm7y5z8qv0003x4f2w7sn1company"
+          }
+        },
+        "required": [
+          "textContent",
+          "answerContent",
+          "difficulty",
+          "topicIds"
+        ]
+      },
+      "QuestionCompanyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm7y5z8qv0003x4f2w7sn1abc"
+          },
+          "name": {
+            "type": "string",
+            "example": "Google"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "QuestionPendingChangeRequestDto": {
+        "type": "object",
+        "properties": {
+          "hasPendingChangeRequest": {
+            "type": "boolean",
+            "example": true
+          },
+          "hasMyPendingChangeRequest": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "hasPendingChangeRequest",
+          "hasMyPendingChangeRequest"
+        ]
+      },
+      "QuestionInterviewEncounterDto": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "example": 12
+          },
+          "checkedByCurrentUser": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "count",
+          "checkedByCurrentUser"
+        ]
+      },
+      "QuestionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm7y5z8qv0001x4f2w7sn1aaa"
+          },
+          "text": {
+            "type": "string",
+            "example": "Какие основные типы данных есть в JavaScript?"
+          },
+          "textContent": {
+            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+          },
+          "answer": {
+            "type": "string",
+            "example": "string, number, boolean, null, undefined, symbol, bigint, object."
+          },
+          "answerContent": {
+            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "junior"
+          },
+          "company": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionCompanyDto"
+              }
+            ]
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionTopicDto"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pendingChangeRequest": {
+            "$ref": "#/components/schemas/QuestionPendingChangeRequestDto"
+          },
+          "interviewEncounter": {
+            "$ref": "#/components/schemas/QuestionInterviewEncounterDto"
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "textContent",
+          "answer",
+          "answerContent",
+          "difficulty",
+          "company",
+          "topics",
+          "createdAt",
+          "updatedAt",
+          "pendingChangeRequest",
+          "interviewEncounter"
+        ]
+      },
+      "UpdateQuestionDto": {
+        "type": "object",
+        "properties": {
+          "textContent": {
+            "description": "Структурированное содержимое вопроса",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionStructuredContentDto"
+              }
+            ]
+          },
+          "answerContent": {
+            "description": "Структурированное содержимое ответа",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionStructuredContentDto"
+              }
+            ]
+          },
+          "difficulty": {
+            "type": "string",
+            "description": "Сложность вопроса",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "middle"
+          },
+          "topicIds": {
+            "description": "Список topicId",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "companyId": {
+            "type": "string",
+            "description": "Новый companyId или null для отвязки компании",
+            "nullable": true,
+            "example": "cm7y5z8qv0003x4f2w7sn1company"
+          }
+        }
+      },
+      "QuestionCsvImportTotalsDto": {
+        "type": "object",
+        "properties": {
+          "totalRows": {
+            "type": "number",
+            "example": 500
+          },
+          "create": {
+            "type": "number",
+            "example": 120
+          },
+          "update": {
+            "type": "number",
+            "example": 48
+          },
+          "noChange": {
+            "type": "number",
+            "example": 310
+          },
+          "error": {
+            "type": "number",
+            "example": 22
+          },
+          "warning": {
+            "type": "number",
+            "example": 17
+          }
+        },
+        "required": [
+          "totalRows",
+          "create",
+          "update",
+          "noChange",
+          "error",
+          "warning"
+        ]
+      },
+      "QuestionCsvImportNormalizedRowDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true,
+            "example": "cm8abc123"
+          },
+          "topics": {
+            "example": [
+              "HTML",
+              "Browser APIs"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "questionText": {
+            "type": "string",
+            "example": "Что такое Event Loop?"
+          },
+          "questionCode": {
+            "type": "string",
+            "nullable": true,
+            "example": "console.log(1)"
+          },
+          "questionCodeLanguage": {
+            "type": "string",
+            "enum": [
+              "javascript",
+              "jsx",
+              "typescript",
+              "tsx"
+            ],
+            "nullable": true,
+            "example": "javascript"
+          },
+          "answerText": {
+            "type": "string",
+            "example": "Механизм координации задач в JavaScript runtime."
+          },
+          "answerCode": {
+            "type": "string",
+            "nullable": true,
+            "example": "Promise.resolve()"
+          },
+          "answerCodeLanguage": {
+            "type": "string",
+            "enum": [
+              "javascript",
+              "jsx",
+              "typescript",
+              "tsx"
+            ],
+            "nullable": true,
+            "example": "javascript"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "nullable": true,
+            "example": "middle"
+          },
+          "company": {
+            "type": "string",
+            "nullable": true,
+            "example": "Google"
+          }
+        },
+        "required": [
+          "id",
+          "topics",
+          "questionText",
+          "questionCode",
+          "questionCodeLanguage",
+          "answerText",
+          "answerCode",
+          "answerCodeLanguage",
+          "difficulty",
+          "company"
+        ]
+      },
+      "QuestionCsvImportRowDto": {
+        "type": "object",
+        "properties": {
+          "rowNumber": {
+            "type": "number",
+            "example": 2
+          },
+          "summary": {
+            "type": "string",
+            "enum": [
+              "create",
+              "update",
+              "no_change",
+              "error"
+            ],
+            "example": "update"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "normalized": {
+            "$ref": "#/components/schemas/QuestionCsvImportNormalizedRowDto"
+          }
+        },
+        "required": [
+          "rowNumber",
+          "summary",
+          "errors",
+          "warnings",
+          "normalized"
+        ]
+      },
+      "QuestionCsvImportReportDto": {
+        "type": "object",
+        "properties": {
+          "applied": {
+            "type": "boolean",
+            "example": false
+          },
+          "fileName": {
+            "type": "string",
+            "example": "_Вопросы - Основной.csv"
+          },
+          "delimiter": {
+            "type": "string",
+            "enum": [
+              ";",
+              ","
+            ],
+            "example": ";"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "topicsToCreate": {
+            "example": [
+              "Angular",
+              "Browser APIs"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "companiesToCreate": {
+            "example": [
+              "Google",
+              "Yandex"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "totals": {
+            "$ref": "#/components/schemas/QuestionCsvImportTotalsDto"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionCsvImportRowDto"
+            }
+          }
+        },
+        "required": [
+          "applied",
+          "fileName",
+          "delimiter",
+          "warnings",
+          "topicsToCreate",
+          "companiesToCreate",
+          "totals",
+          "rows"
+        ]
+      },
+      "SearchAppliedFiltersDto": {
+        "type": "object",
+        "properties": {
+          "difficulty": {
+            "type": "array",
+            "example": [
+              "junior",
+              "middle"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "junior",
+                "middle",
+                "senior",
+                "lead"
+              ]
+            }
+          },
+          "topicIds": {
+            "example": [
+              "cm7y5z8qv0003x4f2w7sn1abc"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "companyQuery": {
+            "type": "object",
+            "nullable": true,
+            "example": "google"
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "relevance",
+              "newest",
+              "popular"
+            ],
+            "example": "relevance"
+          }
+        },
+        "required": [
+          "difficulty",
+          "topicIds",
+          "companyQuery",
+          "sort"
+        ]
+      },
+      "SearchMetaDto": {
+        "type": "object",
+        "properties": {
+          "tookMs": {
+            "type": "number",
+            "example": 14
+          },
+          "appliedFilters": {
+            "$ref": "#/components/schemas/SearchAppliedFiltersDto"
+          }
+        },
+        "required": [
+          "tookMs",
+          "appliedFilters"
+        ]
+      },
+      "SearchQuestionsResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 120
+          },
+          "meta": {
+            "$ref": "#/components/schemas/SearchMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "meta"
+        ]
+      },
+      "QuestionChangeRequestPayloadDto": {
+        "type": "object",
+        "properties": {
+          "textContent": {
+            "description": "Структурированное содержимое вопроса",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionStructuredContentDto"
+              }
+            ]
+          },
+          "answerContent": {
+            "description": "Структурированное содержимое ответа",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionStructuredContentDto"
+              }
+            ]
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "middle"
+          },
+          "topicIds": {
+            "description": "Список topicId",
+            "minItems": 1,
+            "example": [
+              "cm7y5z8qv0003x4f2w7sn1abc"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "companyId": {
+            "type": "string",
+            "description": "Опциональный companyId",
+            "nullable": true,
+            "example": "cm7y5z8qv0003x4f2w7sn1company"
+          }
+        },
+        "required": [
+          "textContent",
+          "answerContent",
+          "difficulty",
+          "topicIds"
+        ]
+      },
+      "CreateQuestionChangeRequestDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE"
+            ],
+            "example": "UPDATE"
+          },
+          "targetQuestionId": {
+            "type": "string",
+            "description": "ID опубликованного вопроса для UPDATE или DELETE",
+            "example": "cm7y5z8qv0001x4f2w7sn1aaa"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/QuestionChangeRequestPayloadDto"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "QuestionChangeRequestActorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "example": "nord.user@example.com"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Nord User"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "MANAGER",
+              "ADMIN"
+            ],
+            "example": "USER"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "displayName",
+          "role"
+        ]
+      },
+      "QuestionSnapshotTopicDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm7y5z8qv0003x4f2w7sn1abc"
+          },
+          "slug": {
+            "type": "string",
+            "example": "postgresql"
+          },
+          "name": {
+            "type": "string",
+            "example": "PostgreSQL"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name"
+        ]
+      },
+      "QuestionSnapshotDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "example": "Что такое MVCC?"
+          },
+          "textContent": {
+            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+          },
+          "answer": {
+            "type": "string",
+            "example": "Механизм версионирования строк в PostgreSQL."
+          },
+          "answerContent": {
+            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "middle"
+          },
+          "company": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionCompanyDto"
+              }
+            ]
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionSnapshotTopicDto"
+            }
+          }
+        },
+        "required": [
+          "text",
+          "textContent",
+          "answer",
+          "answerContent",
+          "difficulty",
+          "company",
+          "topics"
+        ]
+      },
+      "QuestionTextDiffDto": {
+        "type": "object",
+        "properties": {
+          "changed": {
+            "type": "boolean"
+          },
+          "before": {
+            "type": "object",
+            "nullable": true
+          },
+          "after": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "changed",
+          "before",
+          "after"
+        ]
+      },
+      "QuestionDifficultyDiffDto": {
+        "type": "object",
+        "properties": {
+          "changed": {
+            "type": "boolean"
+          },
+          "before": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "nullable": true
+          },
+          "after": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "changed",
+          "before",
+          "after"
+        ]
+      },
+      "QuestionCompanyDiffDto": {
+        "type": "object",
+        "properties": {
+          "changed": {
+            "type": "boolean"
+          },
+          "before": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionCompanyDto"
+              }
+            ]
+          },
+          "after": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionCompanyDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "changed",
+          "before",
+          "after"
+        ]
+      },
+      "QuestionTopicsDiffDto": {
+        "type": "object",
+        "properties": {
+          "changed": {
+            "type": "boolean"
+          },
+          "before": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionSnapshotTopicDto"
+            }
+          },
+          "after": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionSnapshotTopicDto"
+            }
+          },
+          "added": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionSnapshotTopicDto"
+            }
+          },
+          "removed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionSnapshotTopicDto"
+            }
+          }
+        },
+        "required": [
+          "changed",
+          "before",
+          "after",
+          "added",
+          "removed"
+        ]
+      },
+      "QuestionChangeRequestFieldDiffsDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "$ref": "#/components/schemas/QuestionTextDiffDto"
+          },
+          "answer": {
+            "$ref": "#/components/schemas/QuestionTextDiffDto"
+          },
+          "difficulty": {
+            "$ref": "#/components/schemas/QuestionDifficultyDiffDto"
+          },
+          "company": {
+            "$ref": "#/components/schemas/QuestionCompanyDiffDto"
+          },
+          "topics": {
+            "$ref": "#/components/schemas/QuestionTopicsDiffDto"
+          }
+        },
+        "required": [
+          "text",
+          "answer",
+          "difficulty",
+          "company",
+          "topics"
+        ]
+      },
+      "QuestionChangeRequestDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED"
+            ]
+          },
+          "targetQuestionId": {
+            "type": "object",
+            "nullable": true,
+            "example": "cm7y5z8qv0001x4f2w7sn1aaa"
+          },
+          "subject": {
+            "type": "string",
+            "example": "Что такое MVCC?"
+          },
+          "author": {
+            "$ref": "#/components/schemas/QuestionChangeRequestActorDto"
+          },
+          "reviewer": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionChangeRequestActorDto"
+              }
+            ]
+          },
+          "reviewComment": {
+            "type": "object",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "before": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionSnapshotDto"
+              }
+            ]
+          },
+          "after": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionSnapshotDto"
+              }
+            ]
+          },
+          "fieldDiffs": {
+            "$ref": "#/components/schemas/QuestionChangeRequestFieldDiffsDto"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "status",
+          "targetQuestionId",
+          "subject",
+          "author",
+          "reviewer",
+          "reviewComment",
+          "createdAt",
+          "updatedAt",
+          "reviewedAt",
+          "before",
+          "after",
+          "fieldDiffs"
+        ]
+      },
+      "QuestionChangeRequestSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED"
+            ]
+          },
+          "targetQuestionId": {
+            "type": "object",
+            "nullable": true,
+            "example": "cm7y5z8qv0001x4f2w7sn1aaa"
+          },
+          "subject": {
+            "type": "string",
+            "example": "Что такое MVCC?"
+          },
+          "author": {
+            "$ref": "#/components/schemas/QuestionChangeRequestActorDto"
+          },
+          "reviewer": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionChangeRequestActorDto"
+              }
+            ]
+          },
+          "reviewComment": {
+            "type": "object",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "status",
+          "targetQuestionId",
+          "subject",
+          "author",
+          "reviewer",
+          "reviewComment",
+          "createdAt",
+          "updatedAt",
+          "reviewedAt"
+        ]
+      },
+      "RejectQuestionChangeRequestDto": {
+        "type": "object",
+        "properties": {
+          "reviewComment": {
+            "type": "string",
+            "description": "Причина отклонения",
+            "maxLength": 2000,
+            "example": "Слишком общая формулировка и дублирующийся тег."
+          }
+        },
+        "required": [
+          "reviewComment"
+        ]
+      },
+      "TrainingPresetDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm7y5z8qv0003x4f2w7sn1preset"
+          },
+          "name": {
+            "type": "string",
+            "example": "Angular Developer"
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionTopicDto"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "topics",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "TrainingParticipantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "login": {
+            "type": "string",
+            "example": "ivan.petrov"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Иван Петров"
+          }
+        },
+        "required": [
+          "id",
+          "login",
+          "displayName"
+        ]
+      },
+      "ListTrainingParticipantsResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingParticipantDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "CreateTrainingPresetDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Angular Developer"
+          },
+          "topicIds": {
+            "example": [
+              "seed-topic-javascript",
+              "seed-topic-typescript",
+              "seed-topic-angular"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "topicIds"
+        ]
+      },
+      "UpdateTrainingPresetDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Angular Developer"
+          },
+          "topicIds": {
+            "example": [
+              "seed-topic-javascript",
+              "seed-topic-typescript",
+              "seed-topic-angular"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "topicIds"
+        ]
+      },
+      "PrepareTrainingDto": {
+        "type": "object",
+        "properties": {
+          "topicIds": {
+            "example": [
+              "seed-topic-javascript",
+              "seed-topic-typescript",
+              "seed-topic-angular",
+              "seed-topic-scss",
+              "seed-topic-ngrx"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "topicIds"
+        ]
+      },
+      "TrainingQuestionItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "seed-question-bank-123456789abc"
+          },
+          "text": {
+            "type": "string",
+            "example": "Что такое dependency injection в Angular?"
+          },
+          "textContent": {
+            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+          },
+          "answer": {
+            "type": "string",
+            "example": "Это механизм передачи зависимостей извне, чтобы класс не создавал их самостоятельно."
+          },
+          "answerContent": {
+            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "junior"
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionTopicDto"
+            }
+          },
+          "assignedTopic": {
+            "$ref": "#/components/schemas/QuestionTopicDto"
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "textContent",
+          "answer",
+          "answerContent",
+          "difficulty",
+          "topics",
+          "assignedTopic"
+        ]
+      },
+      "TrainingTopicBreakdownDto": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "$ref": "#/components/schemas/QuestionTopicDto"
+          },
+          "availableCount": {
+            "type": "number",
+            "example": 7
+          },
+          "selectedCount": {
+            "type": "number",
+            "example": 5
+          }
+        },
+        "required": [
+          "topic",
+          "availableCount",
+          "selectedCount"
+        ]
+      },
+      "PrepareTrainingMetaDto": {
+        "type": "object",
+        "properties": {
+          "tookMs": {
+            "type": "number",
+            "example": 11
+          },
+          "requestedPerTopic": {
+            "type": "number",
+            "example": 5
+          },
+          "topicBreakdown": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingTopicBreakdownDto"
+            }
+          }
+        },
+        "required": [
+          "tookMs",
+          "requestedPerTopic",
+          "topicBreakdown"
+        ]
+      },
+      "PrepareTrainingResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingQuestionItemDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 19
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PrepareTrainingMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "meta"
+        ]
+      },
+      "TrainingHistoryTrainerDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "login": {
+            "type": "string",
+            "example": "nord.user"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Nord User"
+          }
+        },
+        "required": [
+          "id",
+          "login",
+          "displayName"
+        ]
+      },
+      "TrainingHistorySessionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm7y5z8qv0003x4f2w7sn1session"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "ABANDONED_SAVED"
+            ],
+            "example": "COMPLETED"
+          },
+          "resultsCount": {
+            "type": "number",
+            "example": 12
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 5
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 4
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 3
+          },
+          "feedback": {
+            "type": "object",
+            "nullable": true,
+            "example": "Нужно точнее формулировать компромиссы и аргументацию."
+          },
+          "trainer": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TrainingHistoryTrainerDto"
+              }
+            ]
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "resultsCount",
+          "correctCount",
+          "incorrectCount",
+          "partialCount",
+          "feedback",
+          "trainer",
+          "finishedAt"
+        ]
+      },
+      "ListTrainingHistoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingHistorySessionDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "TrainingHistoryResultItemDto": {
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "string",
+            "example": "seed-question-bank-123456789abc"
+          },
+          "text": {
+            "type": "string",
+            "example": "Когда нужен составной индекс?"
+          },
+          "textContent": {
+            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "middle"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "correct",
+              "incorrect",
+              "partial"
+            ],
+            "example": "partial"
+          },
+          "position": {
+            "type": "number",
+            "example": 3
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionTopicDto"
+            }
+          }
+        },
+        "required": [
+          "questionId",
+          "text",
+          "textContent",
+          "difficulty",
+          "result",
+          "position",
+          "topics"
+        ]
+      },
+      "TrainingHistoryDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm7y5z8qv0003x4f2w7sn1session"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "ABANDONED_SAVED"
+            ],
+            "example": "COMPLETED"
+          },
+          "resultsCount": {
+            "type": "number",
+            "example": 12
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 5
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 4
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 3
+          },
+          "feedback": {
+            "type": "object",
+            "nullable": true,
+            "example": "Нужно точнее формулировать компромиссы и аргументацию."
+          },
+          "trainer": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TrainingHistoryTrainerDto"
+              }
+            ]
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingHistoryResultItemDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "resultsCount",
+          "correctCount",
+          "incorrectCount",
+          "partialCount",
+          "feedback",
+          "trainer",
+          "finishedAt",
+          "results"
+        ]
+      },
+      "SaveTrainingResultsItemDto": {
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "string",
+            "example": "seed-question-bank-123456789abc"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "middle"
+          },
+          "topicIds": {
+            "example": [
+              "seed-topic-javascript",
+              "seed-topic-typescript"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "correct",
+              "incorrect",
+              "partial"
+            ],
+            "example": "correct"
+          }
+        },
+        "required": [
+          "questionId",
+          "difficulty",
+          "topicIds",
+          "result"
+        ]
+      },
+      "SaveTrainingResultsDto": {
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "type": "string",
+            "nullable": true,
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "feedback": {
+            "type": "string",
+            "nullable": true,
+            "example": "Нужно подтянуть аргументацию по Angular change detection и RxJS error handling."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "ABANDONED_SAVED"
+            ],
+            "example": "COMPLETED"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SaveTrainingResultsItemDto"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "items"
+        ]
+      },
+      "SaveTrainingResultsResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm7y5z8qv0003x4f2w7sn1session"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "ABANDONED_SAVED"
+            ],
+            "example": "COMPLETED"
+          },
+          "resultsCount": {
+            "type": "number",
+            "example": 12
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 7
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 5
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 2
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "resultsCount",
+          "correctCount",
+          "incorrectCount",
+          "partialCount",
+          "finishedAt"
+        ]
+      }
+    }
+  }
+}

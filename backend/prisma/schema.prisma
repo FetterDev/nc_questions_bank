@@ -1,0 +1,320 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  MANAGER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum QuestionChangeRequestType {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum QuestionChangeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TrainingSessionStatus {
+  COMPLETED
+  ABANDONED_SAVED
+}
+
+enum TrainingSessionResultMark {
+  CORRECT
+  INCORRECT
+  PARTIAL
+}
+
+enum InterviewStatus {
+  DRAFT
+  PLANNED
+  SCHEDULED
+  COMPLETED
+}
+
+enum InterviewCycleMode {
+  AUTO
+  MANUAL
+}
+
+model Question {
+  id                  String                     @id @default(cuid())
+  text                String
+  textContent         Json
+  answer              String
+  answerContent       Json
+  difficulty          Int                        @db.SmallInt
+  companyId           String?
+  company             Company?                   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  topics              QuestionTopic[]
+  interviewEncounters QuestionInterviewEncounter[]
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+
+  @@index([difficulty])
+  @@index([companyId])
+  @@map("questions")
+}
+
+model Company {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  questions Question[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("companies")
+}
+
+model User {
+  id                             String                  @id @default(cuid())
+  login                          String                  @unique
+  email                          String?                 @unique
+  displayName                    String
+  role                           UserRole
+  status                         UserStatus              @default(ACTIVE)
+  passwordHash                   String
+  tokenVersion                   Int                     @default(0)
+  authoredQuestionChangeRequests QuestionChangeRequest[] @relation("QuestionChangeRequestAuthor")
+  reviewedQuestionChangeRequests QuestionChangeRequest[] @relation("QuestionChangeRequestReviewer")
+  trainingSessions               TrainingSession[]       @relation("TrainingSessionTarget")
+  conductedTrainingSessions      TrainingSession[]       @relation("TrainingSessionTrainer")
+  createdInterviewCycles         InterviewCycle[]        @relation("InterviewCycleCreatedBy")
+  conductedInterviews            Interview[]             @relation("InterviewInterviewer")
+  attendedInterviews             Interview[]             @relation("InterviewInterviewee")
+  interviewEncounters            QuestionInterviewEncounter[]
+  createdAt                      DateTime                @default(now())
+  updatedAt                      DateTime                @updatedAt
+
+  @@map("users")
+}
+
+model Topic {
+  id        String          @id @default(cuid())
+  name      String          @unique
+  slug      String          @unique
+  questions QuestionTopic[]
+  presets   TrainingPresetTopic[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@map("topics")
+}
+
+model QuestionTopic {
+  questionId String
+  topicId    String
+  createdAt  DateTime @default(now())
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  topic    Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, topicId])
+  @@index([topicId])
+  @@map("question_topics")
+}
+
+model QuestionInterviewEncounter {
+  questionId String
+  userId     String
+  createdAt  DateTime @default(now())
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, userId])
+  @@index([userId])
+  @@map("question_interview_encounters")
+}
+
+model QuestionChangeRequest {
+  id               String                      @id @default(cuid())
+  type             QuestionChangeRequestType
+  status           QuestionChangeRequestStatus @default(PENDING)
+  targetQuestionId String?
+  authorId         String
+  reviewerId       String?
+  baseSnapshot     Json?
+  proposedSnapshot Json?
+  reviewComment    String?
+  reviewedAt       DateTime?
+  createdAt        DateTime                    @default(now())
+  updatedAt        DateTime                    @updatedAt
+
+  author   User  @relation("QuestionChangeRequestAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  reviewer User? @relation("QuestionChangeRequestReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([authorId, status, createdAt(sort: Desc)])
+  @@map("question_change_requests")
+}
+
+model TrainingPreset {
+  id        String               @id @default(cuid())
+  name      String               @unique
+  topics    TrainingPresetTopic[]
+  interviews Interview[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@map("training_presets")
+}
+
+model TrainingPresetTopic {
+  presetId  String
+  topicId   String
+  position  Int
+  createdAt DateTime       @default(now())
+
+  preset TrainingPreset @relation(fields: [presetId], references: [id], onDelete: Cascade)
+  topic  Topic          @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([presetId, topicId])
+  @@unique([presetId, position])
+  @@index([topicId])
+  @@map("training_preset_topics")
+}
+
+model TrainingSession {
+  id             String                @id @default(cuid())
+  userId         String
+  trainerId      String?
+  status         TrainingSessionStatus
+  resultsCount   Int
+  correctCount   Int
+  incorrectCount Int
+  partialCount   Int                   @default(0)
+  feedback       String?
+  finishedAt     DateTime
+  createdAt      DateTime              @default(now())
+  user           User                  @relation("TrainingSessionTarget", fields: [userId], references: [id], onDelete: Cascade)
+  trainer        User?                 @relation("TrainingSessionTrainer", fields: [trainerId], references: [id], onDelete: SetNull)
+  results        TrainingSessionResult[]
+
+  @@index([userId, finishedAt(sort: Desc)])
+  @@index([trainerId, finishedAt(sort: Desc)])
+  @@map("training_sessions")
+}
+
+model TrainingSessionResult {
+  id                  String                      @id @default(cuid())
+  sessionId           String
+  questionId          String
+  questionText        String
+  questionTextContent Json
+  difficulty          Int                         @db.SmallInt
+  result              TrainingSessionResultMark
+  position            Int
+  createdAt           DateTime                    @default(now())
+  session             TrainingSession             @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  topics              TrainingSessionResultTopic[]
+
+  @@index([sessionId, position])
+  @@index([questionId, createdAt(sort: Desc)])
+  @@map("training_session_results")
+}
+
+model TrainingSessionResultTopic {
+  resultId   String
+  topicId    String
+  topicName  String
+  topicSlug  String
+  result     TrainingSessionResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+
+  @@id([resultId, topicId])
+  @@index([topicId])
+  @@map("training_session_result_topics")
+}
+
+model InterviewCycle {
+  id              String             @id @default(cuid())
+  periodStart     DateTime
+  periodEnd       DateTime
+  mode            InterviewCycleMode @default(AUTO)
+  createdByAdminId String
+  createdByAdmin  User               @relation("InterviewCycleCreatedBy", fields: [createdByAdminId], references: [id], onDelete: Restrict)
+  interviews      Interview[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([periodStart, periodEnd])
+  @@index([createdByAdminId])
+  @@map("interview_cycles")
+}
+
+model Interview {
+  id             String          @id @default(cuid())
+  cycleId        String
+  interviewerId  String
+  intervieweeId  String
+  plannedDate    DateTime?
+  presetId       String?
+  status         InterviewStatus @default(DRAFT)
+  completedAt    DateTime?
+  feedback       String?
+  resultsCount   Int             @default(0)
+  correctCount   Int             @default(0)
+  incorrectCount Int             @default(0)
+  partialCount   Int             @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  cycle          InterviewCycle  @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  interviewer    User            @relation("InterviewInterviewer", fields: [interviewerId], references: [id], onDelete: Restrict)
+  interviewee    User            @relation("InterviewInterviewee", fields: [intervieweeId], references: [id], onDelete: Restrict)
+  preset         TrainingPreset? @relation(fields: [presetId], references: [id], onDelete: Restrict)
+  questions      InterviewQuestion[]
+
+  @@unique([cycleId, interviewerId, intervieweeId])
+  @@index([plannedDate, status])
+  @@index([interviewerId])
+  @@index([intervieweeId])
+  @@index([cycleId])
+  @@map("interviews")
+}
+
+model InterviewQuestion {
+  id                  String                     @id @default(cuid())
+  interviewId         String
+  questionId          String
+  questionText        String
+  questionTextContent Json
+  answer              String
+  answerContent       Json
+  difficulty          Int                        @db.SmallInt
+  result              TrainingSessionResultMark?
+  position            Int
+  createdAt           DateTime                   @default(now())
+  interview           Interview                  @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  topics              InterviewQuestionTopic[]
+
+  @@index([interviewId, position])
+  @@index([questionId])
+  @@map("interview_questions")
+}
+
+model InterviewQuestionTopic {
+  interviewQuestionId String
+  topicId             String
+  topicName           String
+  topicSlug           String
+  interviewQuestion   InterviewQuestion @relation(fields: [interviewQuestionId], references: [id], onDelete: Cascade)
+
+  @@id([interviewQuestionId, topicId])
+  @@index([topicId])
+  @@map("interview_question_topics")
+}

@@ -1,0 +1,57 @@
+.users-controls-card {
+  align-items: end;
+  grid-template-columns:
+    minmax(0, 1.2fr)
+    minmax(180px, 0.36fr)
+    minmax(180px, 0.36fr)
+    minmax(180px, 0.3fr);
+}
+
+.users-admin-list {
+  display: grid;
+  gap: 8px;
+}
+
+.list-head--users,
+.user-row {
+  grid-template-columns:
+    minmax(0, 1.4fr)
+    minmax(160px, 0.44fr)
+    minmax(160px, 0.44fr)
+    minmax(180px, 0.42fr)
+    minmax(190px, 0.56fr);
+}
+
+.user-identity-cell {
+  display: grid;
+  gap: 4px;
+}
+
+.user-identity-cell strong {
+  color: var(--color-ink);
+}
+
+.user-identity-cell p,
+.user-identity-cell small,
+.user-updated-cell {
+  color: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.users-dialog-card {
+  display: grid;
+  gap: var(--panel-padding-compact);
+}
+
+@media (max-width: 1180px) {
+  .users-controls-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .users-controls-card {
+    grid-template-columns: 1fr;
+  }
+}

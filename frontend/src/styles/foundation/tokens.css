@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --color-paper: #f8f4ed;
+  --color-ivory: #ece2d0;
+  --color-ink: #0f3c43;
+  --color-ink-muted: #385e61;
+  --color-cyan: #187a82;
+  --color-cyan-light: #2b878e;
+  --color-brass: #c39a5e;
+  --color-danger: #a63c3c;
+  --color-success: #356f55;
+  --color-warning: #8c6532;
+  --color-tag-junior: #4a9a70;
+  --color-tag-middle: #c2a257;
+  --color-tag-senior: #c44545;
+  --color-tag-lead: #7d4cc4;
+
+  --font-display: 'Fraunces', serif;
+  --font-ui: 'IBM Plex Sans', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-size-display: 32px;
+  --font-size-h1: 28px;
+  --font-size-h2: 24px;
+  --font-size-body: 16px;
+  --font-size-small: 14px;
+  --line-height-base: 1.4;
+
+  --shell-padding: 24px;
+  --content-max-width: 1160px;
+  --frame-gap: 20px;
+  --panel-padding: 28px;
+  --panel-padding-compact: 18px;
+
+  --panel-radius: 24px;
+  --control-radius: 8px;
+  --pill-radius: 12px;
+
+  --sidebar-width: 292px;
+  --topbar-height: 64px;
+  --control-height: 48px;
+  --icon-button-size: 32px;
+  --list-row-min-height: 64px;
+  --dialog-max-width: 480px;
+  --min-touch-target: 40px;
+
+  --shadow-overlay: 0 6px 12px rgba(15, 60, 67, 0.08);
+  --shadow-floating-card: 0 12px 24px rgba(15, 60, 67, 0.12);
+  --training-backdrop: linear-gradient(180deg, #0f3c43 0%, #163c42 100%);
+
+  --btn-primary-bg: linear-gradient(90deg, var(--color-cyan) 0%, var(--color-cyan-light) 100%);
+  --btn-primary-bg-hover: linear-gradient(90deg, var(--color-ink) 0%, var(--color-cyan) 100%);
+  --btn-primary-border: var(--color-cyan);
+  --btn-primary-color: var(--color-paper);
+
+  --btn-secondary-bg: var(--color-paper);
+  --btn-secondary-bg-hover: var(--color-ivory);
+  --btn-secondary-border: color-mix(in srgb, var(--color-ink-muted) 30%, var(--color-paper));
+  --btn-secondary-border-hover: var(--color-cyan);
+  --btn-secondary-color: var(--color-ink);
+
+  --btn-text-bg: transparent;
+  --btn-text-bg-hover: var(--color-ivory);
+  --btn-text-border: transparent;
+  --btn-text-color: var(--color-ink-muted);
+
+  --field-bg: transparent;
+  --field-border: color-mix(in srgb, var(--color-ink-muted) 26%, var(--color-paper));
+  --field-border-focus: var(--color-cyan);
+  --field-placeholder: color-mix(in srgb, var(--color-ink-muted) 74%, var(--color-paper));
+  --panel-border: color-mix(in srgb, var(--color-ink-muted) 16%, var(--color-paper));
+  --table-header-bg: var(--color-ivory);
+}

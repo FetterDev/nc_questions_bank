@@ -1,0 +1,327 @@
+.interview-toolbar,
+.interview-toolbar__nav,
+.interview-status-pill,
+.interview-calendar__legend,
+.interview-draft-card__actions,
+.interview-draft-card__meta,
+.interview-row-card__meta,
+.interview-row-card__meta--wrap,
+.chart-donut__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.interview-toolbar {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.interview-toolbar__nav strong {
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.interviews-admin-stack {
+  display: grid;
+  gap: var(--frame-gap);
+}
+
+.interviews-user-layout {
+  grid-template-columns: minmax(280px, 0.75fr) minmax(0, 1.2fr) minmax(280px, 0.75fr);
+}
+
+.interviews-dashboard-layout {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.interviews-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.interview-calendar {
+  display: grid;
+  gap: 12px;
+}
+
+.interview-calendar__weekdays,
+.interview-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.interview-calendar__weekdays span {
+  color: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.interview-calendar__cell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 112px;
+  padding: 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: calc(var(--panel-radius) - 8px);
+  background: color-mix(in srgb, var(--color-paper) 88%, var(--color-ivory));
+  text-align: left;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.interview-calendar__cell strong {
+  color: var(--color-ink);
+  font-size: 1.05rem;
+}
+
+.interview-calendar__markers {
+  display: flex;
+  align-self: end;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.interview-calendar__marker {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-paper) 22%, transparent);
+}
+
+.interview-calendar__marker--draft,
+.interview-status-pill--draft .interview-status-pill__dot {
+  background: color-mix(in srgb, var(--color-ink-muted) 76%, var(--color-paper));
+}
+
+.interview-calendar__marker--planned,
+.interview-status-pill--planned .interview-status-pill__dot {
+  background: var(--color-brass);
+}
+
+.interview-calendar__marker--scheduled,
+.interview-status-pill--scheduled .interview-status-pill__dot {
+  background: var(--color-cyan);
+}
+
+.interview-calendar__marker--completed,
+.interview-status-pill--completed .interview-status-pill__dot {
+  background: var(--color-success);
+}
+
+.interview-calendar__more {
+  color: var(--color-ink-muted);
+  font-size: 0.76rem;
+  line-height: 1;
+}
+
+.interview-calendar__cell:hover:not(:disabled),
+.interview-calendar__cell:focus-visible:not(:disabled) {
+  border-color: var(--color-cyan);
+  transform: translateY(-1px);
+}
+
+.interview-calendar__cell--empty {
+  background: color-mix(in srgb, var(--color-paper) 62%, transparent);
+  cursor: default;
+}
+
+.interview-draft-list,
+.interview-row-list,
+.interview-feedback-list,
+.chart-frame,
+.chart-donut,
+.chart-donut__legend,
+.chart-bar-list,
+.chart-stacked-list {
+  display: grid;
+  gap: 12px;
+}
+
+.interview-draft-card,
+.interview-row-card,
+.interview-feedback-card,
+.chart-frame {
+  padding: var(--panel-padding-compact);
+  border: 1px solid var(--panel-border);
+  border-radius: calc(var(--panel-radius) - 8px);
+  background: color-mix(in srgb, var(--color-paper) 90%, var(--color-ivory));
+}
+
+.interview-draft-card,
+.interview-row-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.interview-status-pill {
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--panel-border) 70%, var(--color-ink-muted) 30%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-paper) 86%, var(--color-ivory));
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.interview-status-pill__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+
+.interview-calendar__legend {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.interview-row-card--stacked,
+.interview-row-card__meta--wrap {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.interview-draft-card__copy,
+.interview-row-card__copy,
+.interview-feedback-card {
+  display: grid;
+  gap: 4px;
+}
+
+.interview-draft-card__copy small,
+.interview-row-card__copy small,
+.interview-feedback-card small,
+.chart-bar-list__copy small,
+.chart-frame__head p,
+.chart-donut__legend-item small,
+.panel-copy small {
+  color: var(--color-ink-muted);
+}
+
+.chart-frame__head {
+  display: grid;
+  gap: 4px;
+}
+
+.chart-frame__head h3 {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 1.1;
+}
+
+.chart-bar-list__row,
+.chart-stacked-list__row {
+  display: grid;
+  grid-template-columns: minmax(0, 180px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.chart-bar-list__copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 28px;
+}
+
+.chart-svg__track {
+  fill: color-mix(in srgb, var(--color-ink-muted) 16%, var(--color-paper));
+}
+
+.chart-donut {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.chart-svg--donut {
+  width: 172px;
+  height: 172px;
+  transform: rotate(-90deg);
+}
+
+.chart-svg__donut-track,
+.chart-svg__donut-segment {
+  fill: none;
+  stroke-width: 4;
+}
+
+.chart-svg__donut-track {
+  stroke: color-mix(in srgb, var(--color-ink-muted) 16%, var(--color-paper));
+}
+
+.chart-svg__donut-segment {
+  stroke-linecap: round;
+}
+
+.chart-donut__center {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  inset: 0;
+  gap: 2px;
+  text-align: center;
+}
+
+.chart-donut {
+  position: relative;
+}
+
+.chart-donut__legend {
+  align-content: start;
+}
+
+.chart-donut__legend-item span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.chart-donut__legend-item {
+  justify-content: flex-start;
+}
+
+@media (max-width: 1280px) {
+  .interviews-user-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .interviews-form-grid,
+  .interviews-dashboard-layout,
+  .chart-donut,
+  .chart-bar-list__row,
+  .chart-stacked-list__row {
+    grid-template-columns: 1fr;
+  }
+
+  .interview-calendar__weekdays,
+  .interview-calendar__grid {
+    gap: 6px;
+  }
+
+  .interview-calendar__legend {
+    justify-content: flex-start;
+  }
+
+  .interview-calendar__cell {
+    min-height: 84px;
+  }
+}

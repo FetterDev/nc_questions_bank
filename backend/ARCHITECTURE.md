@@ -1,0 +1,307 @@
+# Backend architecture
+
+## Диаграммы
+- Редактируемая диаграмма модулей backend лежит в `docs/architecture/backend-components.drawio`.
+- Редактируемая диаграмма сущностей и связей лежит в `docs/architecture/domain-model.drawio`.
+- Текстовая review-friendly проекция доменной модели лежит в `docs/architecture/domain-model.md`.
+- Полный справочник структур данных лежит в `docs/architecture/data-structures.md`.
+- Полный governance/source-of-truth playbook лежит в `docs/architecture/domain-governance.md`.
+- В `domain-model.drawio` используются два типа связей:
+  - solid line — физическая FK-связь;
+  - dashed line — logical reference или snapshot reference, где Prisma-связи в схеме нет.
+- При изменении `src/modules/*`, `prisma/schema.prisma`, data model, snapshot-модели или границ data access (`Prisma` / raw SQL) соответствующие `.drawio`-файлы, `docs/architecture/domain-model.md`, `docs/architecture/data-structures.md` и `docs/architecture/domain-governance.md` обновляются в том же change set.
+
+## Текущая архитектура
+- Технологии: NestJS 11 + TypeScript.
+- База данных: PostgreSQL.
+- ORM (CRUD): Prisma.
+- Поиск и агрегирующая аналитика: raw SQL через отдельные repository-слои.
+- Точка входа: `src/main.ts`.
+- Глобальный префикс API: `/api`.
+- Авторизация: локальный `login + password` без публичной регистрации.
+- Сессия: stateless `Bearer JWT` с проверкой `tokenVersion` и `status` пользователя на каждом запросе.
+
+## Структура слоев
+- `src/infra/prisma/*`: инфраструктурный слой Prisma (DI + lifecycle).
+- `src/modules/auth/*`: `POST /api/auth/login`, подпись/проверка JWT, argon2id hash/verify, bearer middleware.
+- `src/modules/authz/*`: `CurrentUser`, `Roles`, `StrictRoles`, `RolesGuard`.
+- `src/modules/users/*`: `GET /api/me` и admin-only CRUD по пользователям.
+- `src/modules/health/*`: health-check модуль.
+- `src/modules/topics/*`: контролируемый справочник тем.
+  - `topics.controller.ts` — list для `USER | ADMIN`, create/update только для `ADMIN`.
+  - `topics.service.ts` — оркестрация list/create/rename и синхронизация snapshot-ов moderation при rename.
+  - `topics.repository.ts` — Prisma CRUD и list с usage count.
+- `src/modules/companies/*`: контролируемый справочник компаний.
+  - `companies.controller.ts` — list для `USER | ADMIN`, create/update только для `ADMIN`.
+  - `companies.service.ts` — оркестрация list/create/rename и синхронизация company snapshot-ов в moderation при rename.
+  - `companies.repository.ts` — Prisma CRUD и list с usage count.
+- `src/modules/questions/*`: published question bank.
+  - `questions.controller.ts` — read-only для `USER | ADMIN`, direct mutations только для `ADMIN`.
+  - `questions.service.ts` — правила published-слоя, валидация `topicIds` и optional `companyId`, нормализация `textContent/answerContent`, переключение interview-encounter отметки и блокировка direct admin edits при pending-заявке.
+  - `questions.repository.ts` — Prisma CRUD опубликованного банка и bulk-read по id, хранение plain-text проекций вместе со структурированными JSON-объектами и optional relation на `Company`.
+  - `question-interview-encounters.repository.ts` — Prisma read/write для per-user отметки `встречал на собесе` и агрегированного count.
+- `src/modules/question-change-requests/*`: moderation workflow.
+  - `question-change-requests.controller.ts` — создание заявок, очередь ревью, approve/reject.
+  - `question-change-requests.service.ts` — бизнес-правила moderation, валидация `topicIds` и optional `companyId`, approve через резолв topic/company snapshot-ов.
+  - `question-change-requests.repository.ts` — Prisma CRUD для очереди заявок и массовая синхронизация topic/company snapshot-ов при rename справочников.
+- `src/modules/search/*`: search-модуль.
+  - `search.controller.ts` — HTTP контракт поиска.
+  - `search.service.ts` — оркестрация и enrichment moderation-state.
+  - `search.repository.ts` — только parameterized raw SQL.
+  - `sql/search-questions.sql` — канонический SQL-шаблон для тюнинга.
+- `src/modules/training/*`: тренировочный контур.
+  - `training.controller.ts` — CRUD пресетов, список участников для взаимной тренировки, user-only history read-side, подготовка тренировки и сохранение её результатов.
+  - `training.service.ts` — валидация `topicIds`, оркестрация пресетов, подготовки выборки и записи финальных/частичных результатов, включая peer-сценарий тренировки другого пользователя с фидбеком.
+  - `training-presets.repository.ts` — Prisma CRUD пресетов.
+  - `training.repository.ts` — raw SQL для распределения published-вопросов по темам, history read-side и Prisma write-side для записи `TrainingSession*`.
+- `src/modules/interviews/*`: отдельный interview-контур.
+  - `interviews.controller.ts` — admin CRUD cycle/пар, admin/user calendars, interviewer runtime/completion и оба dashboard endpoint-а.
+  - `interviews.service.ts` — weekly cycle orchestration, directed pair generation, статусные переходы `draft/planned/scheduled/completed`, snapshot regeneration и interview-only analytics.
+  - `interviews.repository.ts` — Prisma CRUD/read-side для cycles, interviews, snapshot-вопросов и month/dashboard выборок.
+- `src/modules/questions/question-selection.repository.ts`: shared read-side выбора published вопросов по ordered `topicIds`; используется и `training`, и `interviews`.
+- `src/modules/analytics/*`: аналитический read-side.
+  - `analytics.controller.ts` — strict user/admin endpoints.
+  - `analytics.service.ts` — маппинг агрегатов в публичные DTO.
+  - `analytics.repository.ts` — parameterized raw SQL для growth analytics и bank analytics.
+
+## Контракты API
+- DTO-валидация query/body является частью публичного контракта; frontend не имеет права отправлять значения вне declared `min/max/enum/format`, даже если generated TS types это не ограничивают.
+- Любое изменение DTO, validation-правил или response shape требует синхронного обновления OpenAPI и frontend SDK в том же change set.
+- `GET /api/health`
+- `POST /api/auth/login`
+- `GET /api/me`
+- `GET /api/users` — только `ADMIN`
+- `POST /api/users` — только `ADMIN`
+- `PATCH /api/users/:id` — только `ADMIN`
+- `POST /api/users/:id/reset-password` — только `ADMIN`
+- `POST /api/users/:id/deactivate` — только `ADMIN`
+- `POST /api/users/:id/activate` — только `ADMIN`
+- `GET /api/topics`
+- `POST /api/topics` — только `ADMIN`
+- `PATCH /api/topics/:id` — только `ADMIN`
+- `GET /api/companies`
+- `POST /api/companies` — только `ADMIN`
+- `PATCH /api/companies/:id` — только `ADMIN`
+- `GET /api/questions`
+- `GET /api/questions/:id`
+- `POST /api/questions` — только `ADMIN`
+- `PATCH /api/questions/:id` — только `ADMIN`
+- `DELETE /api/questions/:id` — только `ADMIN`
+- `PUT /api/questions/:id/interview-encounter`
+- `DELETE /api/questions/:id/interview-encounter`
+- `GET /api/search/questions`
+- `GET /api/training/presets`
+- `GET /api/training/participants`
+- `GET /api/training/history` — strict `USER`
+- `GET /api/training/history/:id` — strict `USER`
+- `POST /api/training/presets` — только `ADMIN`
+- `PATCH /api/training/presets/:id` — только `ADMIN`
+- `DELETE /api/training/presets/:id` — только `ADMIN`
+- `POST /api/training/prepare`
+- `POST /api/training/results`
+- `POST /api/interviews/cycles` — только `ADMIN`
+- `GET /api/interviews/cycles/:id` — только `ADMIN`
+- `POST /api/interviews/cycles/:id/pairs` — только `ADMIN`
+- `PATCH /api/interviews/:id` — только `ADMIN`
+- `DELETE /api/interviews/:id` — только `ADMIN`
+- `GET /api/interviews/admin-calendar` — только `ADMIN`
+- `GET /api/interviews/my-calendar` — strict `USER`
+- `GET /api/interviews/:id/runtime` — strict `USER`, только interviewer этой записи
+- `POST /api/interviews/:id/complete` — strict `USER`, только interviewer этой записи
+- `GET /api/interviews/admin-dashboard` — только `ADMIN`
+- `GET /api/interviews/my-dashboard` — strict `USER`
+- `GET /api/analytics/growth` — strict `USER`
+- `GET /api/analytics/bank` — strict `ADMIN`
+- `POST /api/question-change-requests`
+- `GET /api/question-change-requests/my`
+- `GET /api/question-change-requests/review` — только `ADMIN`
+- `GET /api/question-change-requests/:id`
+- `POST /api/question-change-requests/:id/approve` — только `ADMIN`
+- `POST /api/question-change-requests/:id/reject` — только `ADMIN`
+
+## Доменные сущности
+- `Question`: только опубликованная версия вопроса.
+  - хранит `text/answer` как derived plain text;
+  - хранит `textContent/answerContent` как канонический JSON-объект с обязательным `text` и опциональными `code/codeLanguage`.
+  - хранит optional relation `companyId -> Company`, если вопрос встречался на собеседовании в компании.
+- `Company`: справочник компаний для question bank и company-aware search.
+- `Topic`: справочник тем.
+- `QuestionTopic`: M:N связь published question bank.
+- `QuestionInterviewEncounter`: per-user отметка того, что пользователь встречал вопрос на собеседовании.
+- `TrainingPreset`: именованный набор тем для тренировки.
+- `TrainingPresetTopic`: упорядоченная связь пресета с темой через `position`.
+- `TrainingSession`: сохранённая тренировка пользователя со статусом `COMPLETED | ABANDONED_SAVED`, итоговыми счётчиками, опциональным `trainerId` и опциональным `feedback`.
+- `TrainingSessionResult`: snapshot результата по одному вопросу внутри сохранённой тренировки.
+  - хранит `questionText` как derived plain text;
+  - хранит `questionTextContent` как snapshot структурированного текста с опциональным кодом.
+- `TrainingSessionResultTopic`: snapshot тегов вопроса внутри сохранённого результата.
+- `InterviewCycle`: weekly контейнер планирования интервью с `periodStart/periodEnd`, mode `AUTO | MANUAL` и creator-admin.
+- `Interview`: отдельная directed interview-запись с `interviewerId`, `intervieweeId`, optional `plannedDate`, optional `presetId`, status `DRAFT | PLANNED | SCHEDULED | COMPLETED`, feedback и итоговыми счётчиками.
+- `InterviewQuestion`: snapshot вопроса для конкретного interview runtime-а, включая `answerContent` и optional итоговый mark.
+- `InterviewQuestionTopic`: snapshot тем внутри interview question snapshot-а.
+- `User`: локальная auth-сущность с `login`, `passwordHash`, `email?`, `displayName`, `role`, `status`, `tokenVersion`.
+- `QuestionChangeRequest`: moderation-сущность с `type`, `status`, `targetQuestionId`, `authorId`, `reviewerId`, `baseSnapshot`, `proposedSnapshot`, `reviewComment`, `reviewedAt`.
+
+## Хранение данных и индексы
+- `users.login` — уникальный неизменяемый идентификатор для входа.
+- `users.email` — nullable unique поле для справочной связи.
+- `users.passwordHash` хранит только argon2id hash; self-service смены пароля нет.
+- `users.tokenVersion` инкрементируется при reset пароля, смене роли и activate/deactivate, чтобы старые JWT немедленно протухали.
+- `users.status` (`ACTIVE | DISABLED`) блокирует вход и любой доступ к защищённым endpoint-ам.
+- `QuestionChangeRequest.baseSnapshot` хранит опубликованное состояние вопроса на момент подачи заявки.
+- `QuestionChangeRequest.proposedSnapshot` хранит полное предлагаемое состояние.
+- `QuestionInterviewEncounter` хранит уникальную пару `questionId + userId`; агрегированный count всегда вычисляется по фактическому числу записей.
+- Snapshot темы хранит стабильную форму `id + name + slug`.
+- Snapshot компании хранит стабильную форму `id + name`.
+- Legacy snapshot без `id` читается backward-compatible и при rename темы синхронизируется в новый формат.
+- Legacy snapshot компании без `id` читается backward-compatible и при rename компании синхронизируется в новый формат.
+- Для `CREATE`: `baseSnapshot = null`.
+- Для `DELETE`: `proposedSnapshot = null`.
+- Индексы moderation-слоя:
+  - `(status, createdAt desc)` для очереди ревью;
+  - `(authorId, status, createdAt desc)` для списка своих заявок;
+  - `(targetQuestionId, status)` для быстрых проверок блокировок;
+  - partial unique index по `targetQuestionId` при `status = 'PENDING'`, чтобы на один опубликованный вопрос существовала только одна активная заявка.
+- Индексы тренировочных пресетов:
+  - unique `training_presets.name`;
+  - unique `(presetId, position)` для стабильного порядка тем внутри пресета;
+  - индекс `topicId` на `training_preset_topics` для быстрых join-ов.
+- Индексы тренировочных результатов:
+  - `(userId, finishedAt desc)` на `training_sessions`;
+  - `(trainerId, finishedAt desc)` на `training_sessions`;
+  - `(sessionId, position)` на `training_session_results`;
+  - `(questionId, createdAt desc)` на `training_session_results`;
+  - `topicId` на `training_session_result_topics`.
+- Индексы interview-контура:
+  - unique `(cycleId, interviewerId, intervieweeId)` для directed pair uniqueness внутри недели;
+  - `(plannedDate, status)` на `interviews`;
+  - `interviewerId`, `intervieweeId`, `cycleId` на `interviews`;
+  - `(interviewId, position)` на `interview_questions`;
+  - `topicId` на `interview_question_topics`.
+- История тренировок хранит snapshot `questionText`, `difficulty` и `topic snapshots`, чтобы growth analytics не зависел от последующих правок банка.
+- Индексы question bank v1:
+  - unique `companies.name`;
+  - `GIN (name gin_trgm_ops)` на `companies.name` для string-search по названию;
+  - индекс `questions.companyId` для join/filter по компании.
+
+## Правила ролей и moderation
+- Ролей ровно две: `USER`, `ADMIN`.
+- `ADMIN` наследует read-возможности `USER` для обычных `Roles(...)` endpoints.
+- `StrictRoles(...)` отключает admin override и используется для analytics endpoints.
+- Публичной регистрации нет.
+- Учётные записи создаёт, редактирует, активирует, деактивирует и сбрасывает пароль только `ADMIN`.
+- Пользователь не может менять `login` и пароль через API.
+- В системе всегда должен оставаться минимум один активный `ADMIN`.
+- Запрещены `self-deactivate` и `self-demote`.
+- Published bank доступен на чтение обеим ролям.
+- Любые пользовательские `CREATE / UPDATE / DELETE` идут только через `QuestionChangeRequest`.
+- `QuestionChangeRequest.type`:
+  - `CREATE` — новая сущность, `baseSnapshot = null`
+  - `UPDATE` — before/after для опубликованного вопроса
+  - `DELETE` — `proposedSnapshot = null`
+- `QuestionChangeRequest.status`:
+  - `PENDING`
+  - `APPROVED`
+  - `REJECTED`
+- На один опубликованный вопрос допускается только одна `PENDING`-заявка.
+- Direct admin `PATCH/DELETE` блокируются, если по вопросу есть `PENDING`-заявка.
+- Reject не переоткрывает заявку: повторная подача создаёт новую сущность.
+
+## Approval flow
+- `CREATE`: из `proposedSnapshot` создаётся published `Question`, optional company-link и topic-links, затем заявка помечается `APPROVED`.
+- `UPDATE`: published `Question` обновляется из `proposedSnapshot`, включая optional company-link, затем заявка помечается `APPROVED`.
+- `DELETE`: published `Question` удаляется, затем заявка помечается `APPROVED`.
+- `REJECT`: published bank не меняется, заявка помечается `REJECTED`, `reviewComment` обязателен.
+- Любой approve/reject выполняется через `prisma.$transaction`.
+
+## Search, training write-side и analytics read model
+- Search продолжает работать только по published `questions`.
+- Pending/rejected данные не попадают в raw SQL search.
+- FTS и ILIKE по-прежнему работают по derived колонкам `questions.text` и `questions.answer`; JSON-контент в SQL не участвует.
+- Поиск по темам работает через отдельный exact filter `topicIds` с OR-семантикой.
+- Поиск по компаниям работает через отдельный string filter `companyQuery` по `companies.name`.
+- Основной `q` по-прежнему ищет только по `questions.text` и `questions.answer`.
+- Read endpoints дополнительно отдают moderation-state вопроса:
+  - есть ли `PENDING`-заявка;
+  - принадлежит ли она текущему пользователю.
+- Read endpoints published bank дополнительно отдают `interviewEncounter`:
+  - `count` — общее число пользователей, отметивших вопрос;
+  - `checkedByCurrentUser` — состояние отметки для текущего пользователя.
+- `QuestionDto`, search read-side и training prepare возвращают и plain-text поля, и структурированные `textContent/answerContent`.
+- `PUT /api/questions/:id/interview-encounter` идемпотентно создаёт отметку текущего пользователя и возвращает актуальное состояние `interviewEncounter`.
+- `DELETE /api/questions/:id/interview-encounter` идемпотентно удаляет отметку текущего пользователя и возвращает актуальное состояние `interviewEncounter`.
+- `QuestionDto.difficulty` и search response используют строковый enum (`junior | middle | senior | lead`), а не внутренний numeric rank PostgreSQL.
+- `QuestionDto` и question snapshots дополнительно отдают optional `company { id, name }`.
+- `POST /api/training/prepare` работает только по published `questions`.
+- Входной массив `topicIds` сначала дедуплицируется с сохранением порядка.
+- Если вопрос размечен несколькими выбранными темами, он назначается первой теме по порядку входного массива.
+- Внутри назначенной темы выбирается до 5 вопросов в псевдослучайном порядке.
+- Финальный ответ `prepare` сортируется по сложности `junior -> middle -> senior`, затем по приоритету темы и внутреннему порядку выборки.
+- `POST /api/training/results` принимает batch `{ status, targetUserId?, feedback?, items[] }`, где item содержит `questionId`, `difficulty`, `topicIds`, `result = correct | incorrect | partial`.
+- `GET /api/training/participants` возвращает активные `USER`-аккаунты для взаимной тренировки, исключая текущего пользователя.
+- `GET /api/training/history` возвращает только сессии, где текущий пользователь является `target user`.
+- `GET /api/training/history/:id` возвращает snapshot одной сохранённой сессии и скрывает чужие записи как отсутствующие.
+- `training.service.ts` валидирует:
+  - отсутствие дубликатов `questionId` внутри batch,
+  - существование вопросов,
+  - соответствие `difficulty` актуальному published-вопросу,
+  - существование всех `topicIds`,
+  - что self-training не принимает `feedback`,
+  - что внешняя тренировка сохраняется только в активный `USER`-аккаунт.
+- После валидации сервис сохраняет `TrainingSession` и nested `TrainingSessionResult*` в одной `prisma.$transaction`; tri-state результат хранится enum-ом, а на уровне сессии отдельно считаются `correctCount`, `incorrectCount`, `partialCount`, `resultsCount`.
+- Для внешней тренировки сервис дополнительно пишет `trainerId = currentUser.id` и опциональный `feedback`; сценарий доступен любому аутентифицированному пользователю, а не только `ADMIN`.
+- Snapshot истории тренировки хранит `questionTextContent` отдельно от текущего published банка, чтобы growth analytics показывал историческое состояние формулировки.
+- `GET /api/analytics/growth` агрегирует только историю текущего пользователя и возвращает:
+  - `summary` по всем сохранённым ответам, включая `partialCount`,
+  - `feedbackEntries` — до 5 последних внешних комментариев по тренировкам,
+  - `weakTopics` по snapshot тегов с отдельным `partialCount`,
+  - `failedQuestions` и `answeredQuestions` с разделением по `lastResult` и `textContent` из snapshot-истории.
+- `GET /api/analytics/bank` агрегирует только текущий опубликованный банк и отдаёт total/dominant difficulty/difficulty mix/top topics/sparse topics.
+- Interview-контур не пишет ничего в `training_sessions` и не участвует в `analytics/growth`.
+- `POST /api/interviews/cycles` принимает weekly period и список участников, создаёт новый cycle и directed `draft`-пары случайным шафлом.
+- Автогенерация interview-пар строит ориентированный цикл по выбранным пользователям; это даёт каждому участнику минимум один `interviewer` и минимум один `interviewee` в пределах недели без duplicate directed pair.
+- `PATCH /api/interviews/:id` управляет status machine:
+  - `plannedDate = null` -> `DRAFT`;
+  - `plannedDate != null && presetId = null` -> `PLANNED`;
+  - `plannedDate != null && presetId != null && snapshot есть` -> `SCHEDULED`.
+- При смене interviewer/interviewee/preset у `SCHEDULED`-записи snapshot вопросов пересобирается заново через shared question selection.
+- `GET /api/interviews/my-calendar` показывает пользователю все его interview-записи с `myRole = interviewer | interviewee`, но `GET /api/interviews/my-dashboard` агрегирует только записи, где пользователь является `interviewee`.
+- `GET /api/interviews/:id/runtime` и `POST /api/interviews/:id/complete` доступны только `interviewer` этой записи; `ADMIN` не обходит это правило.
+- `GET /api/interviews/admin-dashboard` и `GET /api/interviews/my-dashboard` отдают уже агрегированные weekly series, outcome mix и weak topics под frontend SVG charts.
+- `partial` в growth analytics считается non-correct: он не повышает accuracy, попадает в weak topics и в список вопросов, требующих внимания.
+- Сортировки growth analytics детерминированы:
+  - `weakTopics`: `incorrectCount desc`, `accuracy asc`, `topicId desc`;
+  - `failedQuestions`: `incorrectCount desc`, `lastAnsweredAt desc`, `questionId desc`;
+  - `answeredQuestions`: `correctCount desc`, `lastAnsweredAt desc`, `questionId desc`.
+
+## Контракт write-side тем
+- `POST /api/questions`, `PATCH /api/questions/:id` и payload в `POST /api/question-change-requests` принимают `textContent`, `answerContent`, `difficulty`, `topicIds`, optional `companyId`, а не plain `text/answer` и не строки названий тем.
+- Валидация `topicIds` и optional `companyId` выполняется в service-слое до repository-операций.
+- `QuestionsRepository` больше не создаёт темы побочно через `connectOrCreate`; question-topic links строятся только на существующие topic id.
+
+## OpenAPI и SDK-контракт
+- Swagger UI: `/api/docs`.
+- OpenAPI JSON: `/api/openapi-json`.
+- Оффлайн-генерация спеки: `npm run openapi:generate` (выход: `openapi.json`).
+- Генерация спеки из уже собранного `dist`: `npm run openapi:generate:dist`.
+
+## Инициализация данных
+- После миграций отдельный bootstrap-script `npm run bootstrap:admin` проверяет наличие активного админа и создаёт/обновляет его из env-переменных `BOOTSTRAP_ADMIN_*`.
+- Локальный bootstrap после миграций запускает `bootstrap:admin`, затем `seed:question-bank`.
+- Seed формализован: каталог тем хранится отдельно в `scripts/topics.data.js`, затем `seed-question-bank` upsert-ит темы, published вопросы и дефолтные тренировочные пресеты.
+- Seed question bank поддерживает базовое покрытие каждого тега вопросами уровней `junior`, `middle` и `senior`.
+- Дефолтный пресет `Angular Developer` использует темы `JavaScript`, `TypeScript`, `Angular`, `SCSS`, `NgRx`.
+
+## Проверки
+- Статическая проверка seed question bank: `npm run test:seed:question-bank`.
+- Интеграционная проверка auth/login/user lifecycle: `npm run test:integration:auth`.
+- Интеграционная проверка company-aware question bank: `npm run test:integration:companies`.
+- Интеграционная проверка справочника тем и topic-aware search: `npm run test:integration:topics`.
+- Интеграционная проверка тренировок, сохранения результатов и analytics read-side: `npm run test:integration:training`.
+
+## Актуализация v1: company-aware bank
+- Published `Question` поддерживает optional relation на `Company`; семантика поля: вопрос встречался на собеседовании в указанной компании.
+- `QuestionDifficulty` расширен значением `lead`; numeric rank в PostgreSQL остаётся внутренним представлением.
+- Search read-side поддерживает новый filter `companyQuery` и строит aggregated `company` JSON в `QuestionDto`.
+- Moderation snapshot хранит `company { id, name }`; approve-операции резолвят company snapshot в актуальный `companyId`.
+- Rename компании синхронизирует pending snapshots так же, как rename темы синхронизирует topic snapshots.

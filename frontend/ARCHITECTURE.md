@@ -1,0 +1,329 @@
+# Frontend architecture
+
+## Текущая архитектура
+- Технологии: Vue 3 + Vite + TypeScript + Vuetify + Vue Router.
+- Тип приложения: SPA с route-based shell, left nav и top bar.
+- Точка входа: `src/main.ts`.
+- Корневой компонент: `src/App.vue`.
+- Роутер: `src/router/index.ts` с публичным `/login`, role-aware meta, strict-role веткой для user-only/admin-only экранов и async guard через `GET /api/me`.
+- Общий layout: `src/layouts/AppShell.vue` с компактной левой навигацией, коротким page-header, CTA и account-блоком.
+- UI plugin: `src/plugins/vuetify.ts`.
+- Внутренний UI-слой: `src/components/ui/*` с обёртками над high-visibility контролами.
+- Theme-слой: `src/theme/*` с color-only tokens для bridge в Vuetify, semantic button-state map и `light-theme`.
+- Контур визуальной регрессии: `Playwright` + mock fixtures + baseline screenshots.
+- `src/style.css` больше не хранит реальные rules и используется только как import-manifest.
+- Визуальная система разложена по слоям:
+  - `src/styles/foundation/*` — fonts, CSS custom properties, base, motion;
+  - `src/styles/vendors/*` — overrides для Vuetify;
+  - `src/styles/layout/*` — shell и layout primitives;
+  - `src/styles/ui/*` — внутренние UI primitives;
+  - `src/styles/features/*` — screen/domain-specific styles.
+- Кастомный стиль `v-progress-linear` применяется только к явному progress-bar тренировки; встроенные loader-слоты `VCard` и `VField` остаются на штатных стилях Vuetify.
+
+## Structural layout system
+- Все route-экраны собраны на layout-слое из `src/styles/layout/shell.css` и `src/styles/layout/primitives.css`.
+- Базовая content-column ограничена `--content-max-width` и используется через `page-frame`.
+- Повторяемые structural primitives:
+  - `page-frame`
+  - `page-section`
+  - `summary-strip`
+  - `toolbar-panel`
+  - `content-panel`
+  - `table-frame`
+  - `form-panel`
+  - `split-workspace`
+  - `detail-panel`
+  - `empty-state-panel`
+- `action-footer`
+- `metrics-grid`
+- `insight-grid`
+- Для panel/dialog/chart headers действует single-title rule: один смысловой заголовок на блок; декоративные `section-label`/eyebrow/subtitle над тем же `h2/h3/strong` не используются.
+- Базовый panel-container — `src/components/ui/UiPanel.vue`.
+- `UiPanel` поддерживает structural variants:
+  - `default`
+  - `compact`
+  - `toolbar`
+  - `table`
+  - `empty`
+  - `detail`
+  - `form`
+- `UiPanel`, отрисованный внутри `v-dialog`, использует тот же стандартный внутренний `panel-padding`, что и обычные panel-surface.
+- Панели, таблицы, формы, master/detail и empty states не рендерятся напрямую на фоне страницы.
+
+## Session и роли
+- Frontend хранит access token в `localStorage` (`nord.access.token`).
+- `src/sdk/client.ts` автоматически добавляет `Authorization: Bearer <token>` ко всем backend-запросам.
+- `src/composables/useSession.ts` управляет `login/logout/loadSession`, держит профиль через `GET /api/me` и очищает локальную сессию при `401`.
+- Публичный маршрут только один: `/login`.
+- Любой защищённый маршрут без токена редиректит на `/login?redirect=...`.
+- Ролевые сценарии:
+  - `USER` — published bank + заявки + тренировка + история тренировок + личные точки роста,
+  - `ADMIN` — published bank + direct publish + review queue + анализ банка вопросов + управление пользователями.
+- `growth-card` теперь строго user-only на уровне frontend guard.
+- `bank-analysis` теперь строго admin-only на уровне frontend guard.
+
+## Маршруты
+- `/login` — публичный экран входа по `login + password`.
+- `/bank` — опубликованный банк вопросов.
+- `/question/:id` — детальная карточка опубликованного вопроса.
+- `/bank-analysis` — admin-only анализ текущего банка вопросов.
+- `/editor` — создание вопроса или заявки.
+- `/editor/:id` — редактирование опубликованного вопроса или создание заявки на правку.
+- `/requests` — список собственных moderation-заявок.
+- `/review` — очередь модерации, только для `ADMIN`.
+- `/topics` — админский справочник тем, только для `ADMIN`.
+- `/companies` — админский справочник компаний, только для `ADMIN`.
+- `/users` — admin-only управление учётными записями.
+- `/growth-card` — user-only summary по сохранённой истории тренировок, внешнему фидбеку и слабым темам.
+- `/training-history` — user-only история сохранённых тренировок.
+- `/training-history/:id` — user-only деталка сохранённой тренировки.
+- `/training` — сбор тегов через пресеты и ручной каталог, затем полноэкранная тренировочная сессия в режиме `себя` или `другого пользователя`; peer-to-peer режим доступен любому аутентифицированному пользователю.
+- `/training-presets` — админский CRUD тренировочных пресетов.
+- `/interviews` — admin-only календарь собеседований, weekly cycle и ручная настройка пар.
+- `/interviews-dashboard` — admin-only dashboard собеседований.
+- `/my-interviews` — user-only личный календарь собеседований.
+- `/my-interviews-dashboard` — user-only статистика собеседований.
+- `/interviews/:id/run` — user-only runtime проведения собеседования.
+- `/account` — read-only профиль текущей сессии и logout.
+
+## Feature-слой вопросов, тренировок и аналитики
+- `src/components/ui/UiButton.vue` — базовая кнопка для shell, CTA и form-actions.
+- `src/components/ui/UiIconButton.vue` — компактная icon-button обёртка для row-actions, training-nav и ordered-list controls.
+- `src/components/ui/UiField.vue` — внешний label + текстовый input/textarea поверх Vuetify.
+- `src/components/ui/UiSelect.vue` — select-обёртка для фильтров и account-flow.
+- `src/components/ui/UiAutocomplete.vue` — multi/single autocomplete-обёртка для controlled options.
+- `src/components/ui/UiPanel.vue` — единая панель/карточка shell и form-контейнеров со structural variants для toolbar/table/detail/form/empty.
+- `src/components/ui/UiShellNavItem.vue` — sidebar navigation item с собственным active-state.
+- `src/components/questions/DifficultyTag.vue` — единый pill-badge для сложности `junior/middle/senior/lead` с семантическими цветами.
+- `src/components/questions/QuestionContentRenderer.vue` — renderer для structured-content с обязательным `text` и опциональным `code/codeLanguage`; код подсвечивается через `Shiki`, рендерится с line numbers и отдельной lazy-loaded подсветкой.
+- `src/components/questions/QuestionContentBlockEditor.vue` — упрощённый editor вопроса/ответа: textarea для текста, опциональный кодовый блок с `CodeMirror` и select языка `JS | JSX | TS | TSX`.
+- `src/components/questions/QuestionCodeEditor.vue` — локальная обёртка над `CodeMirror 6` с line numbers, syntax highlighting, tab indentation и light-theme под текущую дизайн-систему.
+- `src/theme/theme-tokens.ts` — color-only источник токенов для Vuetify bridge; layout/spacing/radius/typography теперь живут только в CSS custom properties.
+- `src/theme/button-state-map.ts` — semantic-варианты кнопок и state map.
+- `src/theme/vuetify-light-theme.ts` — light theme для Vuetify, связанный с tokens.
+- `src/views/QuestionsBankView.vue` — опубликованный список, фильтры по тексту, компании, сложности и темам, блокировка действий при pending-заявке.
+- `src/composables/useQuestionsDesk.ts` — серверный список, загрузка topic filter options, company-aware search state и role-aware delete flow.
+- `src/composables/useQuestionEditorForm.ts` — общий state/validation/submit слой для route editor и modal edit flow, включая optional company selector.
+- `src/views/QuestionEditorView.vue` — один маршрут для direct admin publish и user moderation-submit с контролируемым multi-select тем и optional company.
+- `src/components/questions/QuestionEditorPanel.vue` — форма вопроса на `topicIds` и optional `companyId`, без свободного ввода темы/компании.
+- `src/views/QuestionDetailsView.vue` — route-level detail экран опубликованного вопроса с company context и per-user interview-encounter toggle.
+- `src/components/questions/QuestionDetailsDialog.vue` — legacy modal view/edit для опубликованного вопроса; контент синхронизирован с company-aware контрактом.
+- `src/views/MyRequestsView.vue` — история собственных заявок.
+- `src/views/ReviewQueueView.vue` — pending queue для `ADMIN`.
+- `src/views/TopicsAdminView.vue` — list/create/rename admin UI для словаря тем.
+- `src/views/CompaniesAdminView.vue` — list/create/rename admin UI для словаря компаний.
+- `src/views/UsersAdminView.vue` — admin-only list/create/edit/reset-password/activate/deactivate UI для пользователей.
+- `src/views/LoginView.vue` — публичный login screen.
+- `src/views/TrainingView.vue` — setup тренировки с переключателем режима `себя | другого пользователя`, auto-apply пресетов и fullscreen training arena с tri-state оценкой `correct | incorrect | partial`; селектор пользователя и active session copy показывают короткое displayName без технического login.
+- `src/views/TrainingHistoryView.vue` — user-only split-workspace истории тренировок со списком сессий и detail snapshot.
+- `src/views/TrainingPresetsView.vue` — admin-only CRUD пресетов с ручным управлением порядком тем.
+- `src/views/GrowthCardView.vue` — пользовательская аналитика по сохранённым тренировочным результатам, tri-state summary, внешнему фидбеку и слабым темам.
+- `src/views/BankAnalysisView.vue` — админский анализ текущего опубликованного банка.
+- `src/components/interviews/InterviewMonthCalendar.vue` — общая month-grid сетка для admin/user interview календарей.
+- `src/components/charts/UiChartFrame.vue` — обёртка заголовка и legend-зоны для dashboard charts.
+- `src/components/charts/UiStackedBarChart.vue` — SVG stacked bars для weekly series интервью.
+- `src/components/charts/UiBarChart.vue` — SVG horizontal bars для загрузки interviewer-ов и weak topics.
+- `src/components/charts/UiDonutChart.vue` — SVG donut для outcome mix.
+- `src/views/InterviewsAdminView.vue` — admin-only monthly calendar, active cycle, список назначений и day modal; селекторы участников показывают displayName как основную метку.
+- `src/views/MyInterviewsView.vue` — user-only monthly calendar с ролью `interviewer | interviewee` и переходом в runtime.
+- `src/views/InterviewsDashboardView.vue` — admin-only dashboard по cycle/status/outcome.
+- `src/views/MyInterviewsDashboardView.vue` — user-only dashboard по completed interview результатам.
+- `src/views/InterviewRuntimeView.vue` — tri-state runtime для interviewer-а по snapshot-вопросам интервью.
+- `src/composables/useGrowthCard.ts` — загрузка и expose user growth analytics.
+- `src/composables/useBankAnalysis.ts` — загрузка и вычисление admin bank insights.
+- `src/features/interviews/*` — типы interview DTO, календарные helpers и chart/view formatters.
+- `src/features/training/*` — типы пресетов, подготовки тренировки, write-side сохранения результатов и локального состояния карточки.
+- `src/features/analytics/*` — типы user/admin analytics ответов.
+- `src/features/companies/*` — типы справочника компаний.
+- `src/features/topics/*` — типы справочника тем.
+- `src/features/moderation/*` — типы и formatters moderation-слоя.
+- `src/features/session/*` — bearer token storage, role/status formatters и session types.
+- `src/features/system/error.utils.ts` — sanitization сырых SDK/network ошибок до коротких UI-сообщений.
+
+## Shell и навигация
+- Shell показывает разные primary-nav пункты в зависимости от роли.
+- Shell минималистичен: в top bar eyebrow, заголовок раздела, primary action и account anchor.
+- Глобальный поиск из shell убран. Поиск живёт только в маршруте `/bank`.
+- Для `ADMIN` shell показывает отдельные routes `Темы`, `Пресеты`, `Анализ банка`.
+- Для `USER` shell показывает отдельные routes `Точки роста` и `История тренировок`.
+- High-visibility shell controls не рендерят сырой `v-btn` напрямую; они идут через `src/components/ui/*`.
+- CTA в top bar меняет подпись:
+  - `ADMIN` — `Новый вопрос`
+  - `USER` — `Новая заявка`
+- Account route — read-only профиль текущей сессии и logout.
+- Лишние disabled-разделы и служебные подписи в shell не рендерятся.
+
+## API интеграция
+- Базовый доступ к API — через SDK слой.
+- Frontend-вызыватель обязан соблюдать backend DTO-ограничения `min/max/default`, даже если generated TypeScript не выражает их на уровне типов.
+- Любое изменение backend DTO, query validation или response shape считается контрактным изменением: после него обязательно регенерируются `backend/openapi.json` и `frontend/src/sdk/generated.ts`, а все caller-ы синхронизируются в том же наборе изменений.
+- В dev-контуре Vite proxy для `/api` по умолчанию направляется на `http://localhost:3000`, но может быть переопределён через `VITE_API_PROXY_TARGET`; `run-local.sh` сначала пытается освободить backend-порт, а затем прокидывает фактический backend URL в proxy.
+- SDK-файлы:
+  - `src/sdk/generated.ts` — автогенерируемые OpenAPI-типы.
+  - `src/sdk/client.ts` — typed API-клиент (openapi-fetch) с инъекцией `Authorization: Bearer <token>`.
+  - `src/sdk/index.ts` — публичный экспорт SDK.
+  - `src/services/api.service.ts` — Vue-friendly singleton сервиса.
+- Published bank использует:
+  - `GET /api/search/questions`
+  - `GET /api/topics?usedOnly=true`
+  - `GET /api/questions/:id`
+  - `GET /api/questions`
+- Topics admin использует:
+  - `GET /api/topics`
+  - `POST /api/topics`
+  - `PATCH /api/topics/:id`
+- Companies admin использует:
+  - `GET /api/companies`
+  - `POST /api/companies`
+  - `PATCH /api/companies/:id`
+- Training использует:
+  - `GET /api/training/presets`
+  - `GET /api/training/participants`
+  - `GET /api/training/history`
+  - `GET /api/training/history/:id`
+  - `POST /api/training/prepare`
+  - `POST /api/training/results`
+- Analytics использует:
+  - `GET /api/analytics/growth`
+  - `GET /api/analytics/bank`
+- Training presets admin использует:
+  - `POST /api/training/presets`
+  - `PATCH /api/training/presets/:id`
+  - `DELETE /api/training/presets/:id`
+- Session использует:
+  - `GET /api/me`
+- Moderation использует:
+  - `POST /api/question-change-requests`
+  - `GET /api/question-change-requests/my`
+  - `GET /api/question-change-requests/review`
+  - `GET /api/question-change-requests/:id`
+  - `POST /api/question-change-requests/:id/approve`
+  - `POST /api/question-change-requests/:id/reject`
+- Direct publish для `ADMIN` использует:
+  - `POST /api/questions`
+  - `PATCH /api/questions/:id`
+  - `DELETE /api/questions/:id`
+- Question read/write контракт теперь передаёт и plain-text поля, и структурированные `textContent/answerContent`; write-side использует только structured-content.
+
+## Поведение published bank
+- Банк вопросов показывает только approved-слой.
+- `/bank` использует `page-frame -> summary-strip -> toolbar-panel -> table-frame`.
+- Summary-strip, toolbar и список используют единые card-padding и frame-gap из `src/styles/foundation/tokens.css`.
+- Toolbar published bank собран на `UiField` / `UiSelect` / `UiAutocomplete`; в topics multi-select попадают только темы с `questionsCount > 0`.
+- Фильтр по нескольким темам отправляет `topicIds` в `GET /api/search/questions` и работает по OR-семантике.
+- Каждый `QuestionDto` приходит с moderation-state:
+  - есть ли активная pending-заявка;
+  - принадлежит ли она текущему пользователю.
+- Каждый `QuestionDto` приходит и с `interviewEncounter`:
+  - `count` — общее число пользователей, отметивших вопрос как встреченный на собеседовании;
+  - `checkedByCurrentUser` — локальное состояние отметки текущего пользователя.
+- Таблица `/bank` показывает колонки `question / difficulty / topics / interview count`; колонка `actions` рендерится только для `ADMIN`.
+- Формулировка вопроса в списке кликабельна и открывает `QuestionDetailsDialog`; сам toggle `встречал на собесе` живёт только внутри modal.
+- Read-only modal повторяет состав редактора (`вопрос / ответ / сложность / темы`), а кнопка `Редактировать` переводит его в edit-режим.
+- При наличии pending-заявки modal явно показывает блокировку, а переход в edit-режим недоступен.
+- Published bank больше не использует `v-table`; row pattern реализован как card-list фиксированной высоты с role-aware набором колонок.
+- Header списка и body держатся внутри одного `table-frame`; pagination привязана к тому же panel-footer.
+
+## Поведение editor и справочника тем
+- Editor больше не собирает подсказки тем обходом questions-list.
+- Editor загружает полный словарь тем через `GET /api/topics` и отправляет на backend `topicIds`.
+- Editor собран в один узкий `form-panel` с внутренними секциями `question / answer / difficulty+topics / footer`.
+- Editor panel использует упрощённый structured editor для `question/answer`, live preview через `QuestionContentRenderer`, `UiAutocomplete` и `UiButton`; поле кода в editor построено на `CodeMirror`, сложность переключается через внутренний segmented-control на том же UI-слое.
+- `/topics` — отдельный рабочий экран `ADMIN` для search/list/create/rename без delete/archive в `v1`.
+- `/topics` использует `summary-strip + toolbar-panel + table-frame`; search и page-size собраны в toolbar, create/rename dialog использует `form-panel`.
+- `/topics` переведён с `v-table` на row-card list и использует только внутренний UI-слой для search, page-size, create/rename dialog и rename action.
+
+## Поведение тренировок и аналитики
+- `/training` загружает список пресетов и только используемые темы через `GET /api/topics?usedOnly=true`.
+- `/training` дополнительно загружает список участников для взаимной тренировки через `GET /api/training/participants`.
+- Выбор пресета на `/training` сразу добавляет его темы в локальный редактируемый пул `topicIds`; отдельной кнопки применения нет.
+- Setup `/training` собран в один `form-panel`.
+- Setup `/training` начинается с переключателя режима:
+  - `тренировать себя` — стандартный self-check flow;
+  - `тренировать другого пользователя` — peer-to-peer flow с выбором получателя результата.
+- Внутри setup `/training` выделены три блока:
+  - selector режима;
+  - выбор пользователя для внешней тренировки, если активен peer-to-peer режим;
+  - selector пресетов;
+  - отдельный бокс выбранных тегов с remove по крестику;
+  - каталог доступных тегов, где добавление идёт через `+` на карточке тега.
+- Кнопка `Подобрать вопросы` закреплена в panel footer того же setup-блока.
+- После `POST /api/training/prepare` setup-экран переключается в fullscreen training arena поверх затемнённого workspace.
+- Активная сессия показывает ровно одну карточку:
+  - по бокам только `Назад` / `Вперёд`;
+  - в центре вопрос, теги, сложность и статус локального state;
+  - на первом шаге доступны `Показать ответ` и `Пропустить вопрос`;
+  - `Пропустить вопрос` сразу фиксирует `incorrect`;
+  - после раскрытия ответа доступны `Засчитать ответ`, `Частично` и `Не засчитать ответ`.
+- В режиме тренировки другого пользователя карточка стартует сразу в состоянии `revealed`: вопрос и ответ доступны с первого шага, а trainer выставляет `correct | incorrect | partial`.
+- В режиме тренировки другого пользователя перед завершением или `save & exit` доступен `textarea` для итогового фидбека.
+- Текст вопроса и ответа в тренировке, moderation diff, growth card и history detail рендерится тем же `QuestionContentRenderer`, что и в банке.
+- Локальный state карточки: `pending | revealed | correct | incorrect | partial`.
+- Навигация не меняет уже сохранённый локальный результат.
+- `Завершить тренировку` появляется только когда все карточки получили финальный результат и вызывает `POST /api/training/results` со статусом `COMPLETED`.
+- `POST /api/training/results` в peer-to-peer сценарии дополнительно отправляет `targetUserId` и `feedback`.
+- Преждевременный выход открывает dialog с вариантами:
+  - сохранить уже зафиксированные результаты через `POST /api/training/results` со статусом `ABANDONED_SAVED`;
+  - выйти без сохранения и полностью сбросить локальную сессию.
+- `/training-history` строится только по `GET /api/training/history*` и показывает split-view со списком сессий текущего пользователя и detail snapshot по выбранной записи.
+- `/growth-card` строится только по `GET /api/analytics/growth` и показывает:
+  - total/correct/partial/incorrect/accuracy,
+  - последние внешние комментарии по тренировкам,
+  - слабые темы,
+  - вопросы с последним `incorrect | partial`,
+  - вопросы с последним `correct`.
+- `/growth-card` после редизайна использует `summary-strip` и panel-only layout: левая колонка держит внешний фидбек и weak-topics, правая stack-колонка — `correct` и `incorrect | partial`.
+- `/bank-analysis` строится только по `GET /api/analytics/bank` и показывает текущий баланс сложности, насыщенные темы и редкие темы банка.
+- `/bank-analysis` после structural pass собирает верхний summary в `summary-strip`, короткую аналитику в общую `content-panel`, а нижний ряд метрик в единый grid из panel-only блоков.
+- `/training-presets` доступен только `ADMIN`.
+- `/training-presets` использует `summary-strip + content-panel + toolbar-panel + table-frame`.
+- `/training-presets` переведён на row-card catalog и UI-layer dialog.
+- Форма пресета не полагается на порядок в multi-select: порядок тем управляется отдельным списком с move up/down/remove через `UiIconButton`.
+
+## Поведение interview-контура
+- `/interviews` использует вертикальный стек из трёх panel-слоёв:
+  - `drafts` текущего cycle;
+  - список назначенных собеседований месяца;
+  - month-calendar.
+- Заголовок списка на `/interviews` больше не использует формулировку `Пары месяца`; список описывает именно назначенные собеседования с датой.
+- Month-calendar интервью не показывает текстовые счётчики вида `1 пара`; вместо этого внутри дня рендерятся контрастные статусные точки по каждой записи:
+  - `planned` — brass;
+  - `scheduled` — cyan;
+  - `completed` — success.
+- `draft` не попадает в календарную сетку без даты и пресета; его статус показывается только в верхнем draft-слое.
+- Day modal и список назначений используют ту же статусную семантику, что и календарные точки.
+- Day modal дополнительно даёт ручное создание пары с уже подставленной датой выбранного дня, если день попадает в `active cycle`.
+
+## Поведение requests, review и account
+- `/requests` использует `split-workspace`: левая колонка держит список заявок и счётчик внутри общей панели, правая колонка всегда зарезервирована под detail/diff.
+- Empty state на `/requests` остаётся внутри panel-layer обеих колонок.
+- `/review` использует тот же `split-workspace`; справа detail/diff, reviewer metadata, reject-reason и approve/reject actions собраны в одном `detail-panel`.
+- `/login` использует отдельный двухколоночный auth-layout вне `AppShell`.
+- `/users` использует `summary-strip + toolbar-panel + table-frame`; create/edit/reset dialogs собраны на `form-panel`.
+- `/account` использует `split-workspace`: слева профиль с login/email/role/status, справа только logout и короткое пояснение по управлению доступом.
+
+## Источник контрактов
+- Контракты не описываются вручную во frontend.
+- Типы генерируются из `../backend/openapi.json`.
+- Команда генерации: `npm run sdk:generate`.
+- Сборка frontend с актуальным SDK: `npm run build:with-sdk`.
+
+## Актуализация v1: company-aware bank
+- В shell добавлен admin-only раздел `/companies` для контролируемого словаря компаний.
+- Published bank получил новый route `/question/:id`; список `/bank` теперь ведёт в route-level detail вместо modal-first сценария.
+- Toolbar `/bank` отправляет в search контракт не только `q`, `difficulty`, `topicIds`, но и string-filter `companyQuery`.
+- Question editor загружает два справочника: `topics` и `companies`; write-side отправляет `optional companyId`.
+- Question detail route показывает `company`, `topics`, `difficulty`, `interviewEncounter` и ведёт в `/editor/:id` для редактирования/правки.
+- `QuestionChangeRequestDiffCard` теперь отображает diff компании наряду с diff текста, ответа, сложности и тем.
+- Frontend SDK расширен методами `listCompanies`, `listAllCompanies`, `createCompany`, `updateCompany`.
+
+## Визуальная регрессия
+- Конфиг Playwright: `playwright.config.ts`.
+- Общие фикстуры и browser-моки: `scripts/ui-snapshots/shared.mjs`.
+- Генерация актуальных PNG: `scripts/ui-snapshots/capture.mjs`, который запускает Playwright c `UI_SNAP_TARGET=latest`.
+- Snapshot tests: `tests/ui/snapshots.spec.ts`.
+- Контур не зависит от backend: `/api/*` подменяются в браузере фиксированными ответами.
+- Отдельный smoke-контур `npm run ui:smoke:test` проверяет login redirect, admin/user role guard, `401` redirect и read-only account без dev-переключателя.
+- `latest` и baseline сохраняются в `css`-scale; это исключает расхождение mobile baseline по `deviceScaleFactor`.
+- Перед каждым snapshot браузерный viewport принудительно возвращается к `scrollTop = 0`, чтобы интерактивные steps не вносили ложные diffs.
+- Покрытые сценарии: `bank`, `editor-edit`, `review-filled`, `review-empty`, `account`, `training-active`, `training-exit`, `growth-user`, `bank-analysis` в desktop и mobile viewport.

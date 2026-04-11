@@ -1,0 +1,82 @@
+<mxfile host="app.diagrams.net" modified="2026-03-11T13:20:00.000Z" agent="Codex" version="27.0.5" editor="draw.io" type="device">
+  <diagram id="system-landscape" name="System Landscape">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="System Landscape" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=28;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="60" y="30" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="Runtime view for browser, delivery, API and data." style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=14;fontColor=#475569;" vertex="1" parent="1">
+          <mxGeometry x="60" y="76" width="420" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#e2e8f0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="140" width="320" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#e2e8f0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="410" y="140" width="760" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#e2e8f0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="140" width="300" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="Client" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=18;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="70" y="166" width="80" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="Delivery &amp; Runtime" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=18;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="440" y="166" width="180" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="Data" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=18;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="166" width="80" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; style=&quot;width:100%;height:100%;font-family:Helvetica,Arial,sans-serif;font-size:13px;&quot;&gt;&lt;tr&gt;&lt;td style=&quot;background:#e0f2fe;padding:12px 14px;border-bottom:1px solid #cbd5e1;font-weight:700;font-size:16px;color:#0f172a;&quot;&gt;User&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:12px 14px;line-height:1.7;color:#0f172a;&quot;&gt;Uses the web application via browser.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=2;overflow=fill;spacing=0;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="80" y="240" width="240" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; style=&quot;width:100%;height:100%;font-family:Helvetica,Arial,sans-serif;font-size:13px;&quot;&gt;&lt;tr&gt;&lt;td style=&quot;background:#dbeafe;padding:12px 14px;border-bottom:1px solid #93c5fd;font-weight:700;font-size:16px;color:#0f172a;&quot;&gt;Frontend SPA&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:12px 14px;line-height:1.7;color:#0f172a;&quot;&gt;Vue 3 + Vite + Vuetify + Vue Router + SDK&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#93c5fd;strokeWidth=2;overflow=fill;spacing=0;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="80" y="420" width="240" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; style=&quot;width:100%;height:100%;font-family:Helvetica,Arial,sans-serif;font-size:13px;&quot;&gt;&lt;tr&gt;&lt;td style=&quot;background:#fef3c7;padding:12px 14px;border-bottom:1px solid #f59e0b;font-weight:700;font-size:16px;color:#0f172a;&quot;&gt;nginx&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:12px 14px;line-height:1.7;color:#0f172a;&quot;&gt;Serves static frontend assets and proxies &lt;b&gt;/api&lt;/b&gt; to backend.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f59e0b;strokeWidth=2;overflow=fill;spacing=0;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="470" y="250" width="250" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; style=&quot;width:100%;height:100%;font-family:Helvetica,Arial,sans-serif;font-size:13px;&quot;&gt;&lt;tr&gt;&lt;td style=&quot;background:#fee2e2;padding:12px 14px;border-bottom:1px solid #f87171;font-weight:700;font-size:16px;color:#0f172a;&quot;&gt;Backend API&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:12px 14px;line-height:1.7;color:#0f172a;&quot;&gt;NestJS 11&lt;br/&gt;Auth, Questions, Moderation, Search, Training, Interviews, Analytics&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f87171;strokeWidth=2;overflow=fill;spacing=0;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="820" y="240" width="280" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; style=&quot;width:100%;height:100%;font-family:Helvetica,Arial,sans-serif;font-size:13px;&quot;&gt;&lt;tr&gt;&lt;td style=&quot;background:#ede9fe;padding:12px 14px;border-bottom:1px solid #c4b5fd;font-weight:700;font-size:16px;color:#0f172a;&quot;&gt;backend-migrate&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:12px 14px;line-height:1.7;color:#0f172a;&quot;&gt;Runs &lt;b&gt;prisma migrate deploy&lt;/b&gt; and admin bootstrap before backend startup.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c4b5fd;strokeWidth=2;overflow=fill;spacing=0;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="470" y="470" width="250" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; style=&quot;width:100%;height:100%;font-family:Helvetica,Arial,sans-serif;font-size:13px;&quot;&gt;&lt;tr&gt;&lt;td style=&quot;background:#f8fafc;padding:12px 14px;border-bottom:1px solid #cbd5e1;font-weight:700;font-size:16px;color:#0f172a;&quot;&gt;Docker Compose&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:12px 14px;line-height:1.7;color:#0f172a;&quot;&gt;Orchestrates frontend, backend, postgres and migration startup order.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#94a3b8;strokeWidth=2;overflow=fill;spacing=0;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="820" y="470" width="280" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; style=&quot;width:100%;height:100%;font-family:Helvetica,Arial,sans-serif;font-size:13px;&quot;&gt;&lt;tr&gt;&lt;td style=&quot;background:#e0f2fe;padding:12px 14px;border-bottom:1px solid #93c5fd;font-weight:700;font-size:16px;color:#0f172a;&quot;&gt;PostgreSQL 16&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:12px 14px;line-height:1.7;color:#0f172a;&quot;&gt;Primary data store for operational entities, snapshots and search read-side.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#93c5fd;strokeWidth=2;overflow=fill;spacing=0;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="320" width="220" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="17" value="uses" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748b;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;fontColor=#475569;fontSize=12;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="10" target="11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="18" value="GET / + /api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748b;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;fontColor=#475569;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="11" target="12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="19" value="reverse proxy /api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748b;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;fontColor=#475569;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="12" target="13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="20" value="Prisma + raw SQL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748b;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;fontColor=#475569;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="13" target="16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="migrate deploy" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748b;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;fontColor=#475569;fontSize=12;exitX=1;exitY=0.45;entryX=0;entryY=0.65;" edge="1" parent="1" source="14" target="16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="orchestrates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748b;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;fontColor=#475569;fontSize=12;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="15" target="13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748b;strokeWidth=2;endArrow=block;endFill=1;exitX=0.2;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="15" target="12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="24" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748b;strokeWidth=2;endArrow=block;endFill=1;exitX=0.8;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="15" target="14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="25" value="Source of truth: infra/compose, infra/nginx/default.conf, run-local.sh, backend/ARCHITECTURE.md, frontend/ARCHITECTURE.md" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1;fontColor=#475569;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="470" y="710" width="720" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

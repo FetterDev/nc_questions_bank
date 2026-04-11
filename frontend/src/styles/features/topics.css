@@ -1,0 +1,36 @@
+.topics-controls-card {
+  align-items: end;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.42fr);
+}
+
+.topic-admin-list {
+  display: grid;
+  gap: 8px;
+}
+
+.topic-name-cell {
+  display: grid;
+  gap: 4px;
+}
+
+.topic-name-cell strong {
+  color: var(--color-ink);
+}
+
+.topic-name-cell p,
+.topic-slug-cell {
+  color: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.topics-dialog-card {
+  display: grid;
+  gap: var(--panel-padding-compact);
+}
+
+@media (max-width: 900px) {
+  .topics-controls-card {
+    grid-template-columns: 1fr;
+  }
+}

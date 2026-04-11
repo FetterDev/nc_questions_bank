@@ -1,0 +1,9 @@
+-- Canonical search query shape used by SearchRepository.
+-- Runtime execution is implemented in TypeScript via parameterized Prisma.$queryRaw.
+-- Keep this file as architecture reference and for EXPLAIN tuning sessions.
+--
+-- Requirements:
+-- 1) Deterministic order with tie-breaker (id desc).
+-- 2) Optional FTS query + topic/company filters.
+-- 3) Pagination via limit/offset.
+-- 4) Topics and optional company aggregated as JSON.
