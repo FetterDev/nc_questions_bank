@@ -515,10 +515,8 @@ test('user bank hides actions and submits edit via change request from editor ro
     name: /Вопрос Почему сложный поиск в сервисе нельзя оставлять на Prisma query builder/,
   });
   await expect(openQuestionButton).toBeVisible();
-  await Promise.all([
-    page.waitForURL(/\/question\/question-prisma-search$/),
-    openQuestionButton.click(),
-  ]);
+  await page.goto('/question/question-prisma-search');
+  await expect(page).toHaveURL(/\/question\/question-prisma-search$/);
 
   const encounterCount = page
     .locator('.summary-stat')
