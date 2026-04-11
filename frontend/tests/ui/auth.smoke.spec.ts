@@ -64,6 +64,54 @@ async function mockLoginFlow(
       body: JSON.stringify({ message: 'Unauthorized' }),
     });
   });
+
+  await page.route(/\/api\/topics(?:\?.*)?$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [],
+        total: 0,
+        meta: {
+          tookMs: 1,
+          appliedFilters: {
+            q: null,
+            usedOnly: route.request().url().includes('usedOnly=true'),
+          },
+        },
+      }),
+    });
+  });
+
+  await page.route(/\/api\/search\/questions(?:\?.*)?$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [],
+        total: 0,
+        meta: {
+          tookMs: 1,
+          appliedFilters: {
+            difficulty: [],
+            topicIds: [],
+            sort: 'newest',
+          },
+        },
+      }),
+    });
+  });
+
+  await page.route(/\/api\/users(?:\?.*)?$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [],
+        total: 0,
+      }),
+    });
+  });
 }
 
 function createBankQuestion() {
@@ -109,12 +157,26 @@ async function mockBankFlow(
     { id: 'topic-search', name: 'Search', slug: 'search', questionsCount: 11 },
   ];
   let requestSubmitted = false;
+  const requestId = 'request-question-update';
+
+  function buildQuestionSnapshot() {
+    return {
+      id: question.id,
+      text: question.text,
+      textContent: question.textContent,
+      answer: question.answer,
+      answerContent: question.answerContent,
+      difficulty: question.difficulty,
+      company: null,
+      topics: question.topics,
+    };
+  }
 
   await page.addInitScript((token) => {
     window.localStorage.setItem('nord.access.token', token);
   }, `${options.profile.role.toLowerCase()}-bank-token`);
 
-  await page.route('**/api/me', async (route) => {
+  await page.route(/\/api\/me(?:\?.*)?$/, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -122,7 +184,7 @@ async function mockBankFlow(
     });
   });
 
-  await page.route('**/api/topics**', async (route) => {
+  await page.route(/\/api\/topics(?:\?.*)?$/, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -140,7 +202,7 @@ async function mockBankFlow(
     });
   });
 
-  await page.route('**/api/companies**', async (route) => {
+  await page.route(/\/api\/companies(?:\?.*)?$/, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -157,7 +219,7 @@ async function mockBankFlow(
     });
   });
 
-  await page.route('**/api/search/questions**', async (route) => {
+  await page.route(/\/api\/search\/questions(?:\?.*)?$/, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -176,7 +238,9 @@ async function mockBankFlow(
     });
   });
 
-  await page.route(`**/api/questions/${question.id}/interview-encounter`, async (route) => {
+  await page.route(
+    new RegExp(`/api/questions/${question.id}/interview-encounter(?:\\?.*)?$`),
+    async (route) => {
     if (route.request().method() === 'PUT') {
       question.interviewEncounter = {
         count: 3,
@@ -196,9 +260,12 @@ async function mockBankFlow(
       contentType: 'application/json',
       body: JSON.stringify(question.interviewEncounter),
     });
-  });
+    },
+  );
 
-  await page.route(`**/api/questions/${question.id}`, async (route) => {
+  await page.route(
+    new RegExp(`/api/questions/${question.id}(?:\\?.*)?$`),
+    async (route) => {
     if (route.request().method() === 'PATCH') {
       const payload = route.request().postDataJSON();
       question.text = payload.textContent.text;
@@ -219,9 +286,10 @@ async function mockBankFlow(
       contentType: 'application/json',
       body: JSON.stringify(question),
     });
-  });
+    },
+  );
 
-  await page.route('**/api/question-change-requests', async (route) => {
+  await page.route(/\/api\/question-change-requests$/, async (route) => {
     requestSubmitted = true;
     question.pendingChangeRequest = {
       hasPendingChangeRequest: true,
@@ -232,10 +300,94 @@ async function mockBankFlow(
       status: 201,
       contentType: 'application/json',
       body: JSON.stringify({
-        id: 'request-question-update',
+        id: requestId,
       }),
     });
   });
+
+  await page.route(/\/api\/question-change-requests\/my(?:\?.*)?$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(
+        requestSubmitted
+          ? [
+              {
+                id: requestId,
+                type: 'UPDATE',
+                status: 'PENDING',
+                targetQuestionId: question.id,
+                subject: question.text,
+                createdAt: '2026-03-08T10:00:00.000Z',
+                updatedAt: '2026-03-08T10:00:00.000Z',
+              },
+            ]
+          : [],
+      ),
+    });
+  });
+
+  await page.route(
+    new RegExp(`/api/question-change-requests/${requestId}(?:\\?.*)?$`),
+    async (route) => {
+      const before = buildQuestionSnapshot();
+      const after = {
+        ...before,
+        text: requestSubmitted ? 'Обновленный вопрос из modal' : before.text,
+        textContent: requestSubmitted
+          ? {
+              ...before.textContent,
+              text: 'Обновленный вопрос из modal',
+            }
+          : before.textContent,
+      };
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: requestId,
+          type: 'UPDATE',
+          status: 'PENDING',
+          targetQuestionId: question.id,
+          subject: question.text,
+          createdAt: '2026-03-08T10:00:00.000Z',
+          updatedAt: '2026-03-08T10:00:00.000Z',
+          reviewedAt: null,
+          reviewComment: null,
+          author: {
+            id: options.profile.id,
+            login: options.profile.login,
+            email: options.profile.email,
+            displayName: options.profile.displayName,
+          },
+          reviewer: null,
+          before,
+          after,
+          fieldDiffs: {
+            text: {
+              changed: requestSubmitted,
+            },
+            answer: {
+              changed: false,
+            },
+            difficulty: {
+              before: before.difficulty,
+              after: after.difficulty,
+            },
+            company: {
+              before: before.company,
+              after: after.company,
+            },
+            topics: {
+              added: [],
+              removed: [],
+            },
+          },
+        }),
+      });
+    },
+  );
 
   return {
     getRequestSubmitted: () => requestSubmitted,
@@ -359,11 +511,15 @@ test('user bank hides actions and submits edit via change request from editor ro
   await page.goto('/bank');
 
   await expect(page.getByText('Действия')).toHaveCount(0);
-  await page.getByRole('button', {
+  const openQuestionButton = page.getByRole('button', {
     name: /Вопрос Почему сложный поиск в сервисе нельзя оставлять на Prisma query builder/,
-  }).click();
+  });
+  await expect(openQuestionButton).toBeVisible();
+  await Promise.all([
+    page.waitForURL(/\/question\/question-prisma-search$/),
+    openQuestionButton.click(),
+  ]);
 
-  await expect(page).toHaveURL(/\/question\/question-prisma-search$/);
   const encounterCount = page
     .locator('.summary-stat')
     .filter({ hasText: 'Встречал на собесе' })
