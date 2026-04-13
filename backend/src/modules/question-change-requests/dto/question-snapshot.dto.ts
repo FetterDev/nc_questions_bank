@@ -18,14 +18,14 @@ export class QuestionSnapshotDto {
   @ApiProperty({ example: 'Что такое MVCC?' })
   text!: string;
 
-  @ApiProperty({ type: QuestionStructuredContentDto })
-  textContent!: QuestionStructuredContentDto;
+  @ApiProperty({ type: [QuestionStructuredContentDto] })
+  textContent!: QuestionStructuredContentDto[];
 
   @ApiProperty({ example: 'Механизм версионирования строк в PostgreSQL.' })
   answer!: string;
 
-  @ApiProperty({ type: QuestionStructuredContentDto })
-  answerContent!: QuestionStructuredContentDto;
+  @ApiProperty({ type: [QuestionStructuredContentDto] })
+  answerContent!: QuestionStructuredContentDto[];
 
   @ApiProperty({ enum: QuestionDifficulty, example: QuestionDifficulty.MIDDLE })
   difficulty!: QuestionDifficulty;

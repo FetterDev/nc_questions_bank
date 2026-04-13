@@ -15,19 +15,23 @@ import { QuestionDifficulty } from '../question-difficulty';
 export class CreateQuestionDto {
   @ApiProperty({
     description: 'Структурированное содержимое вопроса',
-    type: QuestionStructuredContentDto,
+    type: [QuestionStructuredContentDto],
   })
-  @ValidateNested()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
   @Type(() => QuestionStructuredContentDto)
-  textContent!: QuestionStructuredContentDto;
+  textContent!: QuestionStructuredContentDto[];
 
   @ApiProperty({
     description: 'Структурированное содержимое ответа',
-    type: QuestionStructuredContentDto,
+    type: [QuestionStructuredContentDto],
   })
-  @ValidateNested()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
   @Type(() => QuestionStructuredContentDto)
-  answerContent!: QuestionStructuredContentDto;
+  answerContent!: QuestionStructuredContentDto[];
 
   @ApiProperty({
     description: 'Сложность вопроса',

@@ -8,7 +8,10 @@ export type QuestionCsvImportCodeLanguage =
   | 'javascript'
   | 'jsx'
   | 'typescript'
-  | 'tsx';
+  | 'tsx'
+  | 'html'
+  | 'css'
+  | 'vue';
 
 export type QuestionCsvImportDifficulty =
   | 'junior'

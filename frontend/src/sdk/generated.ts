@@ -922,15 +922,18 @@ export interface components {
             accuracy: number;
         };
         QuestionStructuredContentDto: {
+            /**
+             * @example text
+             * @enum {string}
+             */
+            kind: "text" | "code";
             /** @example Что выведет этот код? */
-            text: string;
-            /** @example const answer: number = 42; */
-            code?: string;
+            content: string;
             /**
              * @example typescript
              * @enum {string}
              */
-            codeLanguage?: "javascript" | "jsx" | "typescript" | "tsx";
+            language?: "javascript" | "jsx" | "typescript" | "tsx" | "html" | "css" | "vue";
         };
         QuestionTopicDto: {
             /** @example cm7y5z8qv0003x4f2w7sn1abc */
@@ -945,7 +948,7 @@ export interface components {
             questionId: string;
             /** @example Когда нужен составной индекс? */
             text: string;
-            textContent: components["schemas"]["QuestionStructuredContentDto"];
+            textContent: components["schemas"]["QuestionStructuredContentDto"][];
             /**
              * @example middle
              * @enum {string}
@@ -1234,10 +1237,10 @@ export interface components {
             questionId: string;
             /** @example Когда нужен составной индекс? */
             questionText: string;
-            questionTextContent: components["schemas"]["QuestionStructuredContentDto"];
+            questionTextContent: components["schemas"]["QuestionStructuredContentDto"][];
             /** @example Нужно, когда фильтруешь и сортируешь по нескольким полям. */
             answer: string;
-            answerContent: components["schemas"]["QuestionStructuredContentDto"];
+            answerContent: components["schemas"]["QuestionStructuredContentDto"][];
             /**
              * @example middle
              * @enum {string}
@@ -1440,9 +1443,9 @@ export interface components {
         };
         CreateQuestionDto: {
             /** @description Структурированное содержимое вопроса */
-            textContent: components["schemas"]["QuestionStructuredContentDto"];
+            textContent: components["schemas"]["QuestionStructuredContentDto"][];
             /** @description Структурированное содержимое ответа */
-            answerContent: components["schemas"]["QuestionStructuredContentDto"];
+            answerContent: components["schemas"]["QuestionStructuredContentDto"][];
             /**
              * @description Сложность вопроса
              * @example junior
@@ -1485,10 +1488,10 @@ export interface components {
             id: string;
             /** @example Какие основные типы данных есть в JavaScript? */
             text: string;
-            textContent: components["schemas"]["QuestionStructuredContentDto"];
+            textContent: components["schemas"]["QuestionStructuredContentDto"][];
             /** @example string, number, boolean, null, undefined, symbol, bigint, object. */
             answer: string;
-            answerContent: components["schemas"]["QuestionStructuredContentDto"];
+            answerContent: components["schemas"]["QuestionStructuredContentDto"][];
             /**
              * @example junior
              * @enum {string}
@@ -1505,9 +1508,9 @@ export interface components {
         };
         UpdateQuestionDto: {
             /** @description Структурированное содержимое вопроса */
-            textContent?: components["schemas"]["QuestionStructuredContentDto"];
+            textContent?: components["schemas"]["QuestionStructuredContentDto"][];
             /** @description Структурированное содержимое ответа */
-            answerContent?: components["schemas"]["QuestionStructuredContentDto"];
+            answerContent?: components["schemas"]["QuestionStructuredContentDto"][];
             /**
              * @description Сложность вопроса
              * @example middle
@@ -1554,7 +1557,7 @@ export interface components {
              * @example javascript
              * @enum {string|null}
              */
-            questionCodeLanguage: "javascript" | "jsx" | "typescript" | "tsx" | null;
+            questionCodeLanguage: "javascript" | "jsx" | "typescript" | "tsx" | "html" | "css" | "vue" | null;
             /** @example Механизм координации задач в JavaScript runtime. */
             answerText: string;
             /** @example Promise.resolve() */
@@ -1563,7 +1566,7 @@ export interface components {
              * @example javascript
              * @enum {string|null}
              */
-            answerCodeLanguage: "javascript" | "jsx" | "typescript" | "tsx" | null;
+            answerCodeLanguage: "javascript" | "jsx" | "typescript" | "tsx" | "html" | "css" | "vue" | null;
             /**
              * @example middle
              * @enum {string|null}
@@ -1647,9 +1650,9 @@ export interface components {
         };
         QuestionChangeRequestPayloadDto: {
             /** @description Структурированное содержимое вопроса */
-            textContent: components["schemas"]["QuestionStructuredContentDto"];
+            textContent: components["schemas"]["QuestionStructuredContentDto"][];
             /** @description Структурированное содержимое ответа */
-            answerContent: components["schemas"]["QuestionStructuredContentDto"];
+            answerContent: components["schemas"]["QuestionStructuredContentDto"][];
             /**
              * @example middle
              * @enum {string}
@@ -1705,10 +1708,10 @@ export interface components {
         QuestionSnapshotDto: {
             /** @example Что такое MVCC? */
             text: string;
-            textContent: components["schemas"]["QuestionStructuredContentDto"];
+            textContent: components["schemas"]["QuestionStructuredContentDto"][];
             /** @example Механизм версионирования строк в PostgreSQL. */
             answer: string;
-            answerContent: components["schemas"]["QuestionStructuredContentDto"];
+            answerContent: components["schemas"]["QuestionStructuredContentDto"][];
             /**
              * @example middle
              * @enum {string}
@@ -1863,10 +1866,10 @@ export interface components {
             id: string;
             /** @example Что такое dependency injection в Angular? */
             text: string;
-            textContent: components["schemas"]["QuestionStructuredContentDto"];
+            textContent: components["schemas"]["QuestionStructuredContentDto"][];
             /** @example Это механизм передачи зависимостей извне, чтобы класс не создавал их самостоятельно. */
             answer: string;
-            answerContent: components["schemas"]["QuestionStructuredContentDto"];
+            answerContent: components["schemas"]["QuestionStructuredContentDto"][];
             /**
              * @example junior
              * @enum {string}
@@ -1933,7 +1936,7 @@ export interface components {
             questionId: string;
             /** @example Когда нужен составной индекс? */
             text: string;
-            textContent: components["schemas"]["QuestionStructuredContentDto"];
+            textContent: components["schemas"]["QuestionStructuredContentDto"][];
             /**
              * @example middle
              * @enum {string}

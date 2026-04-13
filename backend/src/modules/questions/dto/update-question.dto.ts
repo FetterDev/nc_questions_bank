@@ -4,8 +4,8 @@ import {
   IsEnum,
   IsOptional,
   IsString,
-  MaxLength,
   ValidateNested,
+  MaxLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { QuestionStructuredContentDto } from './question-structured-content.dto';
@@ -14,21 +14,23 @@ import { QuestionDifficulty } from '../question-difficulty';
 export class UpdateQuestionDto {
   @ApiPropertyOptional({
     description: 'Структурированное содержимое вопроса',
-    type: QuestionStructuredContentDto,
+    type: [QuestionStructuredContentDto],
   })
   @IsOptional()
-  @ValidateNested()
+  @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => QuestionStructuredContentDto)
-  textContent?: QuestionStructuredContentDto;
+  textContent?: QuestionStructuredContentDto[];
 
   @ApiPropertyOptional({
     description: 'Структурированное содержимое ответа',
-    type: QuestionStructuredContentDto,
+    type: [QuestionStructuredContentDto],
   })
   @IsOptional()
-  @ValidateNested()
+  @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => QuestionStructuredContentDto)
-  answerContent?: QuestionStructuredContentDto;
+  answerContent?: QuestionStructuredContentDto[];
 
   @ApiPropertyOptional({
     description: 'Сложность вопроса',

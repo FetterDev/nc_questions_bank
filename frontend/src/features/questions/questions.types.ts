@@ -1,8 +1,24 @@
 import type { components } from '../../sdk';
 
 export type Question = components['schemas']['QuestionDto'];
-export type QuestionStructuredContent = components['schemas']['QuestionStructuredContentDto'];
-export type QuestionCodeLanguage = NonNullable<QuestionStructuredContent['codeLanguage']>;
+export type QuestionStructuredContentSchema =
+  components['schemas']['QuestionStructuredContentDto'];
+export type QuestionCodeLanguage = NonNullable<
+  QuestionStructuredContentSchema['language']
+>;
+export type QuestionTextContentBlock = {
+  kind: 'text';
+  content: string;
+};
+export type QuestionCodeContentBlock = {
+  kind: 'code';
+  content: string;
+  language?: QuestionCodeLanguage;
+};
+export type QuestionStructuredContentBlock =
+  | QuestionTextContentBlock
+  | QuestionCodeContentBlock;
+export type QuestionStructuredContent = QuestionStructuredContentBlock[];
 export type SearchResponse = components['schemas']['SearchQuestionsResponseDto'];
 export type DifficultyValue = Question['difficulty'];
 export type DifficultyOption = {

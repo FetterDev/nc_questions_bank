@@ -172,12 +172,14 @@ export class SearchRepository {
     return {
       items: rows.map((row): SearchQuestionOutput => ({
         ...row,
-        textContent: coerceQuestionStructuredContent(row.textContent, row.text) ?? {
-          text: row.text,
-        },
-        answerContent: coerceQuestionStructuredContent(row.answerContent, row.answer) ?? {
-          text: row.answer,
-        },
+        textContent:
+          coerceQuestionStructuredContent(row.textContent, row.text) ?? [
+            { kind: 'text', content: row.text },
+          ],
+        answerContent:
+          coerceQuestionStructuredContent(row.answerContent, row.answer) ?? [
+            { kind: 'text', content: row.answer },
+          ],
         difficulty: fromDifficultyRank(row.difficulty),
       })),
       total: totalRows[0]?.total ?? 0,

@@ -196,12 +196,14 @@ export class QuestionSelectionRepository {
     return {
       items: items.map((item): SelectedQuestionOutput => ({
         ...item,
-        textContent: coerceQuestionStructuredContent(item.textContent, item.text) ?? {
-          text: item.text,
-        },
-        answerContent: coerceQuestionStructuredContent(item.answerContent, item.answer) ?? {
-          text: item.answer,
-        },
+        textContent:
+          coerceQuestionStructuredContent(item.textContent, item.text) ?? [
+            { kind: 'text', content: item.text },
+          ],
+        answerContent:
+          coerceQuestionStructuredContent(item.answerContent, item.answer) ?? [
+            { kind: 'text', content: item.answer },
+          ],
         difficulty: fromDifficultyRank(item.difficulty),
       })),
       breakdown: breakdown.map((item): SelectedQuestionBreakdownOutput => ({

@@ -14,14 +14,14 @@ class InterviewRuntimeQuestionDto {
   @ApiProperty({ example: 'Когда нужен составной индекс?' })
   questionText!: string;
 
-  @ApiProperty({ type: QuestionStructuredContentDto })
-  questionTextContent!: QuestionStructuredContentDto;
+  @ApiProperty({ type: [QuestionStructuredContentDto] })
+  questionTextContent!: QuestionStructuredContentDto[];
 
   @ApiProperty({ example: 'Нужно, когда фильтруешь и сортируешь по нескольким полям.' })
   answer!: string;
 
-  @ApiProperty({ type: QuestionStructuredContentDto })
-  answerContent!: QuestionStructuredContentDto;
+  @ApiProperty({ type: [QuestionStructuredContentDto] })
+  answerContent!: QuestionStructuredContentDto[];
 
   @ApiProperty({ enum: QuestionDifficulty, example: QuestionDifficulty.MIDDLE })
   difficulty!: QuestionDifficulty;

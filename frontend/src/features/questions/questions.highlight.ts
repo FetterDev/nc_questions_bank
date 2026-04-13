@@ -1,6 +1,12 @@
 import type { QuestionCodeLanguage } from './questions.types';
 
 const FALLBACK_CODE_LANGUAGE: QuestionCodeLanguage = 'typescript';
+const SHIKI_SUPPORTED_LANGUAGES = new Set<QuestionCodeLanguage>([
+  'javascript',
+  'jsx',
+  'typescript',
+  'tsx',
+]);
 const htmlCache = new Map<string, Promise<string>>();
 let highlighterPromise: Promise<{
   codeToHtml: (code: string, options: { lang: string; theme: string }) => string;
@@ -15,8 +21,9 @@ function resolveLanguage(language?: QuestionCodeLanguage) {
     case 'tsx':
       return 'tsx';
     case 'typescript':
-    default:
       return 'typescript';
+    default:
+      return null;
   }
 }
 
@@ -53,7 +60,13 @@ export async function renderQuestionCodeToHtml(
   code: string,
   language?: QuestionCodeLanguage,
 ) {
-  const normalizedLanguage = resolveLanguage(language ?? FALLBACK_CODE_LANGUAGE);
+  const requestedLanguage = language ?? FALLBACK_CODE_LANGUAGE;
+  const normalizedLanguage = resolveLanguage(requestedLanguage);
+
+  if (!normalizedLanguage || !SHIKI_SUPPORTED_LANGUAGES.has(requestedLanguage)) {
+    return `<pre class="shiki"><code>${escapeCodeForHtml(code)}</code></pre>`;
+  }
+
   const cacheKey = `${normalizedLanguage}::${code}`;
   const cached = htmlCache.get(cacheKey);
 
@@ -84,6 +97,12 @@ export function formatQuestionCodeLanguage(
       return 'TSX';
     case 'typescript':
       return 'TYPESCRIPT';
+    case 'html':
+      return 'HTML';
+    case 'css':
+      return 'CSS';
+    case 'vue':
+      return 'VUE';
     default:
       return 'CODE';
   }

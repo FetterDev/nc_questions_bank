@@ -2432,29 +2432,36 @@
       "QuestionStructuredContentDto": {
         "type": "object",
         "properties": {
-          "text": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "text",
+              "code"
+            ],
+            "example": "text"
+          },
+          "content": {
             "type": "string",
             "example": "Что выведет этот код?",
             "maxLength": 5000
           },
-          "code": {
-            "type": "string",
-            "example": "const answer: number = 42;",
-            "maxLength": 5000
-          },
-          "codeLanguage": {
+          "language": {
             "type": "string",
             "enum": [
               "javascript",
               "jsx",
               "typescript",
-              "tsx"
+              "tsx",
+              "html",
+              "css",
+              "vue"
             ],
             "example": "typescript"
           }
         },
         "required": [
-          "text"
+          "kind",
+          "content"
         ]
       },
       "QuestionTopicDto": {
@@ -2491,7 +2498,10 @@
             "example": "Когда нужен составной индекс?"
           },
           "textContent": {
-            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "difficulty": {
             "type": "string",
@@ -3260,14 +3270,20 @@
             "example": "Когда нужен составной индекс?"
           },
           "questionTextContent": {
-            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "answer": {
             "type": "string",
             "example": "Нужно, когда фильтруешь и сортируешь по нескольким полям."
           },
           "answerContent": {
-            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "difficulty": {
             "type": "string",
@@ -3872,19 +3888,17 @@
         "properties": {
           "textContent": {
             "description": "Структурированное содержимое вопроса",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/QuestionStructuredContentDto"
-              }
-            ]
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "answerContent": {
             "description": "Структурированное содержимое ответа",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/QuestionStructuredContentDto"
-              }
-            ]
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "difficulty": {
             "type": "string",
@@ -3985,14 +3999,20 @@
             "example": "Какие основные типы данных есть в JavaScript?"
           },
           "textContent": {
-            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "answer": {
             "type": "string",
             "example": "string, number, boolean, null, undefined, symbol, bigint, object."
           },
           "answerContent": {
-            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "difficulty": {
             "type": "string",
@@ -4053,19 +4073,17 @@
         "properties": {
           "textContent": {
             "description": "Структурированное содержимое вопроса",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/QuestionStructuredContentDto"
-              }
-            ]
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "answerContent": {
             "description": "Структурированное содержимое ответа",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/QuestionStructuredContentDto"
-              }
-            ]
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "difficulty": {
             "type": "string",
@@ -4163,7 +4181,10 @@
               "javascript",
               "jsx",
               "typescript",
-              "tsx"
+              "tsx",
+              "html",
+              "css",
+              "vue"
             ],
             "nullable": true,
             "example": "javascript"
@@ -4183,7 +4204,10 @@
               "javascript",
               "jsx",
               "typescript",
-              "tsx"
+              "tsx",
+              "html",
+              "css",
+              "vue"
             ],
             "nullable": true,
             "example": "javascript"
@@ -4419,19 +4443,17 @@
         "properties": {
           "textContent": {
             "description": "Структурированное содержимое вопроса",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/QuestionStructuredContentDto"
-              }
-            ]
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "answerContent": {
             "description": "Структурированное содержимое ответа",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/QuestionStructuredContentDto"
-              }
-            ]
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "difficulty": {
             "type": "string",
@@ -4556,14 +4578,20 @@
             "example": "Что такое MVCC?"
           },
           "textContent": {
-            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "answer": {
             "type": "string",
             "example": "Механизм версионирования строк в PostgreSQL."
           },
           "answerContent": {
-            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "difficulty": {
             "type": "string",
@@ -5086,14 +5114,20 @@
             "example": "Что такое dependency injection в Angular?"
           },
           "textContent": {
-            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "answer": {
             "type": "string",
             "example": "Это механизм передачи зависимостей извне, чтобы класс не создавал их самостоятельно."
           },
           "answerContent": {
-            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "difficulty": {
             "type": "string",
@@ -5303,7 +5337,10 @@
             "example": "Когда нужен составной индекс?"
           },
           "textContent": {
-            "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
           },
           "difficulty": {
             "type": "string",

@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import type { QuestionStructuredContent } from '../../features/questions/questions.types';
+import { computed, ref, watch } from 'vue';
+import type {
+  QuestionCodeContentBlock,
+  QuestionStructuredContent,
+} from '../../features/questions/questions.types';
 import {
   escapeCodeForHtml,
   formatQuestionCodeLanguage,
@@ -16,39 +19,51 @@ const props = withDefaults(defineProps<{
   emptyLabel: 'Пусто',
 });
 
-const highlightedCode = ref('');
+const highlightedCodeByIndex = ref<Record<number, string>>({});
 let renderId = 0;
 
-watch(
-  () => [props.content?.code, props.content?.codeLanguage],
-  async () => {
-    const code = props.content?.code?.trim() ? props.content.code : '';
+const normalizedBlocks = computed(() =>
+  (Array.isArray(props.content) ? props.content : []).filter((block) =>
+    block.content?.trim(),
+  ),
+);
 
-    if (!code) {
-      highlightedCode.value = '';
+watch(
+  () =>
+    normalizedBlocks.value.map((block) => ({
+      kind: block.kind,
+      content: block.content,
+      language: block.kind === 'code' ? block.language ?? '' : '',
+    })),
+  async () => {
+    const currentRenderId = ++renderId;
+    const entries = await Promise.all(
+      normalizedBlocks.value.map(async (block, index) => {
+        if (block.kind !== 'code') {
+          return [index, ''] as const;
+        }
+
+        const html = await renderCodeBlock(block);
+        return [index, html] as const;
+      }),
+    );
+
+    if (currentRenderId !== renderId) {
       return;
     }
 
-    const currentRenderId = ++renderId;
-
-    try {
-      const html = await renderQuestionCodeToHtml(code, props.content?.codeLanguage);
-
-      if (currentRenderId !== renderId) {
-        return;
-      }
-
-      highlightedCode.value = html;
-    } catch {
-      if (currentRenderId !== renderId) {
-        return;
-      }
-
-      highlightedCode.value = `<pre class="shiki"><code>${escapeCodeForHtml(code)}</code></pre>`;
-    }
+    highlightedCodeByIndex.value = Object.fromEntries(entries);
   },
   { immediate: true },
 );
+
+async function renderCodeBlock(block: QuestionCodeContentBlock) {
+  try {
+    return await renderQuestionCodeToHtml(block.content, block.language);
+  } catch {
+    return `<pre class="shiki"><code>${escapeCodeForHtml(block.content)}</code></pre>`;
+  }
+}
 </script>
 
 <template>
@@ -58,20 +73,25 @@ watch(
       { 'question-content-renderer--compact': compact },
     ]"
   >
-    <template v-if="content?.text?.trim()">
-      <p class="question-content-renderer__text">
-        {{ content.text }}
-      </p>
+    <template v-if="normalizedBlocks.length > 0">
+      <template v-for="(block, index) in normalizedBlocks" :key="`${block.kind}-${index}`">
+        <p
+          v-if="block.kind === 'text'"
+          class="question-content-renderer__text"
+        >
+          {{ block.content }}
+        </p>
 
-      <div v-if="content.code?.trim()" class="question-content-renderer__code">
-        <span class="question-content-renderer__language">
-          {{ formatQuestionCodeLanguage(content.codeLanguage) }}
-        </span>
-        <div
-          class="question-content-renderer__code-body"
-          v-html="highlightedCode"
-        />
-      </div>
+        <div v-else class="question-content-renderer__code">
+          <span class="question-content-renderer__language">
+            {{ formatQuestionCodeLanguage(block.language) }}
+          </span>
+          <div
+            class="question-content-renderer__code-body"
+            v-html="highlightedCodeByIndex[index] ?? ''"
+          />
+        </div>
+      </template>
     </template>
 
     <p v-else class="question-content-renderer__empty">

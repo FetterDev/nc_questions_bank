@@ -51,8 +51,8 @@ class GrowthAnalyticsQuestionStatDto {
   @ApiProperty({ example: 'Когда нужен составной индекс?' })
   text!: string;
 
-  @ApiProperty({ type: QuestionStructuredContentDto })
-  textContent!: QuestionStructuredContentDto;
+  @ApiProperty({ type: [QuestionStructuredContentDto] })
+  textContent!: QuestionStructuredContentDto[];
 
   @ApiProperty({ enum: QuestionDifficulty, example: QuestionDifficulty.MIDDLE })
   difficulty!: QuestionDifficulty;

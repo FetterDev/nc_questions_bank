@@ -238,9 +238,10 @@ export class TrainingRepository {
       results: results.map((row) => ({
         questionId: row.questionId,
         text: row.text,
-        textContent: coerceQuestionStructuredContent(row.textContent, row.text) ?? {
-          text: row.text,
-        },
+        textContent:
+          coerceQuestionStructuredContent(row.textContent, row.text) ?? [
+            { kind: 'text', content: row.text },
+          ],
         difficulty: fromDifficultyRank(row.difficulty),
         result: fromTrainingResultDb(row.result),
         position: row.position,

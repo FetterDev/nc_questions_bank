@@ -87,9 +87,10 @@ export class AnalyticsService {
     const questionStats = questionRows.map((item) => ({
       questionId: item.questionId,
       text: item.text,
-      textContent: coerceQuestionStructuredContent(item.textContent, item.text) ?? {
-        text: item.text,
-      },
+      textContent:
+        coerceQuestionStructuredContent(item.textContent, item.text) ?? [
+          { kind: 'text', content: item.text },
+        ],
       difficulty: fromDifficultyRank(item.difficulty),
       topics: [...item.topics].sort((left, right) =>
         left.slug.localeCompare(right.slug, 'ru-RU'),

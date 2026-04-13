@@ -49,6 +49,17 @@ async function createQuestion(payload) {
   return result.payload;
 }
 
+function textBlock(content) {
+  return [{ kind: 'text', content }];
+}
+
+function textAndCodeBlocks(content, code, language = 'javascript') {
+  return [
+    { kind: 'text', content },
+    { kind: 'code', content: code, language },
+  ];
+}
+
 async function uploadCsv(path, content, filename = 'questions.csv') {
   const form = new FormData();
   form.set('file', new Blob([content], { type: 'text/csv' }), filename);
@@ -159,7 +170,7 @@ function parseCsv(content, delimiter = ';') {
 }
 
 before(async () => {
-  await prepareDatabase(backendDir, databaseUrl, { seed: true });
+  await prepareDatabase(backendDir, databaseUrl, { seed: false });
   serverProcess = await startServer(backendDir, databaseUrl, port);
 
   const adminLogin = await login(
@@ -202,12 +213,12 @@ test('GET /api/questions/export returns canonical csv for all filtered rows', as
 
   for (let index = 0; index < 3; index += 1) {
     const question = await createQuestion({
-      textContent: { text: `CSV export question ${Date.now()}-${index}` },
-      answerContent: { text: `CSV export answer ${index}` },
+      textContent: textBlock(`CSV export question ${Date.now()}-${index}`),
+      answerContent: textBlock(`CSV export answer ${index}`),
       difficulty: 'middle',
       topicIds: [topic.id],
     });
-    createdTexts.push(question.textContent.text);
+    createdTexts.push(question.textContent[0].content);
   }
 
   const exported = await api(
@@ -266,8 +277,8 @@ test('POST /api/questions/import/preview accepts legacy csv and reports ignored 
 test('POST /api/questions/import/preview flags duplicate ids', async () => {
   const topic = await createTopic(`CSV Preview Duplicate Topic ${Date.now()}`);
   const question = await createQuestion({
-    textContent: { text: `CSV duplicate preview question ${Date.now()}` },
-    answerContent: { text: 'CSV duplicate preview answer' },
+    textContent: textBlock(`CSV duplicate preview question ${Date.now()}`),
+    answerContent: textBlock('CSV duplicate preview answer'),
     difficulty: 'junior',
     topicIds: [topic.id],
   });
@@ -305,8 +316,8 @@ test('POST /api/questions/import/preview flags duplicate ids', async () => {
 test('POST /api/questions/import/commit updates existing rows and creates new rows with auto-created catalogs', async () => {
   const existingTopic = await createTopic(`CSV Existing Topic ${Date.now()}`);
   const existingQuestion = await createQuestion({
-    textContent: { text: `CSV commit source ${Date.now()}` },
-    answerContent: { text: 'CSV commit source answer' },
+    textContent: textBlock(`CSV commit source ${Date.now()}`),
+    answerContent: textBlock('CSV commit source answer'),
     difficulty: 'middle',
     topicIds: [existingTopic.id],
   });
@@ -348,9 +359,14 @@ test('POST /api/questions/import/commit updates existing rows and creates new ro
 
   const updatedQuestion = await api(`/questions/${existingQuestion.id}`);
   assert.equal(updatedQuestion.response.status, 200);
-  assert.equal(updatedQuestion.payload.textContent.text, 'Updated import question');
-  assert.equal(updatedQuestion.payload.textContent.code, 'const questionValue = 1;');
-  assert.equal(updatedQuestion.payload.answerContent.code, 'return questionValue;');
+  assert.deepEqual(
+    updatedQuestion.payload.textContent,
+    textAndCodeBlocks('Updated import question', 'const questionValue = 1;'),
+  );
+  assert.deepEqual(
+    updatedQuestion.payload.answerContent,
+    textAndCodeBlocks('Updated import answer', 'return questionValue;'),
+  );
   assert.equal(updatedQuestion.payload.difficulty, 'senior');
   assert.equal(updatedQuestion.payload.company.name, nextCompanyName);
   assert.deepEqual(
@@ -363,7 +379,9 @@ test('POST /api/questions/import/commit updates existing rows and creates new ro
   );
   assert.equal(createdQuestion.response.status, 200);
   assert.ok(
-    createdQuestion.payload.items.some((item) => item.textContent.text === nextQuestionText),
+    createdQuestion.payload.items.some(
+      (item) => item.textContent[0]?.content === nextQuestionText,
+    ),
   );
 
   const createdTopic = await api(`/topics?q=${encodeURIComponent(nextTopicName)}`);

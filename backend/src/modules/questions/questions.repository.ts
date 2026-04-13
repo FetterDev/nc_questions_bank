@@ -277,14 +277,14 @@ export class QuestionsRepository {
       id: question.id,
       text: question.text,
       textContent:
-        coerceQuestionStructuredContent(question.textContent, question.text) ?? {
-          text: question.text,
-        },
+        coerceQuestionStructuredContent(question.textContent, question.text) ?? [
+          { kind: 'text', content: question.text },
+        ],
       answer: question.answer,
       answerContent:
-        coerceQuestionStructuredContent(question.answerContent, question.answer) ?? {
-          text: question.answer,
-        },
+        coerceQuestionStructuredContent(question.answerContent, question.answer) ?? [
+          { kind: 'text', content: question.answer },
+        ],
       difficulty: question.difficulty as QuestionDifficultyRank,
       company: question.company
         ? {

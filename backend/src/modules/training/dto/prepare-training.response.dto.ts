@@ -10,8 +10,8 @@ class TrainingQuestionItemDto {
   @ApiProperty({ example: 'Что такое dependency injection в Angular?' })
   text!: string;
 
-  @ApiProperty({ type: QuestionStructuredContentDto })
-  textContent!: QuestionStructuredContentDto;
+  @ApiProperty({ type: [QuestionStructuredContentDto] })
+  textContent!: QuestionStructuredContentDto[];
 
   @ApiProperty({
     example:
@@ -19,8 +19,8 @@ class TrainingQuestionItemDto {
   })
   answer!: string;
 
-  @ApiProperty({ type: QuestionStructuredContentDto })
-  answerContent!: QuestionStructuredContentDto;
+  @ApiProperty({ type: [QuestionStructuredContentDto] })
+  answerContent!: QuestionStructuredContentDto[];
 
   @ApiProperty({ enum: QuestionDifficulty, example: QuestionDifficulty.JUNIOR })
   difficulty!: QuestionDifficulty;

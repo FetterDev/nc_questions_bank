@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { basicSetup } from 'codemirror';
 import { indentWithTab } from '@codemirror/commands';
-import { Compartment, EditorState } from '@codemirror/state';
+import { Compartment, EditorState, type Extension } from '@codemirror/state';
 import { javascript } from '@codemirror/lang-javascript';
 import { EditorView, keymap, placeholder } from '@codemirror/view';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
@@ -32,11 +32,20 @@ let skipSync = false;
 
 const resolvedLanguage = computed<QuestionCodeLanguage>(() => props.language ?? 'typescript');
 
-function createLanguageExtension(language: QuestionCodeLanguage) {
-  return javascript({
-    jsx: language === 'jsx' || language === 'tsx',
-    typescript: language === 'typescript' || language === 'tsx',
-  });
+function createLanguageExtension(language: QuestionCodeLanguage): Extension {
+  if (
+    language === 'javascript' ||
+    language === 'jsx' ||
+    language === 'typescript' ||
+    language === 'tsx'
+  ) {
+    return javascript({
+      jsx: language === 'jsx' || language === 'tsx',
+      typescript: language === 'typescript' || language === 'tsx',
+    });
+  }
+
+  return [];
 }
 
 function createEditorTheme() {

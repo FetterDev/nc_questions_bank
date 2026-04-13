@@ -25,6 +25,10 @@ import {
   QuestionCodeLanguage,
   QuestionStructuredContent,
   canonicalizeQuestionStructuredContent,
+  getQuestionStructuredContentCode,
+  getQuestionStructuredContentCodeLanguage,
+  getQuestionStructuredContentText,
+  joinQuestionStructuredContent,
   normalizeQuestionStructuredContent,
 } from './question-structured-content';
 import { QuestionOutput, QuestionsRepository } from './questions.repository';
@@ -142,12 +146,12 @@ export class QuestionsCsvService {
         [
           question.id,
           question.topics.map((topic) => topic.name).join('|'),
-          question.textContent.text,
-          question.textContent.code ?? '',
-          question.textContent.codeLanguage ?? '',
-          question.answerContent.text,
-          question.answerContent.code ?? '',
-          question.answerContent.codeLanguage ?? '',
+          this.renderStructuredContentForCsvText(question.textContent),
+          '',
+          '',
+          this.renderStructuredContentForCsvText(question.answerContent),
+          '',
+          '',
           question.difficulty,
           question.company?.name ?? '',
         ]
@@ -579,16 +583,24 @@ export class QuestionsCsvService {
     const normalized = {
       id,
       topics: normalizedTopics.map((topic) => topic.name),
-      questionText: questionContent?.text ?? questionText,
-      questionCode: questionContent?.code ?? (questionCode || null),
-      questionCodeLanguage:
-        (questionContent?.codeLanguage as QuestionCodeLanguage | undefined) ??
-        this.normalizeNullableCodeLanguage(questionCodeLanguage),
-      answerText: answerContent?.text ?? answerText,
-      answerCode: answerContent?.code ?? (answerCode || null),
-      answerCodeLanguage:
-        (answerContent?.codeLanguage as QuestionCodeLanguage | undefined) ??
-        this.normalizeNullableCodeLanguage(answerCodeLanguage),
+      questionText: questionContent
+        ? getQuestionStructuredContentText(questionContent)
+        : questionText,
+      questionCode: questionContent
+        ? getQuestionStructuredContentCode(questionContent) || null
+        : questionCode || null,
+      questionCodeLanguage: questionContent
+        ? getQuestionStructuredContentCodeLanguage(questionContent)
+        : this.normalizeNullableCodeLanguage(questionCodeLanguage),
+      answerText: answerContent
+        ? getQuestionStructuredContentText(answerContent)
+        : answerText,
+      answerCode: answerContent
+        ? getQuestionStructuredContentCode(answerContent) || null
+        : answerCode || null,
+      answerCodeLanguage: answerContent
+        ? getQuestionStructuredContentCodeLanguage(answerContent)
+        : this.normalizeNullableCodeLanguage(answerCodeLanguage),
       difficulty: normalizedDifficulty,
       company:
         companyKey && input.companiesByKey.has(companyKey)
@@ -657,12 +669,10 @@ export class QuestionsCsvService {
     errors: string[],
   ) {
     try {
+      const blocks = this.parseStructuredContentFromCsvFields(value);
+
       return normalizeQuestionStructuredContent(
-        {
-          text: value.text,
-          ...(value.code ? { code: value.code } : {}),
-          ...(value.codeLanguage ? { codeLanguage: value.codeLanguage } : {}),
-        },
+        blocks,
         {
           fieldLabel,
           plainTextLimit,
@@ -949,8 +959,449 @@ export class QuestionsCsvService {
     return fallback;
   }
 
+  private parseStructuredContentFromCsvFields(value: {
+    text: string;
+    code: string;
+    codeLanguage: string;
+  }) {
+    const blocks: QuestionStructuredContent = [
+      ...this.parseStructuredContentFromText(value.text),
+      ...this.buildExplicitCodeBlocks(value.code, value.codeLanguage),
+    ];
+
+    return this.compactStructuredContentBlocks(blocks);
+  }
+
+  private parseStructuredContentFromText(value: string) {
+    const normalized = this.normalizeMultiline(value);
+
+    if (!normalized.trim()) {
+      return [] satisfies QuestionStructuredContent;
+    }
+
+    if (normalized.includes('```')) {
+      return this.parseMarkdownStructuredContent(normalized);
+    }
+
+    return this.parseHeuristicStructuredContent(normalized);
+  }
+
+  private parseMarkdownStructuredContent(value: string) {
+    const blocks: QuestionStructuredContent = [];
+    const fencePattern = /```([^\n`]*)\n?([\s\S]*?)```/g;
+    let lastIndex = 0;
+    let hasFence = false;
+
+    for (const match of value.matchAll(fencePattern)) {
+      hasFence = true;
+      const matchStart = match.index ?? 0;
+      const rawText = value.slice(lastIndex, matchStart);
+
+      blocks.push(...this.parseHeuristicStructuredContent(rawText));
+
+      const code = this.trimCodeBlock(match[2] ?? '');
+
+      if (code) {
+        const language = this.normalizeNullableCodeLanguage(match[1] ?? '');
+        blocks.push({
+          kind: 'code',
+          content: code,
+          ...(language ? { language } : {}),
+        });
+      }
+
+      lastIndex = matchStart + match[0].length;
+    }
+
+    if (!hasFence) {
+      return this.parseHeuristicStructuredContent(value);
+    }
+
+    const trailingText = value.slice(lastIndex);
+    blocks.push(...this.parseHeuristicStructuredContent(trailingText));
+
+    return this.compactStructuredContentBlocks(blocks);
+  }
+
+  private parseHeuristicStructuredContent(value: string) {
+    const normalized = this.normalizeMultiline(value);
+
+    if (!normalized.trim()) {
+      return [] satisfies QuestionStructuredContent;
+    }
+
+    const lines = normalized.split('\n');
+    const blocks: QuestionStructuredContent = [];
+    const textBuffer: string[] = [];
+
+    const flushText = () => {
+      const text = textBuffer.join('\n').trim();
+
+      if (text) {
+        blocks.push({
+          kind: 'text',
+          content: text,
+        });
+      }
+
+      textBuffer.length = 0;
+    };
+
+    let lineIndex = 0;
+
+    while (lineIndex < lines.length) {
+      const inlineCodeStart = this.splitInlineCodeStart(
+        lines[lineIndex] ?? '',
+        lines[lineIndex + 1] ?? '',
+      );
+
+      if (inlineCodeStart) {
+        if (inlineCodeStart.text.trim()) {
+          textBuffer.push(inlineCodeStart.text.trimEnd());
+        }
+
+        lines[lineIndex] = inlineCodeStart.code;
+      }
+
+      const codeRangeEnd = this.detectCodeBlockEnd(lines, lineIndex);
+
+      if (codeRangeEnd === null) {
+        textBuffer.push(lines[lineIndex] ?? '');
+        lineIndex += 1;
+        continue;
+      }
+
+      flushText();
+
+      const code = this.trimCodeBlock(lines.slice(lineIndex, codeRangeEnd).join('\n'));
+
+      if (code) {
+        const language = this.inferCodeLanguage(code);
+        blocks.push({
+          kind: 'code',
+          content: code,
+          ...(language ? { language } : {}),
+        });
+      }
+
+      lineIndex = codeRangeEnd;
+    }
+
+    flushText();
+
+    return this.compactStructuredContentBlocks(blocks);
+  }
+
+  private buildExplicitCodeBlocks(
+    code: string,
+    codeLanguage: string,
+  ) {
+    const normalizedCode = this.normalizeMultiline(code);
+
+    if (!normalizedCode.trim()) {
+      return [] satisfies QuestionStructuredContent;
+    }
+
+    const language =
+      this.normalizeNullableCodeLanguage(codeLanguage) ??
+      this.inferCodeLanguage(normalizedCode);
+
+    return [
+      {
+        kind: 'code' as const,
+        content: this.trimCodeBlock(normalizedCode),
+        ...(language ? { language } : {}),
+      },
+    ] satisfies QuestionStructuredContent;
+  }
+
+  private detectCodeBlockEnd(lines: string[], startIndex: number) {
+    const startScore = this.scoreCodeLine(lines[startIndex] ?? '');
+
+    if (startScore < 3) {
+      return null;
+    }
+
+    let endIndex = startIndex + 1;
+
+    while (endIndex < lines.length) {
+      const line = lines[endIndex] ?? '';
+      const trimmed = line.trim();
+
+      if (!trimmed) {
+        const nextNonEmptyIndex = this.findNextNonEmptyLine(lines, endIndex + 1);
+
+        if (nextNonEmptyIndex === null) {
+          break;
+        }
+
+        if (this.scoreCodeLine(lines[nextNonEmptyIndex] ?? '') < 1) {
+          break;
+        }
+
+        endIndex += 1;
+        continue;
+      }
+
+      if (this.scoreCodeLine(line) < 1) {
+        break;
+      }
+
+      endIndex += 1;
+    }
+
+    if (endIndex === startIndex + 1 && startScore < 4) {
+      return null;
+    }
+
+    return endIndex;
+  }
+
+  private findNextNonEmptyLine(lines: string[], startIndex: number) {
+    for (let index = startIndex; index < lines.length; index += 1) {
+      if ((lines[index] ?? '').trim()) {
+        return index;
+      }
+    }
+
+    return null;
+  }
+
+  private scoreCodeLine(line: string) {
+    const normalized = this.normalizeMultiline(line);
+    const trimmed = normalized.trim();
+
+    if (!trimmed) {
+      return 0;
+    }
+
+    const hasCyrillic = /[А-Яа-яЁё]/.test(trimmed);
+    const isHtmlLine = /^<\/?[A-Za-z][\w:-]*(\s|>|\/>)/.test(trimmed);
+    const startsWithCodeKeyword =
+      /^(const|let|var|function|class|interface|type|enum|import|export|return|if\b|else\b|for\b|while\b|switch\b|case\b|try\b|catch\b|finally\b|throw\b|new\b|await\b)/.test(
+        trimmed,
+      );
+    const hasStrongCodeToken =
+      /=>|===|!==|\bconsole\.|\baddEventListener\(|\bsetTimeout\(|\bsetInterval\(|\bqueueMicrotask\(/.test(
+        trimmed,
+      );
+    const isCommentLine = /^\s*(\/\/|\/\*|\*\/|<!--)/.test(trimmed);
+    let score = 0;
+
+    if (isHtmlLine) {
+      score += 4;
+    }
+
+    if (startsWithCodeKeyword) {
+      score += 3;
+    }
+
+    if (hasStrongCodeToken) {
+      score += 3;
+    }
+
+    if (/^\s*[A-Za-z_$][\w$]*\??:\s*[\w<>{}\[\]|'", ]+,?$/.test(trimmed)) {
+      score += 2;
+    }
+
+    if (/^\s*[@:#.A-Za-z][^{]*\{\s*$/.test(trimmed) && !hasCyrillic) {
+      score += 3;
+    }
+
+    if (/^\s*[A-Za-z-]+\s*:\s*[^;]+;?$/.test(trimmed) && !hasCyrillic) {
+      score += 2;
+    }
+
+    if (/^[)\]}>,;]+$/.test(trimmed)) {
+      score += 1;
+    }
+
+    if (/[{};]/.test(trimmed)) {
+      score += 1;
+    }
+
+    if (isCommentLine) {
+      score += 2;
+    }
+
+    if (!hasCyrillic && /[<>{}()[\];:=]/.test(trimmed)) {
+      score += 1;
+    }
+
+    if (
+      hasCyrillic &&
+      !isHtmlLine &&
+      !startsWithCodeKeyword &&
+      !hasStrongCodeToken &&
+      !isCommentLine
+    ) {
+      score = Math.min(score, 0);
+    }
+
+    return score;
+  }
+
+  private inferCodeLanguage(code: string) {
+    const normalized = this.normalizeMultiline(code).trim();
+
+    if (!normalized) {
+      return null;
+    }
+
+    if (/<template\b|<script\b|<style\b|v-for=|v-if=|@click\b|:\w+=/i.test(normalized)) {
+      return 'vue' satisfies QuestionCodeLanguage;
+    }
+
+    if (/^<\/?[A-Za-z][\w:-]*(\s|>|\/>)/m.test(normalized)) {
+      return 'html' satisfies QuestionCodeLanguage;
+    }
+
+    if (
+      /\binterface\b|\btype\b|:\s*[A-Z][\w<>{}\[\]|]+|\bas const\b|^\s*[A-Za-z_$][\w$]*\??:\s*[\w<>{}\[\]|'", ]+,?$/m.test(
+        normalized,
+      )
+    ) {
+      return 'typescript' satisfies QuestionCodeLanguage;
+    }
+
+    if (/<[A-Za-z][^>]*>/.test(normalized)) {
+      return 'jsx' satisfies QuestionCodeLanguage;
+    }
+
+    if (/\bimport\b|\bconst\b|\blet\b|\bfunction\b|=>|\bconsole\./.test(normalized)) {
+      return 'javascript' satisfies QuestionCodeLanguage;
+    }
+
+    if (
+      /^[\s\S]*\{[\s\S]*:[^;]+;[\s\S]*\}$/m.test(normalized) ||
+      /^\s*[A-Za-z-]+\s*:\s*[^;]+;?$/m.test(normalized)
+    ) {
+      return 'css' satisfies QuestionCodeLanguage;
+    }
+
+    return null;
+  }
+
+  private splitInlineCodeStart(
+    line: string,
+    nextLine: string,
+  ): { text: string; code: string } | null {
+    const normalized = this.normalizeMultiline(line);
+    const nextNormalized = this.normalizeMultiline(nextLine);
+    const codeStartPatterns = [
+      /\b(type|interface|const|let|var|function|class|import|export)\b/,
+      /<\/?[A-Za-z][\w:-]*(\s|>|\/>)/,
+    ];
+
+    for (const pattern of codeStartPatterns) {
+      const match = pattern.exec(normalized);
+
+      if (!match || match.index === undefined || match.index <= 0) {
+        continue;
+      }
+
+      const before = normalized.slice(0, match.index);
+      const after = normalized.slice(match.index);
+
+      if (
+        !/[А-Яа-яЁё]/.test(before) &&
+        !/:\s*$/.test(before)
+      ) {
+        continue;
+      }
+
+      if (
+        this.scoreCodeLine(after) < 3 &&
+        this.scoreCodeLine(nextNormalized) < 1
+      ) {
+        continue;
+      }
+
+      return {
+        text: before,
+        code: after,
+      };
+    }
+
+    return null;
+  }
+
+  private trimCodeBlock(value: string) {
+    return this.normalizeMultiline(value).replace(/^\n+|\n+$/g, '');
+  }
+
+  private compactStructuredContentBlocks(value: QuestionStructuredContent) {
+    const compact: QuestionStructuredContent = [];
+
+    for (const block of value) {
+      const content =
+        block.kind === 'code'
+          ? this.trimCodeBlock(block.content)
+          : this.normalizeMultiline(block.content).trim();
+
+      if (!content) {
+        continue;
+      }
+
+      const previous = compact.at(-1);
+
+      if (
+        previous &&
+        previous.kind === block.kind &&
+        (
+          block.kind === 'text' ||
+          (previous.kind === 'code' &&
+            (previous.language === block.language ||
+              !previous.language ||
+              !block.language))
+        )
+      ) {
+        if (block.kind === 'text') {
+          previous.content = `${previous.content}\n\n${content}`;
+        } else if (previous.kind === 'code') {
+          previous.content = `${previous.content}\n\n${content}`;
+          previous.language = previous.language ?? block.language;
+        }
+        continue;
+      }
+
+      compact.push(
+        block.kind === 'text'
+          ? {
+              kind: 'text',
+              content,
+            }
+          : {
+              kind: 'code',
+              content,
+              ...(block.language ? { language: block.language } : {}),
+            },
+      );
+    }
+
+    return compact;
+  }
+
+  private renderStructuredContentForCsvText(value: QuestionStructuredContent) {
+    return value
+      .map((block) =>
+        block.kind === 'text'
+          ? block.content
+          : [
+              `\`\`\`${block.language ?? ''}`.trimEnd(),
+              block.content,
+              '```',
+            ].join('\n'),
+      )
+      .join('\n\n');
+  }
+
+  private normalizeMultiline(value: string) {
+    return value.replace(/\r\n?/g, '\n');
+  }
+
   private joinStructuredContent(value: QuestionStructuredContent) {
-    return value.code ? `${value.text}\n\n${value.code}` : value.text;
+    return joinQuestionStructuredContent(value);
   }
 
   private toDifficultyRank(value: QuestionDifficulty) {

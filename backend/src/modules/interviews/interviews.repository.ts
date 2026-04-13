@@ -9,7 +9,11 @@ import {
   UserStatus,
 } from '@prisma/client';
 import { PrismaService } from '../../infra/prisma/prisma.service';
-import { QuestionStructuredContent, toQuestionStructuredContentJson } from '../questions/question-structured-content';
+import {
+  QuestionStructuredContent,
+  coerceQuestionStructuredContent,
+  toQuestionStructuredContentJson,
+} from '../questions/question-structured-content';
 import { QuestionDifficultyRank } from '../questions/question-difficulty';
 
 type DbClient = Prisma.TransactionClient | PrismaClient | PrismaService;
@@ -580,9 +584,15 @@ export class InterviewsRepository {
         id: question.id,
         questionId: question.questionId,
         questionText: question.questionText,
-        questionTextContent: question.questionTextContent as QuestionStructuredContent,
+        questionTextContent:
+          coerceQuestionStructuredContent(
+            question.questionTextContent,
+            question.questionText,
+          ) ?? [{ kind: 'text', content: question.questionText }],
         answer: question.answer,
-        answerContent: question.answerContent as QuestionStructuredContent,
+        answerContent:
+          coerceQuestionStructuredContent(question.answerContent, question.answer) ??
+          [{ kind: 'text', content: question.answer }],
         difficulty: question.difficulty as QuestionDifficultyRank,
         result: question.result,
         position: question.position,

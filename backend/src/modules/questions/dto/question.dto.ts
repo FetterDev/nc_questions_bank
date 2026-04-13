@@ -13,14 +13,14 @@ export class QuestionDto {
   @ApiProperty({ example: 'Какие основные типы данных есть в JavaScript?' })
   text!: string;
 
-  @ApiProperty({ type: QuestionStructuredContentDto })
-  textContent!: QuestionStructuredContentDto;
+  @ApiProperty({ type: [QuestionStructuredContentDto] })
+  textContent!: QuestionStructuredContentDto[];
 
   @ApiProperty({ example: 'string, number, boolean, null, undefined, symbol, bigint, object.' })
   answer!: string;
 
-  @ApiProperty({ type: QuestionStructuredContentDto })
-  answerContent!: QuestionStructuredContentDto;
+  @ApiProperty({ type: [QuestionStructuredContentDto] })
+  answerContent!: QuestionStructuredContentDto[];
 
   @ApiProperty({ enum: QuestionDifficulty, example: QuestionDifficulty.JUNIOR })
   difficulty!: QuestionDifficulty;

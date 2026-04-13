@@ -27,6 +27,9 @@ export const questionCodeLanguageOptions: Array<{
   { title: 'JSX', value: 'jsx' },
   { title: 'TS', value: 'typescript' },
   { title: 'TSX', value: 'tsx' },
+  { title: 'HTML', value: 'html' },
+  { title: 'CSS', value: 'css' },
+  { title: 'Vue', value: 'vue' },
 ];
 
 export const createEmptyForm = (): QuestionFormValues => ({
