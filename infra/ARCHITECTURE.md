@@ -12,7 +12,7 @@
   - `infra/compose/docker-compose.backend.yml` (backend + db).
 - Сервисы:
   - `postgres`: основная БД (PostgreSQL 16).
-  - `backend-migrate`: одноразовый контейнер для `prisma migrate deploy` и `bootstrap:admin`.
+  - `backend-migrate`: одноразовый контейнер для `prisma migrate deploy`, `bootstrap:admin` и `seed:question-bank`.
   - `backend`: NestJS API на порту `3000` внутри сети.
   - `frontend`: nginx со статикой Vue.
 - Сеть: `bridge`-сеть `app`.
@@ -26,7 +26,7 @@
 
 ## Порядок старта
 - `postgres` стартует и проходит healthcheck.
-- `backend-migrate` выполняет `prisma migrate deploy`, затем `bootstrap:admin` и завершается.
+- `backend-migrate` выполняет `prisma migrate deploy`, затем `bootstrap:admin`, затем `seed:question-bank` и завершается.
 - `backend` стартует только после успешных миграций.
 - `frontend` (если включен выбранным compose-файлом) стартует после healthcheck `backend`.
 - В миграционный слой теперь входят не только published question bank таблицы, но и auth/moderation таблицы (`users`, `question_change_requests`), поля локального login/password auth и partial unique index для pending-заявок.

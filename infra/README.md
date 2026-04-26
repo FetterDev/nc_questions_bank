@@ -9,7 +9,7 @@ docker compose -f infra/compose/docker-compose.prod.yml --env-file .env up -d --
 
 Сервисы:
 - `postgres` - БД PostgreSQL с volume `postgres_data`
-- `backend-migrate` - одноразовый запуск `prisma migrate deploy` и `npm run bootstrap:admin`
+- `backend-migrate` - одноразовый запуск `prisma migrate deploy`, `npm run bootstrap:admin` и `npm run seed:question-bank`
 - `backend` - NestJS API
 - `frontend` - nginx + статический фронт и прокси `/api`
 
