@@ -361,7 +361,7 @@ async function prepareSeedCompetencySlots(tx, data) {
     ],
   });
 
-  let nextTemporaryPosition = (maxPosition._max.position ?? 0) + 1;
+  let nextTemporaryPosition = Math.max(maxPosition._max.position ?? 0, seedPositionsCount) + 1;
 
   for (const competency of existingSeedSlotCompetencies) {
     await tx.competency.update({
