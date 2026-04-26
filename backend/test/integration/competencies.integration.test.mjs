@@ -153,6 +153,146 @@ test('manager manages stacks and competencies while user can only read', async (
   assert.equal(forbiddenCreate.response.status, 403);
 });
 
+test('manager reorders and deletes competencies', async () => {
+  const stack = await api('/stacks', {
+    method: 'POST',
+    body: JSON.stringify({ name: uniqueLabel('Reorder Stack') }),
+  }, 'manager');
+
+  assert.equal(stack.response.status, 201);
+
+  const first = await api('/competencies', {
+    method: 'POST',
+    body: JSON.stringify({
+      stackId: stack.payload.id,
+      name: uniqueLabel('First competency'),
+      position: 1,
+    }),
+  }, 'manager');
+  const second = await api('/competencies', {
+    method: 'POST',
+    body: JSON.stringify({
+      stackId: stack.payload.id,
+      name: uniqueLabel('Second competency'),
+      position: 2,
+    }),
+  }, 'manager');
+  const third = await api('/competencies', {
+    method: 'POST',
+    body: JSON.stringify({
+      stackId: stack.payload.id,
+      name: uniqueLabel('Third competency'),
+      position: 3,
+    }),
+  }, 'manager');
+
+  assert.equal(first.response.status, 201);
+  assert.equal(second.response.status, 201);
+  assert.equal(third.response.status, 201);
+
+  const moved = await api(`/competencies/${third.payload.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      position: 1,
+    }),
+  }, 'manager');
+
+  assert.equal(moved.response.status, 200);
+  assert.equal(moved.payload.position, 1);
+
+  const reordered = await api(
+    `/competencies?stackId=${stack.payload.id}&limit=100&offset=0`,
+    {},
+    'manager',
+  );
+
+  assert.equal(reordered.response.status, 200);
+  assert.deepEqual(
+    reordered.payload.items.map((item) => item.id),
+    [third.payload.id, first.payload.id, second.payload.id],
+  );
+  assert.deepEqual(
+    reordered.payload.items.map((item) => item.position),
+    [1, 2, 3],
+  );
+
+  const deleted = await api(`/competencies/${first.payload.id}`, {
+    method: 'DELETE',
+  }, 'manager');
+
+  assert.equal(deleted.response.status, 204);
+
+  const afterDelete = await api(
+    `/competencies?stackId=${stack.payload.id}&limit=100&offset=0`,
+    {},
+    'manager',
+  );
+
+  assert.equal(afterDelete.response.status, 200);
+  assert.ok(!afterDelete.payload.items.some((item) => item.id === first.payload.id));
+});
+
+test('manager deletes stacks with assignments and competencies', async () => {
+  const stack = await api('/stacks', {
+    method: 'POST',
+    body: JSON.stringify({ name: uniqueLabel('Delete Stack') }),
+  }, 'manager');
+
+  assert.equal(stack.response.status, 201);
+
+  const competency = await api('/competencies', {
+    method: 'POST',
+    body: JSON.stringify({
+      stackId: stack.payload.id,
+      name: uniqueLabel('Deleted competency'),
+      position: 1,
+    }),
+  }, 'manager');
+
+  assert.equal(competency.response.status, 201);
+
+  const credentials = buildUserCredentials('delete-stack-user');
+  const createdUser = await api('/users', {
+    method: 'POST',
+    body: JSON.stringify({
+      ...credentials,
+      role: 'USER',
+    }),
+  });
+
+  assert.equal(createdUser.response.status, 201);
+
+  const assigned = await api(`/competency-matrix/users/${createdUser.payload.id}/stacks`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      stackIds: [stack.payload.id],
+    }),
+  }, 'manager');
+
+  assert.equal(assigned.response.status, 200);
+  assert.deepEqual(assigned.payload.stacks.map((item) => item.id), [stack.payload.id]);
+
+  const deleted = await api(`/stacks/${stack.payload.id}`, {
+    method: 'DELETE',
+  }, 'manager');
+
+  assert.equal(deleted.response.status, 204);
+
+  const listedStacks = await api('/stacks?limit=100&offset=0', {}, 'manager');
+  const listedCompetencies = await api(
+    `/competencies?stackId=${stack.payload.id}&limit=100&offset=0`,
+    {},
+    'manager',
+  );
+  const matrix = await api(`/competency-matrix/users/${createdUser.payload.id}`, {}, 'manager');
+
+  assert.equal(listedStacks.response.status, 200);
+  assert.ok(!listedStacks.payload.items.some((item) => item.id === stack.payload.id));
+  assert.equal(listedCompetencies.response.status, 404);
+  assert.equal(matrix.response.status, 200);
+  assert.deepEqual(matrix.payload.stacks, []);
+});
+
 test('manager assigns stacks to users through competency matrix', async () => {
   const stack = await api('/stacks', {
     method: 'POST',

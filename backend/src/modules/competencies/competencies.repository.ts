@@ -3,6 +3,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 
 type DbClient = Prisma.TransactionClient | PrismaClient | PrismaService;
+const POSITION_SHIFT_OFFSET = 10_000;
 
 export type StackOutput = {
   id: string;
@@ -126,6 +127,12 @@ export class CompetenciesRepository {
     return this.findStackById(id, db);
   }
 
+  deleteStack(id: string, db?: DbClient) {
+    return this.getDb(db).technologyStack.delete({
+      where: { id },
+    });
+  }
+
   async listCompetencies(
     params: {
       q?: string;
@@ -194,11 +201,19 @@ export class CompetenciesRepository {
     },
     db?: DbClient,
   ) {
-    const created = await this.getDb(db).competency.create({
-      data,
-      select: {
-        id: true,
-      },
+    const client = this.getDb(db);
+    const created = await this.withTransaction(client, async (tx) => {
+      const position = await this.openPosition(tx, data.stackId, data.position);
+
+      return tx.competency.create({
+        data: {
+          ...data,
+          position,
+        },
+        select: {
+          id: true,
+        },
+      });
     });
 
     return this.findCompetencyById(created.id, db);
@@ -215,12 +230,86 @@ export class CompetenciesRepository {
     },
     db?: DbClient,
   ) {
-    await this.getDb(db).competency.update({
-      where: { id },
-      data,
+    const client = this.getDb(db);
+    await this.withTransaction(client, async (tx) => {
+      const existing = await tx.competency.findUnique({
+        where: { id },
+        select: {
+          stackId: true,
+          position: true,
+        },
+      });
+
+      if (!existing) {
+        return;
+      }
+
+      const nextStackId = data.stackId ?? existing.stackId;
+      const positionChanged = data.position !== undefined;
+      const stackChanged = nextStackId !== existing.stackId;
+
+      if (!positionChanged && !stackChanged) {
+        await tx.competency.update({
+          where: { id },
+          data,
+        });
+        return;
+      }
+
+      const movingPosition = -Date.now();
+      await tx.competency.update({
+        where: { id },
+        data: {
+          position: movingPosition,
+        },
+      });
+
+      if (stackChanged) {
+        await this.closePosition(tx, existing.stackId, existing.position);
+      }
+
+      const nextPosition = stackChanged
+        ? await this.openPosition(tx, nextStackId, data.position ?? existing.position)
+        : await this.movePosition(
+            tx,
+            existing.stackId,
+            existing.position,
+            data.position ?? existing.position,
+          );
+
+      await tx.competency.update({
+        where: { id },
+        data: {
+          ...data,
+          stackId: stackChanged ? nextStackId : data.stackId,
+          position: nextPosition,
+        },
+      });
     });
 
     return this.findCompetencyById(id, db);
+  }
+
+  async deleteCompetency(id: string, db?: DbClient) {
+    const client = this.getDb(db);
+    await this.withTransaction(client, async (tx) => {
+      const existing = await tx.competency.findUnique({
+        where: { id },
+        select: {
+          stackId: true,
+          position: true,
+        },
+      });
+
+      if (!existing) {
+        return;
+      }
+
+      await tx.competency.delete({
+        where: { id },
+      });
+      await this.closePosition(tx, existing.stackId, existing.position);
+    });
   }
 
   async getNextCompetencyPosition(stackId: string, db?: DbClient) {
@@ -341,5 +430,181 @@ export class CompetenciesRepository {
 
   private getDb(db?: DbClient) {
     return db ?? this.prisma;
+  }
+
+  private withTransaction<T>(
+    db: DbClient,
+    callback: (tx: Prisma.TransactionClient) => Promise<T>,
+  ) {
+    if ('$transaction' in db && typeof db.$transaction === 'function') {
+      return db.$transaction(callback);
+    }
+
+    return callback(db as Prisma.TransactionClient);
+  }
+
+  private async openPosition(
+    tx: Prisma.TransactionClient,
+    stackId: string,
+    requestedPosition: number,
+  ) {
+    const boundedPosition = await this.boundPosition(tx, stackId, requestedPosition);
+
+    await tx.competency.updateMany({
+      where: {
+        stackId,
+        position: {
+          gte: boundedPosition,
+        },
+      },
+      data: {
+        position: {
+          increment: POSITION_SHIFT_OFFSET,
+        },
+      },
+    });
+    await tx.competency.updateMany({
+      where: {
+        stackId,
+        position: {
+          gte: boundedPosition + POSITION_SHIFT_OFFSET,
+        },
+      },
+      data: {
+        position: {
+          decrement: POSITION_SHIFT_OFFSET - 1,
+        },
+      },
+    });
+
+    return boundedPosition;
+  }
+
+  private async closePosition(
+    tx: Prisma.TransactionClient,
+    stackId: string,
+    removedPosition: number,
+  ) {
+    await tx.competency.updateMany({
+      where: {
+        stackId,
+        position: {
+          gt: removedPosition,
+        },
+      },
+      data: {
+        position: {
+          increment: POSITION_SHIFT_OFFSET,
+        },
+      },
+    });
+    await tx.competency.updateMany({
+      where: {
+        stackId,
+        position: {
+          gte: removedPosition + POSITION_SHIFT_OFFSET,
+        },
+      },
+      data: {
+        position: {
+          decrement: POSITION_SHIFT_OFFSET + 1,
+        },
+      },
+    });
+  }
+
+  private async movePosition(
+    tx: Prisma.TransactionClient,
+    stackId: string,
+    currentPosition: number,
+    requestedPosition: number,
+  ) {
+    const maxPosition = await tx.competency.count({
+      where: {
+        stackId,
+      },
+    });
+    const boundedPosition = Math.max(1, Math.min(requestedPosition, maxPosition));
+
+    if (boundedPosition === currentPosition) {
+      return boundedPosition;
+    }
+
+    if (boundedPosition < currentPosition) {
+      await tx.competency.updateMany({
+        where: {
+          stackId,
+          position: {
+            gte: boundedPosition,
+            lt: currentPosition,
+          },
+        },
+        data: {
+          position: {
+            increment: POSITION_SHIFT_OFFSET,
+          },
+        },
+      });
+      await tx.competency.updateMany({
+        where: {
+          stackId,
+          position: {
+            gte: boundedPosition + POSITION_SHIFT_OFFSET,
+            lt: currentPosition + POSITION_SHIFT_OFFSET,
+          },
+        },
+        data: {
+          position: {
+            decrement: POSITION_SHIFT_OFFSET - 1,
+          },
+        },
+      });
+      return boundedPosition;
+    }
+
+    await tx.competency.updateMany({
+      where: {
+        stackId,
+        position: {
+          gt: currentPosition,
+          lte: boundedPosition,
+        },
+      },
+      data: {
+        position: {
+          increment: POSITION_SHIFT_OFFSET,
+        },
+      },
+    });
+    await tx.competency.updateMany({
+      where: {
+        stackId,
+        position: {
+          gt: currentPosition + POSITION_SHIFT_OFFSET,
+          lte: boundedPosition + POSITION_SHIFT_OFFSET,
+        },
+      },
+      data: {
+        position: {
+          decrement: POSITION_SHIFT_OFFSET + 1,
+        },
+      },
+    });
+
+    return boundedPosition;
+  }
+
+  private async boundPosition(
+    tx: Prisma.TransactionClient,
+    stackId: string,
+    requestedPosition: number,
+  ) {
+    const count = await tx.competency.count({
+      where: {
+        stackId,
+      },
+    });
+
+    return Math.max(1, Math.min(requestedPosition, count + 1));
   }
 }

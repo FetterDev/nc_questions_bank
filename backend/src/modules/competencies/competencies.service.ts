@@ -53,7 +53,8 @@ export class CompetenciesService {
   }
 
   async updateStack(id: string, dto: UpdateStackDto) {
-    const existing = await this.getExistingStackOrThrow(id);
+    const normalizedId = normalizeId(id, 'id');
+    const existing = await this.getExistingStackOrThrow(normalizedId);
     const name = normalizeCompetencyName(dto.name, 'Stack name');
     const slug = buildCompetencySlug(name);
 
@@ -62,10 +63,16 @@ export class CompetenciesService {
     }
 
     try {
-      return await this.competenciesRepository.updateStack(id, { name, slug });
+      return await this.competenciesRepository.updateStack(normalizedId, { name, slug });
     } catch (error) {
       this.rethrowUniqueViolation(error, `Stack with name or slug '${slug}' already exists`);
     }
+  }
+
+  async deleteStack(id: string) {
+    const normalizedId = normalizeId(id, 'id');
+    await this.getExistingStackOrThrow(normalizedId);
+    await this.competenciesRepository.deleteStack(normalizedId);
   }
 
   async listCompetencies(query: ListCompetenciesQueryDto) {
@@ -117,7 +124,8 @@ export class CompetenciesService {
   }
 
   async updateCompetency(id: string, dto: UpdateCompetencyDto) {
-    const existing = await this.getExistingCompetencyOrThrow(id);
+    const normalizedId = normalizeId(id, 'id');
+    const existing = await this.getExistingCompetencyOrThrow(normalizedId);
     const nextStackId = dto.stackId !== undefined
       ? normalizeId(dto.stackId, 'stackId')
       : existing.stackId;
@@ -132,7 +140,7 @@ export class CompetenciesService {
     const nextSlug = buildCompetencySlug(nextName);
 
     try {
-      return await this.competenciesRepository.updateCompetency(id, {
+      return await this.competenciesRepository.updateCompetency(normalizedId, {
         stackId: dto.stackId !== undefined ? nextStackId : undefined,
         name: dto.name !== undefined ? nextName : undefined,
         slug: dto.name !== undefined ? nextSlug : undefined,
@@ -144,6 +152,12 @@ export class CompetenciesService {
     } catch (error) {
       this.rethrowUniqueViolation(error, `Competency with name or position already exists in stack`);
     }
+  }
+
+  async deleteCompetency(id: string) {
+    const normalizedId = normalizeId(id, 'id');
+    await this.getExistingCompetencyOrThrow(normalizedId);
+    await this.competenciesRepository.deleteCompetency(normalizedId);
   }
 
   async getExistingStackOrThrow(id: string) {

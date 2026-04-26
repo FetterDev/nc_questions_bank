@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
@@ -48,6 +59,14 @@ export class CompetenciesController {
     return this.competenciesService.updateStack(id, dto);
   }
 
+  @ApiOperation({ summary: 'Удалить стек' })
+  @Roles(...MANAGER_ONLY_ROLES)
+  @Delete('stacks/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteStack(@Param('id') id: string) {
+    return this.competenciesService.deleteStack(id);
+  }
+
   @ApiOperation({ summary: 'Список компетенций' })
   @ApiOkResponse({ type: ListCompetenciesResponseDto })
   @Roles(...ALL_ROLES)
@@ -70,5 +89,13 @@ export class CompetenciesController {
   @Patch('competencies/:id')
   updateCompetency(@Param('id') id: string, @Body() dto: UpdateCompetencyDto) {
     return this.competenciesService.updateCompetency(id, dto);
+  }
+
+  @ApiOperation({ summary: 'Удалить компетенцию' })
+  @Roles(...MANAGER_ONLY_ROLES)
+  @Delete('competencies/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteCompetency(@Param('id') id: string) {
+    return this.competenciesService.deleteCompetency(id);
   }
 }

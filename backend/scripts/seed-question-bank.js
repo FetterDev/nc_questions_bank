@@ -1,6 +1,7 @@
 const { createHash } = require('node:crypto');
 const { PrismaPg } = require('@prisma/adapter-pg');
 const { PrismaClient } = require('@prisma/client');
+const { competencyStacks } = require('./competency-stacks.data');
 const { questionBank } = require('./question-bank.data');
 const { topics: topicsCatalog } = require('./topics.data');
 
@@ -67,6 +68,14 @@ function buildTrainingPresetTopicLinks(topics) {
       },
     },
   }));
+}
+
+function buildSeedStackId(name) {
+  return `seed-stack-${slugify(name)}`;
+}
+
+function buildSeedCompetencyId(stackName, competencyName) {
+  return `seed-competency-${slugify(stackName)}-${slugify(competencyName)}`;
 }
 
 function normalizeQuestion(item) {
@@ -185,6 +194,74 @@ async function main() {
       });
     }
 
+    const seededCompetencies = [];
+
+    for (const stack of competencyStacks) {
+      const stackSlug = slugify(stack.name);
+      const desiredStackId = buildSeedStackId(stack.name);
+      const seededStack = await ensureSeedStack(tx, {
+        id: desiredStackId,
+        name: stack.name,
+        slug: stackSlug,
+      });
+
+      for (const competency of stack.competencies) {
+        const competencySlug = slugify(competency.name);
+        const desiredCompetencyId = buildSeedCompetencyId(stack.name, competency.name);
+        const seededCompetency = await ensureSeedCompetency(tx, {
+          id: desiredCompetencyId,
+          stackId: seededStack.id,
+          name: competency.name,
+          slug: competencySlug,
+          description: competency.description,
+          position: competency.position,
+        });
+
+        seededCompetencies.push({
+          id: seededCompetency.id,
+          sourceTopics: competency.sourceTopics,
+        });
+      }
+    }
+
+    const seededQuestionIds = questions.map((question) => question.id);
+    const seededCompetencyIds = seededCompetencies.map((competency) => competency.id);
+
+    if (seededQuestionIds.length > 0 && seededCompetencyIds.length > 0) {
+      await tx.questionCompetency.deleteMany({
+        where: {
+          questionId: {
+            in: seededQuestionIds,
+          },
+          competencyId: {
+            in: seededCompetencyIds,
+          },
+        },
+      });
+
+      const questionCompetencyLinks = [];
+
+      for (const question of questions) {
+        const questionTopics = new Set(question.topics);
+
+        for (const competency of seededCompetencies) {
+          if (competency.sourceTopics.some((topic) => questionTopics.has(topic))) {
+            questionCompetencyLinks.push({
+              questionId: question.id,
+              competencyId: competency.id,
+            });
+          }
+        }
+      }
+
+      if (questionCompetencyLinks.length > 0) {
+        await tx.questionCompetency.createMany({
+          data: questionCompetencyLinks,
+          skipDuplicates: true,
+        });
+      }
+    }
+
     for (const preset of trainingPresets) {
       await tx.trainingPreset.upsert({
         where: { id: preset.id },
@@ -206,7 +283,95 @@ async function main() {
     }
   });
 
-  console.log(`[seed] question bank loaded (${questions.length} records)`);
+  console.log(
+    `[seed] question bank loaded (${questions.length} records, ${competencyStacks.length} stacks)`,
+  );
+}
+
+async function ensureSeedStack(tx, data) {
+  const existingById = await tx.technologyStack.findUnique({
+    where: { id: data.id },
+    select: { id: true },
+  });
+
+  if (existingById) {
+    return tx.technologyStack.update({
+      where: { id: data.id },
+      data: {
+        name: data.name,
+        slug: data.slug,
+      },
+      select: { id: true },
+    });
+  }
+
+  const existingBySlug = await tx.technologyStack.findUnique({
+    where: { slug: data.slug },
+    select: { id: true },
+  });
+
+  if (existingBySlug) {
+    return tx.technologyStack.update({
+      where: { id: existingBySlug.id },
+      data: {
+        name: data.name,
+        slug: data.slug,
+      },
+      select: { id: true },
+    });
+  }
+
+  return tx.technologyStack.create({
+    data,
+    select: { id: true },
+  });
+}
+
+async function ensureSeedCompetency(tx, data) {
+  const existingById = await tx.competency.findUnique({
+    where: { id: data.id },
+    select: { id: true },
+  });
+
+  if (existingById) {
+    return tx.competency.update({
+      where: { id: data.id },
+      data: {
+        stackId: data.stackId,
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        position: data.position,
+      },
+      select: { id: true },
+    });
+  }
+
+  const existingByStackAndSlug = await tx.competency.findFirst({
+    where: {
+      stackId: data.stackId,
+      slug: data.slug,
+    },
+    select: { id: true },
+  });
+
+  if (existingByStackAndSlug) {
+    return tx.competency.update({
+      where: { id: existingByStackAndSlug.id },
+      data: {
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        position: data.position,
+      },
+      select: { id: true },
+    });
+  }
+
+  return tx.competency.create({
+    data,
+    select: { id: true },
+  });
 }
 
 main()

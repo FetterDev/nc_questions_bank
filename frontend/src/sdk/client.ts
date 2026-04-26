@@ -484,11 +484,61 @@ export function createApiSdk(options?: ClientOptions) {
       return ensureData(result, 'createStack');
     },
 
+    async updateStack(
+      id: string,
+      body: paths['/api/stacks/{id}']['patch']['requestBody']['content']['application/json'],
+    ) {
+      const result = await client.PATCH('/api/stacks/{id}', {
+        params: { path: { id } },
+        body,
+      });
+      return ensureData(result, 'updateStack');
+    },
+
+    async deleteStack(id: string) {
+      const { response } = await client.DELETE('/api/stacks/{id}', {
+        params: { path: { id } },
+      });
+
+      if (response.status === 401) {
+        throw new Error('HTTP 401');
+      }
+
+      if (!response.ok) {
+        throw new Error(`[SDK:deleteStack] HTTP ${response.status}`);
+      }
+    },
+
     async createCompetency(
       body: paths['/api/competencies']['post']['requestBody']['content']['application/json'],
     ) {
       const result = await client.POST('/api/competencies', { body });
       return ensureData(result, 'createCompetency');
+    },
+
+    async updateCompetency(
+      id: string,
+      body: paths['/api/competencies/{id}']['patch']['requestBody']['content']['application/json'],
+    ) {
+      const result = await client.PATCH('/api/competencies/{id}', {
+        params: { path: { id } },
+        body,
+      });
+      return ensureData(result, 'updateCompetency');
+    },
+
+    async deleteCompetency(id: string) {
+      const { response } = await client.DELETE('/api/competencies/{id}', {
+        params: { path: { id } },
+      });
+
+      if (response.status === 401) {
+        throw new Error('HTTP 401');
+      }
+
+      if (!response.ok) {
+        throw new Error(`[SDK:deleteCompetency] HTTP ${response.status}`);
+      }
     },
 
     async listQuestions(

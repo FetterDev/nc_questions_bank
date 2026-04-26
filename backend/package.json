@@ -18,6 +18,7 @@
     "test:seed:question-bank": "node --test test/question-bank.data.test.mjs",
     "test:integration:auth": "npm run build && node --test test/integration/auth.integration.test.mjs",
     "test:integration:companies": "npm run build && node --test test/integration/companies.integration.test.mjs",
+    "test:integration:competencies": "npm run build && node --test test/integration/competencies.integration.test.mjs",
     "test:integration:interviews": "npm run build && node --test test/integration/interviews.integration.test.mjs",
     "test:integration:topics": "npm run build && node --test test/integration/topics.integration.test.mjs",
     "test:integration:training": "npm run build && node --test test/integration/training.integration.test.mjs",

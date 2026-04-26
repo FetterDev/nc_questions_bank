@@ -289,7 +289,8 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete?: never;
+        /** Удалить стек */
+        delete: operations["CompetenciesController_deleteStack"];
         options?: never;
         head?: never;
         /** Переименовать стек */
@@ -324,7 +325,8 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete?: never;
+        /** Удалить компетенцию */
+        delete: operations["CompetenciesController_deleteCompetency"];
         options?: never;
         head?: never;
         /** Обновить компетенцию */
@@ -2954,6 +2956,25 @@ export interface operations {
             };
         };
     };
+    CompetenciesController_deleteStack: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     CompetenciesController_updateStack: {
         parameters: {
             query?: never;
@@ -3023,6 +3044,25 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CompetencyDto"];
                 };
+            };
+        };
+    };
+    CompetenciesController_deleteCompetency: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
