@@ -64,6 +64,44 @@ export class CompetencyMatrixRepository {
     });
   }
 
+  updateUserStacks(userId: string, stackIds: string[], db?: DbClient) {
+    return this.getDb(db).user.update({
+      where: { id: userId },
+      data: {
+        stacks: {
+          deleteMany: {},
+          create: stackIds.map((stackId) => ({
+            stack: {
+              connect: {
+                id: stackId,
+              },
+            },
+          })),
+        },
+      },
+      select: matrixUserSelect,
+    });
+  }
+
+  findStacksByIds(ids: string[], db?: DbClient) {
+    const uniqueIds = [...new Set(ids)];
+
+    if (uniqueIds.length === 0) {
+      return Promise.resolve([]);
+    }
+
+    return this.getDb(db).technologyStack.findMany({
+      where: {
+        id: {
+          in: uniqueIds,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+  }
+
   listUsers(params: { stackId?: string }, db?: DbClient) {
     return this.getDb(db).user.findMany({
       where: {

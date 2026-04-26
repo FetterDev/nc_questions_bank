@@ -852,6 +852,17 @@ export function createApiSdk(options?: ClientOptions) {
       return ensureData(result, 'getUserCompetencyMatrix');
     },
 
+    async updateUserStacks(
+      userId: string,
+      body: paths['/api/competency-matrix/users/{userId}/stacks']['patch']['requestBody']['content']['application/json'],
+    ): Promise<CompetencyMatrix> {
+      const result = await client.PATCH('/api/competency-matrix/users/{userId}/stacks', {
+        params: { path: { userId } },
+        body,
+      });
+      return ensureData(result, 'updateUserStacks');
+    },
+
     async listTopics(
       query?: paths['/api/topics']['get']['parameters']['query'],
     ) {

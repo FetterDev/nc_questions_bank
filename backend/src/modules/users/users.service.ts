@@ -15,7 +15,6 @@ import {
   validateLogin,
   validatePassword,
 } from '../auth/auth.utils';
-import { CompetenciesRepository } from '../competencies/competencies.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ListUsersQueryDto } from './dto/list-users.query.dto';
 import { ResetUserPasswordDto } from './dto/reset-user-password.dto';
@@ -27,7 +26,6 @@ export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly passwordService: PasswordService,
-    private readonly competenciesRepository: CompetenciesRepository,
   ) {}
 
   async resolveAuthenticatedUser(
@@ -64,7 +62,6 @@ export class UsersService {
       q: query.q?.trim() || undefined,
       role: query.role,
       status: query.status,
-      stackId: query.stackId?.trim() || undefined,
       limit: query.limit ?? 50,
       offset: query.offset ?? 0,
     });
@@ -78,7 +75,6 @@ export class UsersService {
           q: query.q?.trim() || null,
           role: query.role ?? null,
           status: query.status ?? null,
-          stackId: query.stackId?.trim() || null,
         },
       },
     };
@@ -89,7 +85,6 @@ export class UsersService {
     const password = validatePassword(dto.password);
     const email = normalizeOptionalEmail(dto.email);
     const displayName = this.normalizeDisplayName(dto.displayName);
-    const stackIds = await this.normalizeAndRequireStackIds(dto.stackIds);
     const passwordHash = await this.passwordService.hashPassword(password);
 
     try {
@@ -99,7 +94,6 @@ export class UsersService {
         displayName,
         email,
         role: dto.role,
-        stackIds,
       });
 
       return this.toUserDto(created);
@@ -124,9 +118,6 @@ export class UsersService {
         email: dto.email !== undefined ? normalizeOptionalEmail(dto.email) : undefined,
         role: dto.role,
         incrementTokenVersion: dto.role !== undefined && dto.role !== existing.role,
-        stackIds: dto.stackIds !== undefined
-          ? await this.normalizeAndRequireStackIds(dto.stackIds)
-          : undefined,
       });
 
       return this.toUserDto(updated);
@@ -252,32 +243,6 @@ export class UsersService {
     }
 
     return normalized;
-  }
-
-  private async normalizeAndRequireStackIds(values: string[] | undefined) {
-    if (values === undefined) {
-      return undefined;
-    }
-
-    const stackIds = Array.from(
-      new Set(
-        values
-          .map((value) => value.trim())
-          .filter(Boolean),
-      ),
-    );
-
-    if (stackIds.length === 0) {
-      return [];
-    }
-
-    const stacks = await this.competenciesRepository.findStacksByIds(stackIds);
-
-    if (stacks.length !== stackIds.length) {
-      throw new BadRequestException('Some stacks do not exist');
-    }
-
-    return stackIds;
   }
 
   private ensureSelfRoleChangeIsAllowed(

@@ -21,3 +21,7 @@ coverage/
 
 # Git metadata backups
 .git-backups/
+
+# Local prod / Proxmox instructions and secrets
+docs/prod-vm-runbook.local.md
+docs/prod-vm-secrets.local.env

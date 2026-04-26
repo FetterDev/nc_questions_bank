@@ -124,76 +124,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/stacks": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Список стеков */
-        get: operations["CompetenciesController_listStacks"];
-        put?: never;
-        /** Создать стек */
-        post: operations["CompetenciesController_createStack"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/stacks/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Переименовать стек */
-        patch: operations["CompetenciesController_updateStack"];
-        trace?: never;
-    };
-    "/api/competencies": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Список компетенций */
-        get: operations["CompetenciesController_listCompetencies"];
-        put?: never;
-        /** Создать компетенцию */
-        post: operations["CompetenciesController_createCompetency"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/competencies/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Обновить компетенцию */
-        patch: operations["CompetenciesController_updateCompetency"];
-        trace?: never;
-    };
     "/api/analytics/growth": {
         parameters: {
             query?: never;
@@ -312,6 +242,93 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/competency-matrix/users/{userId}/stacks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Назначить стеки сотруднику */
+        patch: operations["CompetencyMatrixController_updateUserStacks"];
+        trace?: never;
+    };
+    "/api/stacks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список стеков */
+        get: operations["CompetenciesController_listStacks"];
+        put?: never;
+        /** Создать стек */
+        post: operations["CompetenciesController_createStack"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stacks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Переименовать стек */
+        patch: operations["CompetenciesController_updateStack"];
+        trace?: never;
+    };
+    "/api/competencies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список компетенций */
+        get: operations["CompetenciesController_listCompetencies"];
+        put?: never;
+        /** Создать компетенцию */
+        post: operations["CompetenciesController_createCompetency"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/competencies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Обновить компетенцию */
+        patch: operations["CompetenciesController_updateCompetency"];
         trace?: never;
     };
     "/api/health": {
@@ -1000,8 +1017,6 @@ export interface components {
              * @enum {string|null}
              */
             status: "ACTIVE" | "DISABLED" | null;
-            /** @example cm8q4x7r10001stack */
-            stackId: string | null;
         };
         ListUsersMetaDto: {
             /** @example 7 */
@@ -1028,12 +1043,6 @@ export interface components {
              * @enum {string}
              */
             role: "USER" | "MANAGER" | "ADMIN";
-            /**
-             * @example [
-             *       "cm8q4x7r10001stack"
-             *     ]
-             */
-            stackIds?: string[];
         };
         UpdateUserDto: {
             /** @example Nord User */
@@ -1045,99 +1054,10 @@ export interface components {
              * @enum {string}
              */
             role?: "USER" | "MANAGER" | "ADMIN";
-            /**
-             * @example [
-             *       "cm8q4x7r10001stack"
-             *     ]
-             */
-            stackIds?: string[];
         };
         ResetUserPasswordDto: {
             /** @example new-password-2026 */
             password: string;
-        };
-        ListStacksMetaDto: {
-            /** @example 4 */
-            tookMs: number;
-            /**
-             * @example {
-             *       "q": null
-             *     }
-             */
-            appliedFilters: Record<string, never>;
-        };
-        ListStacksResponseDto: {
-            items: components["schemas"]["StackDto"][];
-            /** @example 12 */
-            total: number;
-            meta: components["schemas"]["ListStacksMetaDto"];
-        };
-        CreateStackDto: {
-            /** @example Frontend */
-            name: string;
-        };
-        UpdateStackDto: {
-            /** @example Frontend */
-            name: string;
-        };
-        CompetencyStackDto: {
-            /** @example cm8q4x7r10001stack */
-            id: string;
-            /** @example Frontend */
-            name: string;
-            /** @example frontend */
-            slug: string;
-        };
-        CompetencyDto: {
-            /** @example cm8q4x7r10001competency */
-            id: string;
-            /** @example cm8q4x7r10001stack */
-            stackId: string;
-            stack: components["schemas"]["CompetencyStackDto"];
-            /** @example TypeScript */
-            name: string;
-            /** @example typescript */
-            slug: string;
-            /** @example Static typing and type-system tradeoffs. */
-            description?: string | null;
-            /** @example 1 */
-            position: number;
-        };
-        ListCompetenciesMetaDto: {
-            /** @example 4 */
-            tookMs: number;
-            /**
-             * @example {
-             *       "q": null,
-             *       "stackId": null
-             *     }
-             */
-            appliedFilters: Record<string, never>;
-        };
-        ListCompetenciesResponseDto: {
-            items: components["schemas"]["CompetencyDto"][];
-            /** @example 12 */
-            total: number;
-            meta: components["schemas"]["ListCompetenciesMetaDto"];
-        };
-        CreateCompetencyDto: {
-            /** @example cm8q4x7r10001stack */
-            stackId: string;
-            /** @example TypeScript */
-            name: string;
-            /** @example Static typing and type-system tradeoffs. */
-            description?: string | null;
-            /** @default 1 */
-            position: number;
-        };
-        UpdateCompetencyDto: {
-            /** @example cm8q4x7r10001stack */
-            stackId?: string;
-            /** @example TypeScript */
-            name?: string;
-            /** @example Static typing and type-system tradeoffs. */
-            description?: string | null;
-            position?: number;
         };
         GrowthAnalyticsSummaryDto: {
             /** @example 42 */
@@ -1358,6 +1278,97 @@ export interface components {
         };
         ListCompetencyMatrixResponseDto: {
             items: components["schemas"]["CompetencyMatrixUserResponseDto"][];
+        };
+        UpdateUserStacksDto: {
+            /**
+             * @example [
+             *       "cm8q4x7r10001stack"
+             *     ]
+             */
+            stackIds: string[];
+        };
+        ListStacksMetaDto: {
+            /** @example 4 */
+            tookMs: number;
+            /**
+             * @example {
+             *       "q": null
+             *     }
+             */
+            appliedFilters: Record<string, never>;
+        };
+        ListStacksResponseDto: {
+            items: components["schemas"]["StackDto"][];
+            /** @example 12 */
+            total: number;
+            meta: components["schemas"]["ListStacksMetaDto"];
+        };
+        CreateStackDto: {
+            /** @example Frontend */
+            name: string;
+        };
+        UpdateStackDto: {
+            /** @example Frontend */
+            name: string;
+        };
+        CompetencyStackDto: {
+            /** @example cm8q4x7r10001stack */
+            id: string;
+            /** @example Frontend */
+            name: string;
+            /** @example frontend */
+            slug: string;
+        };
+        CompetencyDto: {
+            /** @example cm8q4x7r10001competency */
+            id: string;
+            /** @example cm8q4x7r10001stack */
+            stackId: string;
+            stack: components["schemas"]["CompetencyStackDto"];
+            /** @example TypeScript */
+            name: string;
+            /** @example typescript */
+            slug: string;
+            /** @example Static typing and type-system tradeoffs. */
+            description?: string | null;
+            /** @example 1 */
+            position: number;
+        };
+        ListCompetenciesMetaDto: {
+            /** @example 4 */
+            tookMs: number;
+            /**
+             * @example {
+             *       "q": null,
+             *       "stackId": null
+             *     }
+             */
+            appliedFilters: Record<string, never>;
+        };
+        ListCompetenciesResponseDto: {
+            items: components["schemas"]["CompetencyDto"][];
+            /** @example 12 */
+            total: number;
+            meta: components["schemas"]["ListCompetenciesMetaDto"];
+        };
+        CreateCompetencyDto: {
+            /** @example cm8q4x7r10001stack */
+            stackId: string;
+            /** @example TypeScript */
+            name: string;
+            /** @example Static typing and type-system tradeoffs. */
+            description?: string | null;
+            /** @default 1 */
+            position: number;
+        };
+        UpdateCompetencyDto: {
+            /** @example cm8q4x7r10001stack */
+            stackId?: string;
+            /** @example TypeScript */
+            name?: string;
+            /** @example Static typing and type-system tradeoffs. */
+            description?: string | null;
+            position?: number;
         };
         CreateInterviewCycleDto: {
             /**
@@ -2567,7 +2578,6 @@ export interface operations {
                 q?: string;
                 role?: "USER" | "MANAGER" | "ADMIN";
                 status?: "ACTIVE" | "DISABLED";
-                stackId?: string;
                 limit?: number;
                 offset?: number;
             };
@@ -2698,149 +2708,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserDto"];
-                };
-            };
-        };
-    };
-    CompetenciesController_listStacks: {
-        parameters: {
-            query?: {
-                q?: string;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListStacksResponseDto"];
-                };
-            };
-        };
-    };
-    CompetenciesController_createStack: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateStackDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StackDto"];
-                };
-            };
-        };
-    };
-    CompetenciesController_updateStack: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateStackDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StackDto"];
-                };
-            };
-        };
-    };
-    CompetenciesController_listCompetencies: {
-        parameters: {
-            query?: {
-                q?: string;
-                stackId?: string;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListCompetenciesResponseDto"];
-                };
-            };
-        };
-    };
-    CompetenciesController_createCompetency: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCompetencyDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CompetencyDto"];
-                };
-            };
-        };
-    };
-    CompetenciesController_updateCompetency: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateCompetencyDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CompetencyDto"];
                 };
             };
         };
@@ -3012,6 +2879,174 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CompetencyMatrixUserResponseDto"];
+                };
+            };
+        };
+    };
+    CompetencyMatrixController_updateUserStacks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserStacksDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompetencyMatrixUserResponseDto"];
+                };
+            };
+        };
+    };
+    CompetenciesController_listStacks: {
+        parameters: {
+            query?: {
+                q?: string;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListStacksResponseDto"];
+                };
+            };
+        };
+    };
+    CompetenciesController_createStack: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStackDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StackDto"];
+                };
+            };
+        };
+    };
+    CompetenciesController_updateStack: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateStackDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StackDto"];
+                };
+            };
+        };
+    };
+    CompetenciesController_listCompetencies: {
+        parameters: {
+            query?: {
+                q?: string;
+                stackId?: string;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListCompetenciesResponseDto"];
+                };
+            };
+        };
+    };
+    CompetenciesController_createCompetency: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCompetencyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompetencyDto"];
+                };
+            };
+        };
+    };
+    CompetenciesController_updateCompetency: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCompetencyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompetencyDto"];
                 };
             };
         };

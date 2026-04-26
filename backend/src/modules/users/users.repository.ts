@@ -99,7 +99,6 @@ export class UsersRepository {
       q?: string;
       role?: UserRole;
       status?: UserStatus;
-      stackId?: string;
       limit: number;
       offset: number;
     },
@@ -113,14 +112,6 @@ export class UsersRepository {
 
     if (params.status) {
       where.status = params.status;
-    }
-
-    if (params.stackId) {
-      where.stacks = {
-        some: {
-          stackId: params.stackId,
-        },
-      };
     }
 
     if (params.q) {
@@ -169,7 +160,6 @@ export class UsersRepository {
       role: UserRole;
       status?: UserStatus;
       tokenVersion?: number;
-      stackIds?: string[];
     },
     db?: DbClient,
   ) {
@@ -182,17 +172,6 @@ export class UsersRepository {
         role: data.role,
         status: data.status ?? UserStatus.ACTIVE,
         tokenVersion: data.tokenVersion ?? 0,
-        stacks: data.stackIds
-          ? {
-              create: data.stackIds.map((stackId) => ({
-                stack: {
-                  connect: {
-                    id: stackId,
-                  },
-                },
-              })),
-            }
-          : undefined,
       },
       include: userInclude,
     });
@@ -207,7 +186,6 @@ export class UsersRepository {
       status?: UserStatus;
       passwordHash?: string;
       incrementTokenVersion?: boolean;
-      stackIds?: string[];
     },
     db?: DbClient,
   ) {
@@ -236,19 +214,6 @@ export class UsersRepository {
     if (data.incrementTokenVersion) {
       updateData.tokenVersion = {
         increment: 1,
-      };
-    }
-
-    if (data.stackIds !== undefined) {
-      updateData.stacks = {
-        deleteMany: {},
-        create: data.stackIds.map((stackId) => ({
-          stack: {
-            connect: {
-              id: stackId,
-            },
-          },
-        })),
       };
     }
 

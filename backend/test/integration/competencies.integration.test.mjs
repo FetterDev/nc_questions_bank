@@ -153,7 +153,7 @@ test('manager manages stacks and competencies while user can only read', async (
   assert.equal(forbiddenCreate.response.status, 403);
 });
 
-test('admin assigns stacks to users and can filter users by stack', async () => {
+test('manager assigns stacks to users through competency matrix', async () => {
   const stack = await api('/stacks', {
     method: 'POST',
     body: JSON.stringify({ name: uniqueLabel('Backend Stack') }),
@@ -167,20 +167,47 @@ test('admin assigns stacks to users and can filter users by stack', async () => 
     body: JSON.stringify({
       ...credentials,
       role: 'USER',
-      stackIds: [stack.payload.id],
     }),
   });
 
   assert.equal(created.response.status, 201);
+  assert.deepEqual(created.payload.stacks, []);
+
+  const adminAssignment = await api(`/competency-matrix/users/${created.payload.id}/stacks`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      stackIds: [stack.payload.id],
+    }),
+  });
+
+  assert.equal(adminAssignment.response.status, 403);
+
+  const userAssignment = await api(`/competency-matrix/users/${created.payload.id}/stacks`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      stackIds: [stack.payload.id],
+    }),
+  }, 'user');
+
+  assert.equal(userAssignment.response.status, 403);
+
+  const assigned = await api(`/competency-matrix/users/${created.payload.id}/stacks`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      stackIds: [stack.payload.id],
+    }),
+  }, 'manager');
+
+  assert.equal(assigned.response.status, 200);
   assert.deepEqual(
-    created.payload.stacks.map((item) => item.id),
+    assigned.payload.stacks.map((item) => item.id),
     [stack.payload.id],
   );
 
-  const listed = await api(`/users?stackId=${stack.payload.id}&limit=100&offset=0`);
+  const listed = await api(`/competency-matrix?stackId=${stack.payload.id}`, {}, 'manager');
 
   assert.equal(listed.response.status, 200);
-  assert.ok(listed.payload.items.some((item) => item.id === created.payload.id));
+  assert.ok(listed.payload.items.some((item) => item.user.id === created.payload.id));
   assert.ok(listed.payload.items.every((item) =>
     item.stacks.some((stackItem) => stackItem.id === stack.payload.id),
   ));
@@ -192,12 +219,12 @@ test('admin assigns stacks to users and can filter users by stack', async () => 
 
   assert.equal(otherStack.response.status, 201);
 
-  const updated = await api(`/users/${created.payload.id}`, {
+  const updated = await api(`/competency-matrix/users/${created.payload.id}/stacks`, {
     method: 'PATCH',
     body: JSON.stringify({
       stackIds: [otherStack.payload.id],
     }),
-  });
+  }, 'manager');
 
   assert.equal(updated.response.status, 200);
   assert.deepEqual(
@@ -205,4 +232,3 @@ test('admin assigns stacks to users and can filter users by stack', async () => 
     [otherStack.payload.id],
   );
 });
-

@@ -16,8 +16,6 @@ class ListUsersAppliedFiltersDto {
   })
   status!: UserStatus | null;
 
-  @ApiProperty({ type: String, nullable: true, example: 'cm8q4x7r10001stack' })
-  stackId!: string | null;
 }
 
 class ListUsersMetaDto {

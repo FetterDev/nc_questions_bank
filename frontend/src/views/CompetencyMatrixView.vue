@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import UiAutocomplete from '../components/ui/UiAutocomplete.vue';
 import UiButton from '../components/ui/UiButton.vue';
 import UiField from '../components/ui/UiField.vue';
 import UiPanel from '../components/ui/UiPanel.vue';
@@ -30,6 +31,8 @@ const newCompetencyStackId = ref('');
 const newCompetencyName = ref('');
 const newCompetencyDescription = ref('');
 const directorySaving = ref(false);
+const assignmentSavingUserId = ref('');
+const stackAssignments = ref<Record<string, string[]>>({});
 
 const stackSelectOptions = computed(() => [
   { id: 'all', name: 'Все стеки' },
@@ -89,6 +92,12 @@ async function loadMatrix() {
         stackId: stackId.value === 'all' ? undefined : stackId.value,
       });
       managerItems.value = response.items;
+      stackAssignments.value = Object.fromEntries(
+        response.items.map((item) => [
+          item.user.id,
+          item.stacks.map((stack) => stack.id),
+        ]),
+      );
       return;
     }
 
@@ -100,6 +109,25 @@ async function loadMatrix() {
     );
   } finally {
     loading.value = false;
+  }
+}
+
+async function saveUserStacks(userId: string) {
+  assignmentSavingUserId.value = userId;
+  errorMessage.value = '';
+
+  try {
+    await apiService.updateUserStacks(userId, {
+      stackIds: stackAssignments.value[userId] ?? [],
+    });
+    await loadMatrix();
+  } catch (error) {
+    errorMessage.value = toUserErrorMessage(
+      error,
+      'Не удалось назначить стеки сотруднику.',
+    );
+  } finally {
+    assignmentSavingUserId.value = '';
   }
 }
 
@@ -285,7 +313,7 @@ onMounted(async () => {
             <small>{{ matrix.user.login }}</small>
           </div>
 
-          <div class="topic-stack">
+          <div v-if="!session.isManager.value" class="topic-stack">
             <v-chip
               v-for="stack in matrix.stacks"
               :key="stack.id"
@@ -296,6 +324,29 @@ onMounted(async () => {
               {{ stack.name }}
             </v-chip>
           </div>
+        </div>
+
+        <div v-if="session.isManager.value" class="competency-assignment-row">
+          <UiAutocomplete
+            v-model="stackAssignments[matrix.user.id]"
+            :items="stackOptions"
+            chips
+            clearable
+            closable-chips
+            item-title="name"
+            item-value="id"
+            label="Стеки сотрудника"
+            multiple
+            placeholder="Назначьте стеки"
+          />
+
+          <UiButton
+            :loading="assignmentSavingUserId === matrix.user.id"
+            tone="secondary"
+            @click="saveUserStacks(matrix.user.id)"
+          >
+            Сохранить стеки
+          </UiButton>
         </div>
 
         <div v-if="matrix.competencies.length" class="competency-matrix-grid">

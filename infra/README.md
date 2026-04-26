@@ -1,5 +1,13 @@
 # Infra
 
+Прод-выкат на VM в Proxmox:
+
+- tracked runbook: `docs/prod-vm-runbook.md`
+- локальный overlay без git: `docs/prod-vm-runbook.local.md`
+- локальные секреты без git: `docs/prod-vm-secrets.local.env`
+
+Для штатного prod deploy использовать именно этот runbook. Локальный `docker-compose.prod.yml` не считать заменой prod VM runbook.
+
 Прод-сборка и запуск (полный стек: frontend + backend + db):
 
 ```bash

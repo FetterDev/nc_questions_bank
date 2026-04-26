@@ -8,6 +8,7 @@ import {
   CompetencyMatrixUserRecord,
 } from './competency-matrix.repository';
 import { ListCompetencyMatrixQueryDto } from './dto/list-competency-matrix.query.dto';
+import { UpdateUserStacksDto } from './dto/update-user-stacks.dto';
 import { UserContext } from '../authz/user-context';
 
 type MatrixCompetencyStats = {
@@ -32,6 +33,14 @@ export class CompetencyMatrixService {
   async getUserMatrix(userId: string) {
     const user = await this.requireActiveUser(normalizeRequiredId(userId, 'userId'));
     return this.buildUserMatrix(user);
+  }
+
+  async updateUserStacks(userId: string, dto: UpdateUserStacksDto) {
+    const user = await this.requireActiveUser(normalizeRequiredId(userId, 'userId'));
+    const stackIds = await this.normalizeAndRequireStackIds(dto.stackIds);
+    const updated = await this.repository.updateUserStacks(user.id, stackIds);
+
+    return this.buildUserMatrix(updated);
   }
 
   async listMatrix(query: ListCompetencyMatrixQueryDto) {
@@ -62,6 +71,10 @@ export class CompetencyMatrixService {
     }
 
     return user;
+  }
+
+  private normalizeAndRequireStackIds(values: string[]) {
+    return normalizeAndRequireStackIdsForRepository(this.repository, values);
   }
 
   private async buildUserMatrix(user: CompetencyMatrixUserRecord, stackId?: string) {
@@ -111,10 +124,6 @@ export class CompetencyMatrixService {
     criteriaResults: CompetencyMatrixCriterionResultRecord[],
     stackId?: string,
   ) {
-    const stackIds = stackId
-      ? new Set([stackId])
-      : new Set(user.stacks.map((item) => item.stackId));
-
     return {
       user: {
         id: user.id,
@@ -122,7 +131,6 @@ export class CompetencyMatrixService {
         displayName: user.displayName,
       },
       stacks: user.stacks
-        .filter((item) => stackIds.has(item.stackId))
         .map((item) => ({
           id: item.stack.id,
           name: item.stack.name,
@@ -221,6 +229,31 @@ function normalizeOptionalId(value: string | null | undefined) {
 
   const normalized = value.trim();
   return normalized || undefined;
+}
+
+async function normalizeAndRequireStackIdsForRepository(
+  repository: CompetencyMatrixRepository,
+  values: string[],
+) {
+  const stackIds = Array.from(
+    new Set(
+      values
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  );
+
+  if (stackIds.length === 0) {
+    return [];
+  }
+
+  const stacks = await repository.findStacksByIds(stackIds);
+
+  if (stacks.length !== stackIds.length) {
+    throw new BadRequestException('Some stacks do not exist');
+  }
+
+  return stackIds;
 }
 
 function toPercent(value: number, total: number) {

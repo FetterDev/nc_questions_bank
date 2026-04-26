@@ -283,6 +283,13 @@
   grid-template-columns: minmax(180px, 0.6fr) minmax(180px, 0.7fr) minmax(220px, 1fr) auto;
 }
 
+.competency-assignment-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
 .competency-matrix-row {
   display: grid;
   grid-template-columns: minmax(220px, 0.7fr) minmax(160px, 1fr) minmax(120px, auto);
@@ -301,6 +308,12 @@
 
 .competency-matrix-row__copy small {
   color: var(--color-ink-muted);
+}
+
+.muted-inline {
+  color: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
 }
 
 .interview-draft-card__copy small,
@@ -414,6 +427,7 @@
   .competency-matrix-row,
   .competency-directory__form,
   .competency-directory__form--wide,
+  .competency-assignment-row,
   .chart-donut,
   .chart-bar-list__row,
   .chart-stacked-list__row {

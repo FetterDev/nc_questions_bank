@@ -435,12 +435,12 @@ test('completed interview detail and competency matrix include criterion results
   assert.equal(question.response.status, 201);
 
   const interviewee = interviewUsers[1];
-  const assignedStack = await api(`/users/${interviewee.id}`, {
+  const assignedStack = await api(`/competency-matrix/users/${interviewee.id}/stacks`, {
     method: 'PATCH',
     body: JSON.stringify({
       stackIds: [stack.payload.id],
     }),
-  });
+  }, 'manager');
 
   assert.equal(assignedStack.response.status, 200);
 

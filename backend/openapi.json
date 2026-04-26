@@ -95,15 +95,6 @@
             }
           },
           {
-            "name": "stackId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "example": "cm8q4x7r10001stack",
-              "type": "string"
-            }
-          },
-          {
             "name": "limit",
             "required": false,
             "in": "query",
@@ -314,6 +305,301 @@
         "summary": "Активировать пользователя",
         "tags": [
           "users"
+        ]
+      }
+    },
+    "/api/analytics/growth": {
+      "get": {
+        "operationId": "AnalyticsController_getGrowthAnalytics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrowthAnalyticsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Точки роста текущего пользователя по истории тренировок",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
+    "/api/analytics/bank": {
+      "get": {
+        "operationId": "AnalyticsController_getBankAnalytics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankAnalyticsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Анализ текущего опубликованного банка вопросов",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
+    "/api/companies": {
+      "get": {
+        "operationId": "CompaniesController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Поиск по названию компании",
+            "schema": {
+              "example": "google",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCompaniesResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Список компаний",
+        "tags": [
+          "companies"
+        ]
+      },
+      "post": {
+        "operationId": "CompaniesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompanyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Создать компанию",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/api/companies/{id}": {
+      "patch": {
+        "operationId": "CompaniesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Переименовать компанию",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/api/competency-matrix/me": {
+      "get": {
+        "operationId": "CompetencyMatrixController_getMyMatrix",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetencyMatrixUserResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Моя матрица компетенций по завершённым интервью",
+        "tags": [
+          "competency-matrix"
+        ]
+      }
+    },
+    "/api/competency-matrix": {
+      "get": {
+        "operationId": "CompetencyMatrixController_listMatrix",
+        "parameters": [
+          {
+            "name": "stackId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "cm8stack1",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCompetencyMatrixResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Матрицы компетенций сотрудников",
+        "tags": [
+          "competency-matrix"
+        ]
+      }
+    },
+    "/api/competency-matrix/users/{userId}": {
+      "get": {
+        "operationId": "CompetencyMatrixController_getUserMatrix",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetencyMatrixUserResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Матрица компетенций сотрудника",
+        "tags": [
+          "competency-matrix"
+        ]
+      }
+    },
+    "/api/competency-matrix/users/{userId}/stacks": {
+      "patch": {
+        "operationId": "CompetencyMatrixController_updateUserStacks",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserStacksDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetencyMatrixUserResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Назначить стеки сотруднику",
+        "tags": [
+          "competency-matrix"
         ]
       }
     },
@@ -571,260 +857,6 @@
         "summary": "Обновить компетенцию",
         "tags": [
           "competencies"
-        ]
-      }
-    },
-    "/api/analytics/growth": {
-      "get": {
-        "operationId": "AnalyticsController_getGrowthAnalytics",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GrowthAnalyticsResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Точки роста текущего пользователя по истории тренировок",
-        "tags": [
-          "analytics"
-        ]
-      }
-    },
-    "/api/analytics/bank": {
-      "get": {
-        "operationId": "AnalyticsController_getBankAnalytics",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankAnalyticsResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Анализ текущего опубликованного банка вопросов",
-        "tags": [
-          "analytics"
-        ]
-      }
-    },
-    "/api/companies": {
-      "get": {
-        "operationId": "CompaniesController_list",
-        "parameters": [
-          {
-            "name": "q",
-            "required": false,
-            "in": "query",
-            "description": "Поиск по названию компании",
-            "schema": {
-              "example": "google",
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 100,
-              "default": 50,
-              "type": "number"
-            }
-          },
-          {
-            "name": "offset",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 0,
-              "default": 0,
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListCompaniesResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Список компаний",
-        "tags": [
-          "companies"
-        ]
-      },
-      "post": {
-        "operationId": "CompaniesController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCompanyDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompanyDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Создать компанию",
-        "tags": [
-          "companies"
-        ]
-      }
-    },
-    "/api/companies/{id}": {
-      "patch": {
-        "operationId": "CompaniesController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCompanyDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompanyDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Переименовать компанию",
-        "tags": [
-          "companies"
-        ]
-      }
-    },
-    "/api/competency-matrix/me": {
-      "get": {
-        "operationId": "CompetencyMatrixController_getMyMatrix",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompetencyMatrixUserResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Моя матрица компетенций по завершённым интервью",
-        "tags": [
-          "competency-matrix"
-        ]
-      }
-    },
-    "/api/competency-matrix": {
-      "get": {
-        "operationId": "CompetencyMatrixController_listMatrix",
-        "parameters": [
-          {
-            "name": "stackId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "example": "cm8stack1",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListCompetencyMatrixResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Матрицы компетенций сотрудников",
-        "tags": [
-          "competency-matrix"
-        ]
-      }
-    },
-    "/api/competency-matrix/users/{userId}": {
-      "get": {
-        "operationId": "CompetencyMatrixController_getUserMatrix",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompetencyMatrixUserResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Матрица компетенций сотрудника",
-        "tags": [
-          "competency-matrix"
         ]
       }
     },
@@ -2617,18 +2649,12 @@
               "DISABLED"
             ],
             "example": "ACTIVE"
-          },
-          "stackId": {
-            "type": "string",
-            "nullable": true,
-            "example": "cm8q4x7r10001stack"
           }
         },
         "required": [
           "q",
           "role",
-          "status",
-          "stackId"
+          "status"
         ]
       },
       "ListUsersMetaDto": {
@@ -2700,15 +2726,6 @@
               "ADMIN"
             ],
             "example": "USER"
-          },
-          "stackIds": {
-            "example": [
-              "cm8q4x7r10001stack"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         },
         "required": [
@@ -2738,15 +2755,6 @@
               "ADMIN"
             ],
             "example": "USER"
-          },
-          "stackIds": {
-            "example": [
-              "cm8q4x7r10001stack"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       },
@@ -2763,229 +2771,6 @@
         "required": [
           "password"
         ]
-      },
-      "ListStacksMetaDto": {
-        "type": "object",
-        "properties": {
-          "tookMs": {
-            "type": "number",
-            "example": 4
-          },
-          "appliedFilters": {
-            "type": "object",
-            "example": {
-              "q": null
-            }
-          }
-        },
-        "required": [
-          "tookMs",
-          "appliedFilters"
-        ]
-      },
-      "ListStacksResponseDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StackDto"
-            }
-          },
-          "total": {
-            "type": "number",
-            "example": 12
-          },
-          "meta": {
-            "$ref": "#/components/schemas/ListStacksMetaDto"
-          }
-        },
-        "required": [
-          "items",
-          "total",
-          "meta"
-        ]
-      },
-      "CreateStackDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "Frontend"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "UpdateStackDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "Frontend"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "CompetencyStackDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "cm8q4x7r10001stack"
-          },
-          "name": {
-            "type": "string",
-            "example": "Frontend"
-          },
-          "slug": {
-            "type": "string",
-            "example": "frontend"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "slug"
-        ]
-      },
-      "CompetencyDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "cm8q4x7r10001competency"
-          },
-          "stackId": {
-            "type": "string",
-            "example": "cm8q4x7r10001stack"
-          },
-          "stack": {
-            "$ref": "#/components/schemas/CompetencyStackDto"
-          },
-          "name": {
-            "type": "string",
-            "example": "TypeScript"
-          },
-          "slug": {
-            "type": "string",
-            "example": "typescript"
-          },
-          "description": {
-            "type": "string",
-            "nullable": true,
-            "example": "Static typing and type-system tradeoffs."
-          },
-          "position": {
-            "type": "number",
-            "example": 1
-          }
-        },
-        "required": [
-          "id",
-          "stackId",
-          "stack",
-          "name",
-          "slug",
-          "position"
-        ]
-      },
-      "ListCompetenciesMetaDto": {
-        "type": "object",
-        "properties": {
-          "tookMs": {
-            "type": "number",
-            "example": 4
-          },
-          "appliedFilters": {
-            "type": "object",
-            "example": {
-              "q": null,
-              "stackId": null
-            }
-          }
-        },
-        "required": [
-          "tookMs",
-          "appliedFilters"
-        ]
-      },
-      "ListCompetenciesResponseDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CompetencyDto"
-            }
-          },
-          "total": {
-            "type": "number",
-            "example": 12
-          },
-          "meta": {
-            "$ref": "#/components/schemas/ListCompetenciesMetaDto"
-          }
-        },
-        "required": [
-          "items",
-          "total",
-          "meta"
-        ]
-      },
-      "CreateCompetencyDto": {
-        "type": "object",
-        "properties": {
-          "stackId": {
-            "type": "string",
-            "example": "cm8q4x7r10001stack"
-          },
-          "name": {
-            "type": "string",
-            "example": "TypeScript"
-          },
-          "description": {
-            "type": "string",
-            "nullable": true,
-            "example": "Static typing and type-system tradeoffs."
-          },
-          "position": {
-            "type": "number",
-            "minimum": 1,
-            "maximum": 1000,
-            "default": 1
-          }
-        },
-        "required": [
-          "stackId",
-          "name"
-        ]
-      },
-      "UpdateCompetencyDto": {
-        "type": "object",
-        "properties": {
-          "stackId": {
-            "type": "string",
-            "example": "cm8q4x7r10001stack"
-          },
-          "name": {
-            "type": "string",
-            "example": "TypeScript"
-          },
-          "description": {
-            "type": "string",
-            "nullable": true,
-            "example": "Static typing and type-system tradeoffs."
-          },
-          "position": {
-            "type": "number",
-            "minimum": 1,
-            "maximum": 1000
-          }
-        }
       },
       "GrowthAnalyticsSummaryDto": {
         "type": "object",
@@ -3643,6 +3428,246 @@
         "required": [
           "items"
         ]
+      },
+      "UpdateUserStacksDto": {
+        "type": "object",
+        "properties": {
+          "stackIds": {
+            "example": [
+              "cm8q4x7r10001stack"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "stackIds"
+        ]
+      },
+      "ListStacksMetaDto": {
+        "type": "object",
+        "properties": {
+          "tookMs": {
+            "type": "number",
+            "example": 4
+          },
+          "appliedFilters": {
+            "type": "object",
+            "example": {
+              "q": null
+            }
+          }
+        },
+        "required": [
+          "tookMs",
+          "appliedFilters"
+        ]
+      },
+      "ListStacksResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StackDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 12
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ListStacksMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "meta"
+        ]
+      },
+      "CreateStackDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Frontend"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateStackDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Frontend"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CompetencyStackDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001stack"
+          },
+          "name": {
+            "type": "string",
+            "example": "Frontend"
+          },
+          "slug": {
+            "type": "string",
+            "example": "frontend"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ]
+      },
+      "CompetencyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001competency"
+          },
+          "stackId": {
+            "type": "string",
+            "example": "cm8q4x7r10001stack"
+          },
+          "stack": {
+            "$ref": "#/components/schemas/CompetencyStackDto"
+          },
+          "name": {
+            "type": "string",
+            "example": "TypeScript"
+          },
+          "slug": {
+            "type": "string",
+            "example": "typescript"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Static typing and type-system tradeoffs."
+          },
+          "position": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "id",
+          "stackId",
+          "stack",
+          "name",
+          "slug",
+          "position"
+        ]
+      },
+      "ListCompetenciesMetaDto": {
+        "type": "object",
+        "properties": {
+          "tookMs": {
+            "type": "number",
+            "example": 4
+          },
+          "appliedFilters": {
+            "type": "object",
+            "example": {
+              "q": null,
+              "stackId": null
+            }
+          }
+        },
+        "required": [
+          "tookMs",
+          "appliedFilters"
+        ]
+      },
+      "ListCompetenciesResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompetencyDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 12
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ListCompetenciesMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "meta"
+        ]
+      },
+      "CreateCompetencyDto": {
+        "type": "object",
+        "properties": {
+          "stackId": {
+            "type": "string",
+            "example": "cm8q4x7r10001stack"
+          },
+          "name": {
+            "type": "string",
+            "example": "TypeScript"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Static typing and type-system tradeoffs."
+          },
+          "position": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 1
+          }
+        },
+        "required": [
+          "stackId",
+          "name"
+        ]
+      },
+      "UpdateCompetencyDto": {
+        "type": "object",
+        "properties": {
+          "stackId": {
+            "type": "string",
+            "example": "cm8q4x7r10001stack"
+          },
+          "name": {
+            "type": "string",
+            "example": "TypeScript"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Static typing and type-system tradeoffs."
+          },
+          "position": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        }
       },
       "CreateInterviewCycleDto": {
         "type": "object",

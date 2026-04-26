@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../authz/current-user.decorator';
 import { MANAGER_ONLY_ROLES, USER_ONLY_ROLES } from '../authz/role-groups';
@@ -11,6 +11,7 @@ import {
   ListCompetencyMatrixResponseDto,
 } from './dto/competency-matrix.response.dto';
 import { ListCompetencyMatrixQueryDto } from './dto/list-competency-matrix.query.dto';
+import { UpdateUserStacksDto } from './dto/update-user-stacks.dto';
 
 @ApiTags('competency-matrix')
 @Controller('competency-matrix')
@@ -39,5 +40,16 @@ export class CompetencyMatrixController {
   @Get('users/:userId')
   getUserMatrix(@Param('userId') userId: string) {
     return this.competencyMatrixService.getUserMatrix(userId);
+  }
+
+  @ApiOperation({ summary: 'Назначить стеки сотруднику' })
+  @ApiOkResponse({ type: CompetencyMatrixUserResponseDto })
+  @Roles(...MANAGER_ONLY_ROLES)
+  @Patch('users/:userId/stacks')
+  updateUserStacks(
+    @Param('userId') userId: string,
+    @Body() dto: UpdateUserStacksDto,
+  ) {
+    return this.competencyMatrixService.updateUserStacks(userId, dto);
   }
 }
