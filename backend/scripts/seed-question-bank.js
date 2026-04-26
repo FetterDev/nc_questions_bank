@@ -205,6 +205,12 @@ async function main() {
         slug: stackSlug,
       });
 
+      await prepareSeedCompetencySlots(tx, {
+        stackId: seededStack.id,
+        stackName: stack.name,
+        competencies: stack.competencies,
+      });
+
       for (const competency of stack.competencies) {
         const competencySlug = slugify(competency.name);
         const desiredCompetencyId = buildSeedCompetencyId(stack.name, competency.name);
@@ -325,6 +331,46 @@ async function ensureSeedStack(tx, data) {
     data,
     select: { id: true },
   });
+}
+
+async function prepareSeedCompetencySlots(tx, data) {
+  const seedPositionsCount = data.competencies.length;
+  const seedIds = data.competencies.map((competency) =>
+    buildSeedCompetencyId(data.stackName, competency.name),
+  );
+  const seedSlugs = data.competencies.map((competency) => slugify(competency.name));
+  const maxPosition = await tx.competency.aggregate({
+    where: { stackId: data.stackId },
+    _max: { position: true },
+  });
+  const existingSeedSlotCompetencies = await tx.competency.findMany({
+    where: {
+      stackId: data.stackId,
+      OR: [
+        { id: { in: seedIds } },
+        { slug: { in: seedSlugs } },
+        { position: { lte: seedPositionsCount } },
+      ],
+    },
+    select: {
+      id: true,
+    },
+    orderBy: [
+      { position: 'asc' },
+      { id: 'asc' },
+    ],
+  });
+
+  let nextTemporaryPosition = (maxPosition._max.position ?? 0) + 1;
+
+  for (const competency of existingSeedSlotCompetencies) {
+    await tx.competency.update({
+      where: { id: competency.id },
+      data: { position: nextTemporaryPosition },
+      select: { id: true },
+    });
+    nextTemporaryPosition += 1;
+  }
 }
 
 async function ensureSeedCompetency(tx, data) {
