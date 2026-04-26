@@ -57,6 +57,10 @@ function weekBounds(offsetWeeks = 0) {
   };
 }
 
+function uniqueLabel(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 async function createInterviewUser(prefix) {
   const credentials = buildUserCredentials(prefix);
   const created = await api('/users', {
@@ -362,6 +366,196 @@ test('scheduled interview runtime and completion are available only to interview
   );
 
   assert.equal(adminDashboardForbidden.response.status, 403);
+});
+
+test('completed interview detail and competency matrix include criterion results', async () => {
+  const stack = await api('/stacks', {
+    method: 'POST',
+    body: JSON.stringify({ name: uniqueLabel('Interview Matrix Stack') }),
+  }, 'manager');
+
+  assert.equal(stack.response.status, 201);
+
+  const competency = await api('/competencies', {
+    method: 'POST',
+    body: JSON.stringify({
+      stackId: stack.payload.id,
+      name: uniqueLabel('Interview Matrix Competency'),
+      position: 1,
+    }),
+  }, 'manager');
+
+  assert.equal(competency.response.status, 201);
+
+  const topic = await api('/topics', {
+    method: 'POST',
+    body: JSON.stringify({ name: uniqueLabel('Interview Matrix Topic') }),
+  }, 'manager');
+
+  assert.equal(topic.response.status, 201);
+
+  const preset = await api('/training/presets', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: uniqueLabel('Interview Matrix Preset'),
+      topicIds: [topic.payload.id],
+    }),
+  }, 'manager');
+
+  assert.equal(preset.response.status, 201);
+
+  const question = await api('/questions', {
+    method: 'POST',
+    body: JSON.stringify({
+      textContent: [
+        {
+          kind: 'text',
+          content: 'Как проверить результат работы по критерию компетенции?',
+        },
+      ],
+      answerContent: [
+        {
+          kind: 'text',
+          content: 'Нужно сопоставить ответ с заранее заданными критериями.',
+        },
+      ],
+      difficulty: 'middle',
+      topicIds: [topic.payload.id],
+      competencyIds: [competency.payload.id],
+      evaluationCriteria: [
+        {
+          title: 'Сопоставляет ответ с критерием',
+          competencyId: competency.payload.id,
+          weight: 2,
+        },
+      ],
+    }),
+  }, 'manager');
+
+  assert.equal(question.response.status, 201);
+
+  const interviewee = interviewUsers[1];
+  const assignedStack = await api(`/competency-matrix/users/${interviewee.id}/stacks`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      stackIds: [stack.payload.id],
+    }),
+  }, 'manager');
+
+  assert.equal(assignedStack.response.status, 200);
+
+  const { bounds, cycle } = await createCycle(
+    8,
+    interviewUsers.slice(0, 2).map((user) => user.id),
+  );
+  const scheduledInterview =
+    cycle.interviews.find((item) => item.interviewee.id === interviewee.id) ??
+    cycle.interviews[0];
+
+  const scheduled = await api(`/interviews/${scheduledInterview.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      plannedDate: bounds.plannedDate,
+      presetId: preset.payload.id,
+    }),
+  }, 'manager');
+
+  assert.equal(scheduled.response.status, 200);
+  assert.equal(scheduled.payload.status, 'SCHEDULED');
+
+  const runtime = await api(
+    `/interviews/${scheduledInterview.id}/runtime`,
+    {},
+    scheduled.payload.interviewer.id,
+  );
+
+  assert.equal(runtime.response.status, 200);
+  assert.equal(runtime.payload.items.length, 1);
+  assert.equal(runtime.payload.items[0].criteria.length, 1);
+
+  const criterion = runtime.payload.items[0].criteria[0];
+  const completion = await api(
+    `/interviews/${scheduledInterview.id}/complete`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        feedback: 'Финальный фидбек по критериям зафиксирован.',
+        items: [{
+          interviewQuestionId: runtime.payload.items[0].id,
+          result: 'correct',
+          criteriaResults: [{
+            criterionId: criterion.id,
+            result: 'partial',
+            comment: 'Критерий раскрыт частично.',
+          }],
+        }],
+      }),
+    },
+    scheduled.payload.interviewer.id,
+  );
+
+  assert.equal(completion.response.status, 200);
+  assert.equal(completion.payload.status, 'COMPLETED');
+  assert.equal(completion.payload.partialCount, 1);
+
+  const history = await api('/interviews/my-history', {}, scheduled.payload.interviewee.id);
+
+  assert.equal(history.response.status, 200);
+  assert.ok(history.payload.items.some((item) => item.id === scheduledInterview.id));
+
+  const detail = await api(
+    `/interviews/${scheduledInterview.id}/detail`,
+    {},
+    scheduled.payload.interviewee.id,
+  );
+
+  assert.equal(detail.response.status, 200);
+  assert.equal(detail.payload.feedback, 'Финальный фидбек по критериям зафиксирован.');
+  assert.equal(detail.payload.questions[0].criteria[0].result, 'partial');
+  assert.equal(detail.payload.questions[0].criteria[0].comment, 'Критерий раскрыт частично.');
+  assert.equal(detail.payload.competencySummary[0].competencyId, competency.payload.id);
+  assert.equal(detail.payload.competencySummary[0].partialCount, 2);
+
+  const foreignDetail = await api(
+    `/interviews/${scheduledInterview.id}/detail`,
+    {},
+    interviewUsers[2].id,
+  );
+
+  assert.equal(foreignDetail.response.status, 403);
+
+  const matrix = await api('/competency-matrix/me', {}, scheduled.payload.interviewee.id);
+
+  assert.equal(matrix.response.status, 200);
+  const matrixCompetency = matrix.payload.competencies.find(
+    (item) => item.id === competency.payload.id,
+  );
+  assert.ok(matrixCompetency);
+  assert.equal(matrixCompetency.totalCount, 2);
+  assert.equal(matrixCompetency.partialCount, 2);
+  assert.equal(matrixCompetency.lastResult, 'partial');
+
+  const managerMatrix = await api(
+    `/competency-matrix/users/${scheduled.payload.interviewee.id}`,
+    {},
+    'manager',
+  );
+
+  assert.equal(managerMatrix.response.status, 200);
+  assert.ok(
+    managerMatrix.payload.competencies.some((item) => item.id === competency.payload.id),
+  );
+
+  const matrixList = await api(
+    `/competency-matrix?stackId=${stack.payload.id}`,
+    {},
+    'manager',
+  );
+
+  assert.equal(matrixList.response.status, 200);
+  assert.ok(
+    matrixList.payload.items.some((item) => item.user.id === scheduled.payload.interviewee.id),
+  );
 });
 
 test('manual pair validations reject duplicate, self-pair and out-of-range date', async () => {

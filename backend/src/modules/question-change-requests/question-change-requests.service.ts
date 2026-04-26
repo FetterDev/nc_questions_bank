@@ -7,14 +7,19 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { CompaniesRepository } from '../companies/companies.repository';
+import { CompetenciesRepository } from '../competencies/competencies.repository';
 import { UserContext } from '../authz/user-context';
 import {
   buildQuestionSnapshot,
   coerceQuestionSnapshot,
+  extractCompetencyIdsFromSnapshot,
   extractTopicIdsFromSnapshot,
+  normalizeCompetencyIds,
+  normalizeQuestionEvaluationCriteria,
   normalizeQuestionPayload,
   normalizeTopicIds,
   QuestionSnapshot,
+  QuestionSnapshotCompetency,
   snapshotsEqual,
 } from '../questions/question-payload';
 import { toDifficultyRank } from '../questions/question-difficulty';
@@ -40,6 +45,7 @@ export class QuestionChangeRequestsService {
     private readonly questionChangeRequestsRepository: QuestionChangeRequestsRepository,
     private readonly companiesRepository: CompaniesRepository,
     private readonly topicsRepository: TopicsRepository,
+    private readonly competenciesRepository: CompetenciesRepository,
   ) {}
 
   async create(
@@ -50,10 +56,12 @@ export class QuestionChangeRequestsService {
       this.ensureMissingTargetQuestionId(dto.targetQuestionId);
       const payload = this.ensurePayload(dto);
       const company = await this.requireCompany(payload.companyId ?? null);
+      const competencies = await this.requireCompetencies(payload.competencyIds ?? []);
       const proposed = normalizeQuestionPayload(
         payload,
         await this.requireTopics(payload.topicIds),
         company,
+        competencies,
       );
 
       const created = await this.questionChangeRequestsRepository.create({
@@ -103,10 +111,12 @@ export class QuestionChangeRequestsService {
 
     const payload = this.ensurePayload(dto);
     const company = await this.requireCompany(payload.companyId ?? null);
+    const competencies = await this.requireCompetencies(payload.competencyIds ?? []);
     const proposed = normalizeQuestionPayload(
       payload,
       await this.requireTopics(payload.topicIds),
       company,
+      competencies,
     );
 
     if (snapshotsEqual(baseSnapshot, proposed.snapshot)) {
@@ -157,6 +167,7 @@ export class QuestionChangeRequestsService {
 
         const topicIds = await this.resolveSnapshotTopicIds(after, tx);
         const companyId = await this.resolveSnapshotCompanyId(after, tx);
+        const competencyIds = await this.resolveSnapshotCompetencyIds(after, tx);
         await this.questionsRepository.create(
           {
             text: after.text,
@@ -166,6 +177,8 @@ export class QuestionChangeRequestsService {
             difficulty: toDifficultyRank(after.difficulty),
             companyId,
             topicIds,
+            competencyIds,
+            evaluationCriteria: this.toQuestionCriteriaWritePayload(after),
           },
           tx,
         );
@@ -194,6 +207,7 @@ export class QuestionChangeRequestsService {
 
         const topicIds = await this.resolveSnapshotTopicIds(after, tx);
         const companyId = await this.resolveSnapshotCompanyId(after, tx);
+        const competencyIds = await this.resolveSnapshotCompetencyIds(after, tx);
         await this.questionsRepository.update(
           targetQuestionId,
           {
@@ -204,6 +218,8 @@ export class QuestionChangeRequestsService {
             difficulty: toDifficultyRank(after.difficulty),
             companyId,
             topicIds,
+            competencyIds,
+            evaluationCriteria: this.toQuestionCriteriaWritePayload(after),
           },
           tx,
         );
@@ -379,6 +395,8 @@ export class QuestionChangeRequestsService {
           after: after?.company ?? null,
         },
         topics: this.buildTopicsDiff(before, after),
+        competencies: this.buildCompetenciesDiff(before, after),
+        evaluationCriteria: this.buildEvaluationCriteriaDiff(before, after),
       },
     };
   }
@@ -401,6 +419,41 @@ export class QuestionChangeRequestsService {
       after: afterTopics,
       added: afterTopics.filter((topic) => !beforeMap.has(topic.slug)),
       removed: beforeTopics.filter((topic) => !afterMap.has(topic.slug)),
+    };
+  }
+
+  private buildCompetenciesDiff(
+    before: QuestionSnapshot | null,
+    after: QuestionSnapshot | null,
+  ) {
+    const beforeCompetencies = before?.competencies ?? [];
+    const afterCompetencies = after?.competencies ?? [];
+    const beforeMap = new Map(beforeCompetencies.map((item) => [item.id, item]));
+    const afterMap = new Map(afterCompetencies.map((item) => [item.id, item]));
+
+    return {
+      changed:
+        beforeCompetencies.length !== afterCompetencies.length ||
+        beforeCompetencies.some((item) => !afterMap.has(item.id)) ||
+        afterCompetencies.some((item) => !beforeMap.has(item.id)),
+      before: beforeCompetencies,
+      after: afterCompetencies,
+      added: afterCompetencies.filter((item) => !beforeMap.has(item.id)),
+      removed: beforeCompetencies.filter((item) => !afterMap.has(item.id)),
+    };
+  }
+
+  private buildEvaluationCriteriaDiff(
+    before: QuestionSnapshot | null,
+    after: QuestionSnapshot | null,
+  ) {
+    const beforeCriteria = before?.evaluationCriteria ?? [];
+    const afterCriteria = after?.evaluationCriteria ?? [];
+
+    return {
+      changed: JSON.stringify(beforeCriteria) !== JSON.stringify(afterCriteria),
+      before: beforeCriteria,
+      after: afterCriteria,
     };
   }
 
@@ -459,6 +512,45 @@ export class QuestionChangeRequestsService {
       id: company.id,
       name: company.name,
     };
+  }
+
+  private async requireCompetencies(
+    competencyIds: string[],
+  ): Promise<QuestionSnapshotCompetency[]> {
+    const normalizedCompetencyIds = normalizeCompetencyIds(competencyIds);
+
+    if (normalizedCompetencyIds.length === 0) {
+      return [];
+    }
+
+    const competencies = await this.competenciesRepository.findCompetenciesByIds(
+      normalizedCompetencyIds,
+    );
+
+    if (competencies.length !== normalizedCompetencyIds.length) {
+      throw new BadRequestException('Some competencies do not exist');
+    }
+
+    const competenciesById = new Map(competencies.map((competency) => [competency.id, competency]));
+
+    return normalizedCompetencyIds.map((competencyId) => {
+      const competency = competenciesById.get(competencyId);
+
+      if (!competency) {
+        throw new BadRequestException('Some competencies do not exist');
+      }
+
+      return {
+        id: competency.id,
+        name: competency.name,
+        slug: competency.slug,
+        stack: {
+          id: competency.stack.id,
+          name: competency.stack.name,
+          slug: competency.stack.slug,
+        },
+      };
+    });
   }
 
   private async resolveSnapshotTopicIds(
@@ -523,5 +615,45 @@ export class QuestionChangeRequestsService {
     }
 
     return company.id;
+  }
+
+  private async resolveSnapshotCompetencyIds(
+    snapshot: QuestionSnapshot,
+    db: Parameters<QuestionsRepository['create']>[1],
+  ) {
+    const competencyIds = extractCompetencyIdsFromSnapshot(snapshot);
+
+    if (competencyIds.length === 0) {
+      return [];
+    }
+
+    const competencies = await this.competenciesRepository.findCompetenciesByIds(
+      competencyIds,
+      db,
+    );
+
+    if (competencies.length !== competencyIds.length) {
+      throw new ConflictException('Request competencies are outdated');
+    }
+
+    return competencyIds;
+  }
+
+  private toQuestionCriteriaWritePayload(snapshot: QuestionSnapshot) {
+    return normalizeQuestionEvaluationCriteria(
+      snapshot.evaluationCriteria.map((criterion) => ({
+        title: criterion.title,
+        description: criterion.description,
+        weight: criterion.weight,
+        competencyId: criterion.competency?.id ?? null,
+      })),
+      snapshot.competencies,
+    ).map((criterion) => ({
+      title: criterion.title,
+      description: criterion.description,
+      weight: criterion.weight,
+      position: criterion.position,
+      competencyId: criterion.competency?.id ?? null,
+    }));
   }
 }

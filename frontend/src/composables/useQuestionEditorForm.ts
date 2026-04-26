@@ -15,6 +15,7 @@ import type {
   QuestionFormValues,
 } from '../features/questions/questions.types';
 import type { Company } from '../features/companies/companies.types';
+import type { Competency } from '../features/competencies/competencies.types';
 import type { Topic } from '../features/topics/topics.types';
 import { toUserErrorMessage } from '../features/system/error.utils';
 
@@ -45,16 +46,19 @@ export function useQuestionEditorForm() {
 
   const form = reactive<QuestionFormValues>(createEmptyForm());
   const companyOptions = ref<Company[]>([]);
+  const competencyOptions = ref<Competency[]>([]);
   const topicOptions = ref<Topic[]>([]);
   const loading = ref(false);
   const saving = ref(false);
   const companiesLoading = ref(false);
+  const competenciesLoading = ref(false);
   const topicsLoading = ref(false);
   const errorMessage = ref('');
   const submissionLockedReason = ref('');
   const validationErrors = reactive({
     textContent: '',
     answerContent: '',
+    evaluationCriteria: '',
     topicIds: '',
   });
 
@@ -64,6 +68,7 @@ export function useQuestionEditorForm() {
 
   let topicsPromise: Promise<Topic[]> | null = null;
   let companiesPromise: Promise<Company[]> | null = null;
+  let competenciesPromise: Promise<Competency[]> | null = null;
   let loadCounter = 0;
 
   function resetForm() {
@@ -76,6 +81,7 @@ export function useQuestionEditorForm() {
   function clearValidationErrors() {
     validationErrors.textContent = '';
     validationErrors.answerContent = '';
+    validationErrors.evaluationCriteria = '';
     validationErrors.topicIds = '';
   }
 
@@ -91,6 +97,13 @@ export function useQuestionEditorForm() {
     form.difficulty = question.difficulty as QuestionFormValues['difficulty'];
     form.companyId = question.company?.id ?? null;
     form.topicIds = question.topics.map((topic) => topic.id);
+    form.competencyIds = question.competencies.map((competency) => competency.id);
+    form.evaluationCriteria = question.evaluationCriteria.map((criterion) => ({
+      title: criterion.title,
+      description: criterion.description ?? '',
+      competencyId: criterion.competency?.id ?? null,
+      weight: criterion.weight,
+    }));
     submissionLockedReason.value = question.pendingChangeRequest.hasPendingChangeRequest
       ? 'По этому вопросу уже есть активная pending-заявка. До её разрешения прямые изменения недоступны.'
       : '';
@@ -160,6 +173,37 @@ export function useQuestionEditorForm() {
     return request;
   }
 
+  async function ensureCompetencyOptions(force = false) {
+    if (!force && competencyOptions.value.length > 0) {
+      return competencyOptions.value;
+    }
+
+    if (!force && competenciesPromise) {
+      return competenciesPromise;
+    }
+
+    competenciesLoading.value = true;
+
+    const request = apiService
+      .listAllCompetencies()
+      .then((competencies) => {
+        competencyOptions.value = competencies;
+        return competencies;
+      })
+      .catch((error) => {
+        throw new Error(
+          toUserErrorMessage(error, 'Не удалось загрузить компетенции для редактора.'),
+        );
+      })
+      .finally(() => {
+        competenciesLoading.value = false;
+        competenciesPromise = null;
+      });
+
+    competenciesPromise = request;
+    return request;
+  }
+
   async function loadQuestion(id: string) {
     const requestId = ++loadCounter;
     loading.value = true;
@@ -197,7 +241,11 @@ export function useQuestionEditorForm() {
     resetForm();
 
     try {
-      await Promise.all([ensureTopicOptions(), ensureCompanyOptions()]);
+      await Promise.all([
+        ensureTopicOptions(),
+        ensureCompanyOptions(),
+        ensureCompetencyOptions(),
+      ]);
     } catch (error) {
       errorMessage.value =
         error instanceof Error ? error.message : 'Не удалось подготовить справочники.';
@@ -244,6 +292,37 @@ export function useQuestionEditorForm() {
       validationErrors.topicIds = '';
     }
 
+    const selectedCompetencyIds = new Set(form.competencyIds);
+    const criteria = form.evaluationCriteria
+      .map((criterion) => ({
+        ...criterion,
+        title: criterion.title.trim(),
+        description: criterion.description.trim(),
+        competencyId: criterion.competencyId || null,
+        weight: Number(criterion.weight),
+      }))
+      .filter((criterion) => criterion.title || criterion.description || criterion.competencyId);
+
+    if (criteria.length > 12) {
+      validationErrors.evaluationCriteria = 'Максимум 12 критериев.';
+      isValid = false;
+    } else if (criteria.some((criterion) => !criterion.title)) {
+      validationErrors.evaluationCriteria = 'У каждого критерия должно быть название.';
+      isValid = false;
+    } else if (
+      criteria.some(
+        (criterion) =>
+          criterion.competencyId && !selectedCompetencyIds.has(criterion.competencyId),
+      )
+    ) {
+      validationErrors.evaluationCriteria =
+        'Компетенция критерия должна быть выбрана в списке компетенций вопроса.';
+      isValid = false;
+    } else {
+      form.evaluationCriteria = criteria;
+      validationErrors.evaluationCriteria = '';
+    }
+
     return isValid;
   }
 
@@ -262,6 +341,13 @@ export function useQuestionEditorForm() {
       difficulty: form.difficulty,
       companyId: form.companyId,
       topicIds: normalizeTopicIds(form.topicIds),
+      competencyIds: form.competencyIds,
+      evaluationCriteria: form.evaluationCriteria.map((criterion) => ({
+        title: criterion.title,
+        description: criterion.description || null,
+        competencyId: criterion.competencyId,
+        weight: criterion.weight,
+      })),
     };
 
     saving.value = true;
@@ -336,12 +422,23 @@ export function useQuestionEditorForm() {
     { deep: true },
   );
 
+  watch(
+    () => form.evaluationCriteria,
+    () => {
+      validationErrors.evaluationCriteria = '';
+    },
+    { deep: true },
+  );
+
   return {
     disabledForm,
     companyOptions,
     companiesLoading,
+    competencyOptions,
+    competenciesLoading,
     errorMessage,
     ensureCompanyOptions,
+    ensureCompetencyOptions,
     form,
     hydrateFromQuestion,
     initializeForCreate,

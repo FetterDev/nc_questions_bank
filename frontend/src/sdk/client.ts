@@ -15,6 +15,12 @@ import type {
   UserRecord,
 } from '../features/users/users.types';
 import type {
+  CompetencyMatrix,
+  ListCompetenciesResponse,
+  ListCompetencyMatrixResponse,
+  ListStacksResponse,
+} from '../features/competencies/competencies.types';
+import type {
   AdminInterviewCalendar,
   AdminInterviewDashboard,
   CompleteInterviewPayload,
@@ -22,6 +28,8 @@ import type {
   CreateInterviewPairPayload,
   InterviewCalendarActiveCycle,
   InterviewCycle,
+  InterviewDetail,
+  InterviewHistory,
   InterviewItem,
   InterviewRuntime,
   MyInterviewCalendar,
@@ -262,6 +270,7 @@ function normalizeUserRecord(record: {
   displayName: string;
   role: UserRecord['role'];
   status: 'ACTIVE' | 'DISABLED';
+  stacks: UserRecord['stacks'];
   createdAt: string;
   updatedAt: string;
 }): UserRecord {
@@ -394,6 +403,92 @@ export function createApiSdk(options?: ClientOptions) {
     async getBankAnalytics() {
       const result = await client.GET('/api/analytics/bank');
       return ensureData(result, 'getBankAnalytics');
+    },
+
+    async listStacks(
+      query?: paths['/api/stacks']['get']['parameters']['query'],
+    ): Promise<ListStacksResponse> {
+      const result = await client.GET('/api/stacks', {
+        params: { query },
+      });
+      return ensureData(result, 'listStacks');
+    },
+
+    async listAllStacks(
+      query?: Omit<NonNullable<paths['/api/stacks']['get']['parameters']['query']>, 'limit' | 'offset'>,
+    ) {
+      const items: ListStacksResponse['items'] = [];
+      const limit = 100;
+      let offset = 0;
+      let total = 0;
+
+      do {
+        const batch = await this.listStacks({
+          ...query,
+          limit,
+          offset,
+        });
+
+        items.push(...batch.items);
+        total = batch.total;
+        offset += batch.items.length;
+
+        if (batch.items.length === 0) {
+          break;
+        }
+      } while (offset < total);
+
+      return items;
+    },
+
+    async listCompetencies(
+      query?: paths['/api/competencies']['get']['parameters']['query'],
+    ): Promise<ListCompetenciesResponse> {
+      const result = await client.GET('/api/competencies', {
+        params: { query },
+      });
+      return ensureData(result, 'listCompetencies');
+    },
+
+    async listAllCompetencies(
+      query?: Omit<NonNullable<paths['/api/competencies']['get']['parameters']['query']>, 'limit' | 'offset'>,
+    ) {
+      const items: ListCompetenciesResponse['items'] = [];
+      const limit = 100;
+      let offset = 0;
+      let total = 0;
+
+      do {
+        const batch = await this.listCompetencies({
+          ...query,
+          limit,
+          offset,
+        });
+
+        items.push(...batch.items);
+        total = batch.total;
+        offset += batch.items.length;
+
+        if (batch.items.length === 0) {
+          break;
+        }
+      } while (offset < total);
+
+      return items;
+    },
+
+    async createStack(
+      body: paths['/api/stacks']['post']['requestBody']['content']['application/json'],
+    ) {
+      const result = await client.POST('/api/stacks', { body });
+      return ensureData(result, 'createStack');
+    },
+
+    async createCompetency(
+      body: paths['/api/competencies']['post']['requestBody']['content']['application/json'],
+    ) {
+      const result = await client.POST('/api/competencies', { body });
+      return ensureData(result, 'createCompetency');
     },
 
     async listQuestions(
@@ -710,6 +805,62 @@ export function createApiSdk(options?: ClientOptions) {
         params: { query },
       });
       return ensureData(result, 'getMyInterviewDashboard');
+    },
+
+    async listMyInterviewHistory(): Promise<InterviewHistory> {
+      const result = await client.GET('/api/interviews/my-history');
+      const data = ensureData(result, 'listMyInterviewHistory');
+
+      return {
+        ...data,
+        items: data.items.map((item) => normalizeInterviewItem(item)),
+      };
+    },
+
+    async getInterviewDetail(id: string): Promise<InterviewDetail> {
+      const result = await client.GET('/api/interviews/{id}/detail', {
+        params: { path: { id } },
+      });
+      const data = ensureData(result, 'getInterviewDetail');
+
+      return {
+        ...data,
+        interview: normalizeInterviewItem(data.interview),
+        interviewer: normalizeInterviewUser(data.interviewer),
+        interviewee: normalizeInterviewUser(data.interviewee),
+      };
+    },
+
+    async getMyCompetencyMatrix(): Promise<CompetencyMatrix> {
+      const result = await client.GET('/api/competency-matrix/me');
+      return ensureData(result, 'getMyCompetencyMatrix');
+    },
+
+    async listCompetencyMatrix(
+      query?: paths['/api/competency-matrix']['get']['parameters']['query'],
+    ): Promise<ListCompetencyMatrixResponse> {
+      const result = await client.GET('/api/competency-matrix', {
+        params: { query },
+      });
+      return ensureData(result, 'listCompetencyMatrix');
+    },
+
+    async getUserCompetencyMatrix(userId: string): Promise<CompetencyMatrix> {
+      const result = await client.GET('/api/competency-matrix/users/{userId}', {
+        params: { path: { userId } },
+      });
+      return ensureData(result, 'getUserCompetencyMatrix');
+    },
+
+    async updateUserStacks(
+      userId: string,
+      body: paths['/api/competency-matrix/users/{userId}/stacks']['patch']['requestBody']['content']['application/json'],
+    ): Promise<CompetencyMatrix> {
+      const result = await client.PATCH('/api/competency-matrix/users/{userId}/stacks', {
+        params: { path: { userId } },
+        body,
+      });
+      return ensureData(result, 'updateUserStacks');
     },
 
     async listTopics(

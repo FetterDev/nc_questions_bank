@@ -30,6 +30,12 @@ export type PageSizeOption = {
   value: number;
 };
 export type EditorMode = 'create' | 'edit';
+export type QuestionEvaluationCriterionFormValue = {
+  title: string;
+  description: string;
+  competencyId: string | null;
+  weight: number;
+};
 
 export type QuestionFormValues = {
   textContent: QuestionStructuredContent;
@@ -37,4 +43,6 @@ export type QuestionFormValues = {
   difficulty: DifficultyValue;
   companyId: string | null;
   topicIds: string[];
+  competencyIds: string[];
+  evaluationCriteria: QuestionEvaluationCriterionFormValue[];
 };

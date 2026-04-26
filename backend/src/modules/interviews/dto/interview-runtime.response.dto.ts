@@ -4,6 +4,44 @@ import { QuestionTopicDto } from '../../questions/dto/question-topic.dto';
 import { QuestionDifficulty } from '../../questions/question-difficulty';
 import { InterviewItemDto, InterviewUserDto } from './interview-common.dto';
 
+class InterviewRuntimeCriterionDto {
+  @ApiProperty({ example: 'cm8interviewcriterion1' })
+  id!: string;
+
+  @ApiProperty({ example: 'cm8criterionSource1', nullable: true })
+  sourceCriterionId!: string | null;
+
+  @ApiProperty({
+    nullable: true,
+    example: {
+      id: 'cm8competency1',
+      name: 'TypeScript',
+      slug: 'typescript',
+    },
+  })
+  competency!: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
+
+  @ApiProperty({ example: 'Называет tradeoff выбранного подхода' })
+  title!: string;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    example: 'Кандидат должен объяснить плюсы и минусы решения.',
+  })
+  description!: string | null;
+
+  @ApiProperty({ example: 2 })
+  weight!: number;
+
+  @ApiProperty({ example: 0 })
+  position!: number;
+}
+
 class InterviewRuntimeQuestionDto {
   @ApiProperty({ example: 'cm8interviewquestion1' })
   id!: string;
@@ -31,6 +69,9 @@ class InterviewRuntimeQuestionDto {
 
   @ApiProperty({ type: [QuestionTopicDto] })
   topics!: QuestionTopicDto[];
+
+  @ApiProperty({ type: [InterviewRuntimeCriterionDto] })
+  criteria!: InterviewRuntimeCriterionDto[];
 }
 
 export class InterviewRuntimeResponseDto {

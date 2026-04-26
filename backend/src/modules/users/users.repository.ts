@@ -22,6 +22,27 @@ export type UserRecord = {
   updatedAt: Date;
 };
 
+const userInclude = {
+  stacks: {
+    include: {
+      stack: {
+        include: {
+          _count: {
+            select: {
+              competencies: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: [{ stack: { name: 'asc' } }, { stackId: 'asc' }],
+  },
+} satisfies Prisma.UserInclude;
+
+export type UserOutput = Prisma.UserGetPayload<{
+  include: typeof userInclude;
+}>;
+
 @Injectable()
 export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -29,6 +50,7 @@ export class UsersRepository {
   findById(id: string, db?: DbClient) {
     return this.getDb(db).user.findUnique({
       where: { id },
+      include: userInclude,
     });
   }
 
@@ -49,6 +71,7 @@ export class UsersRepository {
   findByLogin(login: string, db?: DbClient) {
     return this.getDb(db).user.findUnique({
       where: { login },
+      include: userInclude,
     });
   }
 
@@ -117,6 +140,7 @@ export class UsersRepository {
     const [items, total] = await Promise.all([
       this.getDb(db).user.findMany({
         where,
+        include: userInclude,
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         take: params.limit,
         skip: params.offset,
@@ -149,6 +173,7 @@ export class UsersRepository {
         status: data.status ?? UserStatus.ACTIVE,
         tokenVersion: data.tokenVersion ?? 0,
       },
+      include: userInclude,
     });
   }
 
@@ -195,6 +220,7 @@ export class UsersRepository {
     return this.getDb(db).user.update({
       where: { id },
       data: updateData,
+      include: userInclude,
     });
   }
 

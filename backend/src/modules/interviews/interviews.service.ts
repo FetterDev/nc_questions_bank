@@ -17,6 +17,7 @@ import {
   DEFAULT_SELECTION_QUESTIONS_PER_TOPIC,
   QuestionSelectionRepository,
 } from '../questions/question-selection.repository';
+import { QuestionsRepository } from '../questions/questions.repository';
 import { fromDifficultyRank } from '../questions/question-difficulty';
 import { TrainingPresetsRepository } from '../training/training-presets.repository';
 import {
@@ -56,6 +57,7 @@ export class InterviewsService {
     private readonly prisma: PrismaService,
     private readonly interviewsRepository: InterviewsRepository,
     private readonly questionSelectionRepository: QuestionSelectionRepository,
+    private readonly questionsRepository: QuestionsRepository,
     private readonly trainingPresetsRepository: TrainingPresetsRepository,
   ) {}
 
@@ -261,6 +263,21 @@ export class InterviewsService {
         difficulty: fromDifficultyRank(item.difficulty),
         position: item.position,
         topics: item.topics,
+        criteria: item.criteria.map((criterion) => ({
+          id: criterion.id,
+          sourceCriterionId: criterion.sourceCriterionId,
+          competency: criterion.competencyId
+            ? {
+                id: criterion.competencyId,
+                name: criterion.competencyName ?? '',
+                slug: criterion.competencySlug ?? '',
+              }
+            : null,
+          title: criterion.title,
+          description: criterion.description,
+          weight: criterion.weight,
+          position: criterion.position,
+        })),
       })),
     };
   }
@@ -283,6 +300,11 @@ export class InterviewsService {
     const payloadItems = dto.items.map((item) => ({
       interviewQuestionId: normalizeRequiredId(item.interviewQuestionId, 'interviewQuestionId'),
       result: item.result,
+      criteriaResults: (item.criteriaResults ?? []).map((criterion) => ({
+        criterionId: normalizeRequiredId(criterion.criterionId, 'criterionId'),
+        result: criterion.result,
+        comment: normalizeNullableText(criterion.comment),
+      })),
     }));
     const uniqueIds = new Set(payloadItems.map((item) => item.interviewQuestionId));
 
@@ -297,18 +319,43 @@ export class InterviewsService {
     const questionsById = new Set(interview.questions.map((item) => item.id));
 
     for (const item of payloadItems) {
-      if (!questionsById.has(item.interviewQuestionId)) {
+      const question = interview.questions.find(
+        (questionItem) => questionItem.id === item.interviewQuestionId,
+      );
+
+      if (!question || !questionsById.has(item.interviewQuestionId)) {
         throw new BadRequestException('Interview completion contains foreign question ids');
       }
+
+      this.ensureCriteriaCompletion(question, item.criteriaResults);
     }
 
-    const correctCount = payloadItems.filter((item) =>
+    const normalizedItems = payloadItems.map((item) => {
+      const question = interview.questions.find(
+        (questionItem) => questionItem.id === item.interviewQuestionId,
+      );
+
+      if (!question) {
+        throw new BadRequestException('Interview completion contains foreign question ids');
+      }
+
+      const result = question.criteria.length > 0
+        ? deriveQuestionResultFromCriteria(item.criteriaResults)
+        : item.result;
+
+      return {
+        ...item,
+        result,
+      };
+    });
+
+    const correctCount = normalizedItems.filter((item) =>
       isCorrectTrainingResult(item.result),
     ).length;
-    const incorrectCount = payloadItems.filter((item) =>
+    const incorrectCount = normalizedItems.filter((item) =>
       isIncorrectTrainingResult(item.result),
     ).length;
-    const partialCount = payloadItems.filter((item) =>
+    const partialCount = normalizedItems.filter((item) =>
       isPartialTrainingResult(item.result),
     ).length;
     const completedAt = new Date();
@@ -316,9 +363,14 @@ export class InterviewsService {
     const updated = await this.prisma.$transaction(async (tx) => {
       await this.interviewsRepository.updateQuestionResults(
         interview.id,
-        payloadItems.map((item) => ({
+        normalizedItems.map((item) => ({
           interviewQuestionId: item.interviewQuestionId,
           result: toTrainingResultDb(item.result),
+          criteriaResults: item.criteriaResults.map((criterion) => ({
+            criterionId: criterion.criterionId,
+            result: toTrainingResultDb(criterion.result),
+            comment: criterion.comment,
+          })),
         })),
         tx,
       );
@@ -474,6 +526,68 @@ export class InterviewsService {
     };
   }
 
+  async getMyHistory(currentUser: UserContext) {
+    const interviews = await this.interviewsRepository.listIntervieweeCompletedInterviews(
+      currentUser.id,
+    );
+
+    return {
+      items: interviews.map((item) => this.toInterviewItemResponse(item)),
+    };
+  }
+
+  async getInterviewDetail(currentUser: UserContext, id: string) {
+    const interview = await this.requireInterview(id);
+
+    if (interview.status !== InterviewStatus.COMPLETED) {
+      throw new BadRequestException('Interview must be completed before detail is available');
+    }
+
+    if (
+      currentUser.role === UserRole.USER &&
+      interview.interviewer.id !== currentUser.id &&
+      interview.interviewee.id !== currentUser.id
+    ) {
+      throw new ForbiddenException('Only interview participants can access interview detail');
+    }
+
+    return {
+      interview: this.toInterviewItemResponse(interview),
+      interviewer: this.toUserResponse(interview.interviewer),
+      interviewee: this.toUserResponse(interview.interviewee),
+      feedback: interview.feedback,
+      questions: interview.questions.map((question) => ({
+        id: question.id,
+        questionId: question.questionId,
+        questionText: question.questionText,
+        questionTextContent: question.questionTextContent,
+        answer: question.answer,
+        answerContent: question.answerContent,
+        difficulty: fromDifficultyRank(question.difficulty),
+        result: question.result ? fromTrainingResultDb(question.result) : null,
+        position: question.position,
+        topics: question.topics,
+        criteria: question.criteria.map((criterion) => ({
+          id: criterion.id,
+          title: criterion.title,
+          description: criterion.description,
+          weight: criterion.weight,
+          position: criterion.position,
+          result: criterion.result ? fromTrainingResultDb(criterion.result) : null,
+          comment: criterion.comment,
+          competency: criterion.competencyId
+            ? {
+                id: criterion.competencyId,
+                name: criterion.competencyName ?? '',
+                slug: criterion.competencySlug ?? '',
+              }
+            : null,
+        })),
+      })),
+      competencySummary: this.aggregateCompetencyCriteria(interview),
+    };
+  }
+
   private async requireCycle(id: string) {
     const cycle = await this.interviewsRepository.findCycleById(id);
 
@@ -591,26 +705,77 @@ export class InterviewsService {
       throw new BadRequestException('Selected preset does not produce any interview questions');
     }
 
-    await this.interviewsRepository.replaceQuestions(
-      interviewId,
-      selected.items.map((item, index) => ({
-        questionId: item.id,
-        questionText: item.text,
-        questionTextContent: item.textContent,
-        answer: item.answer,
-        answerContent: item.answerContent,
-        difficulty: item.difficulty === 'junior'
-          ? 1
-          : item.difficulty === 'middle'
-            ? 2
-            : item.difficulty === 'senior'
-              ? 3
-              : 4,
-        position: index,
-        topics: item.topics,
-      })),
+    const liveQuestions = await this.questionsRepository.findByIds(
+      selected.items.map((item) => item.id),
       tx as never,
     );
+    const liveQuestionsById = new Map(liveQuestions.map((item) => [item.id, item]));
+
+    await this.interviewsRepository.replaceQuestions(
+      interviewId,
+      selected.items.map((item, index) => {
+        const liveQuestion = liveQuestionsById.get(item.id);
+
+        return {
+          questionId: item.id,
+          questionText: item.text,
+          questionTextContent: item.textContent,
+          answer: item.answer,
+          answerContent: item.answerContent,
+          difficulty: item.difficulty === 'junior'
+            ? 1
+            : item.difficulty === 'middle'
+              ? 2
+              : item.difficulty === 'senior'
+                ? 3
+                : 4,
+          position: index,
+          topics: item.topics,
+          criteria: liveQuestion?.evaluationCriteria.map((criterion) => ({
+            sourceCriterionId: criterion.id,
+            competencyId: criterion.competency?.id ?? null,
+            competencyName: criterion.competency?.name ?? null,
+            competencySlug: criterion.competency?.slug ?? null,
+            title: criterion.title,
+            description: criterion.description,
+            weight: criterion.weight,
+            position: criterion.position,
+          })) ?? [],
+        };
+      }),
+      tx as never,
+    );
+  }
+
+  private ensureCriteriaCompletion(
+    question: Awaited<ReturnType<InterviewsService['requireInterview']>>['questions'][number],
+    criteriaResults: Array<{
+      criterionId: string;
+      result: TrainingResult;
+      comment: string | null;
+    }>,
+  ) {
+    if (criteriaResults.length === 0 && question.criteria.length === 0) {
+      return;
+    }
+
+    const uniqueIds = new Set(criteriaResults.map((item) => item.criterionId));
+
+    if (uniqueIds.size !== criteriaResults.length) {
+      throw new BadRequestException('Interview completion must not contain duplicate criteria');
+    }
+
+    const criteriaById = new Set(question.criteria.map((criterion) => criterion.id));
+
+    if (criteriaResults.length !== question.criteria.length) {
+      throw new BadRequestException('Interview completion must include all question criteria');
+    }
+
+    for (const criterion of criteriaResults) {
+      if (!criteriaById.has(criterion.criterionId)) {
+        throw new BadRequestException('Interview completion contains foreign criterion ids');
+      }
+    }
   }
 
   private resolveAdminDashboardRange(query: InterviewDashboardQueryDto) {
@@ -732,6 +897,63 @@ export class InterviewsService {
       .slice(0, 8);
   }
 
+  private aggregateCompetencyCriteria(interview: Awaited<ReturnType<InterviewsService['requireInterview']>>) {
+    const grouped = new Map<
+      string,
+      {
+        competencyId: string;
+        name: string;
+        slug: string;
+        correctCount: number;
+        partialCount: number;
+        incorrectCount: number;
+      }
+    >();
+
+    for (const question of interview.questions) {
+      for (const criterion of question.criteria) {
+        if (!criterion.competencyId || !criterion.result) {
+          continue;
+        }
+
+        const existing = grouped.get(criterion.competencyId) ?? {
+          competencyId: criterion.competencyId,
+          name: criterion.competencyName ?? '',
+          slug: criterion.competencySlug ?? '',
+          correctCount: 0,
+          partialCount: 0,
+          incorrectCount: 0,
+        };
+        const result = fromTrainingResultDb(criterion.result);
+        const weight = Math.max(1, criterion.weight);
+
+        if (isCorrectTrainingResult(result)) {
+          existing.correctCount += weight;
+        } else if (isPartialTrainingResult(result)) {
+          existing.partialCount += weight;
+        } else {
+          existing.incorrectCount += weight;
+        }
+
+        grouped.set(criterion.competencyId, existing);
+      }
+    }
+
+    return [...grouped.values()]
+      .map((item) => ({
+        ...item,
+        accuracy: toPercent(
+          item.correctCount,
+          item.correctCount + item.partialCount + item.incorrectCount,
+        ),
+      }))
+      .sort(
+        (left, right) =>
+          left.name.localeCompare(right.name, 'ru-RU') ||
+          left.competencyId.localeCompare(right.competencyId, 'ru-RU'),
+      );
+  }
+
   private toCycleDetailResponse(cycle: Awaited<ReturnType<InterviewsRepository['findCycleById']>> extends infer T ? NonNullable<T> : never) {
     return {
       ...this.toCycleDetailBase(cycle),
@@ -823,6 +1045,22 @@ function resolveInterviewStatus(plannedDate: Date | null, presetId: string | nul
   }
 
   return InterviewStatus.SCHEDULED;
+}
+
+function deriveQuestionResultFromCriteria(
+  criteriaResults: Array<{
+    result: TrainingResult;
+  }>,
+) {
+  if (criteriaResults.some((item) => isIncorrectTrainingResult(item.result))) {
+    return TrainingResult.INCORRECT;
+  }
+
+  if (criteriaResults.every((item) => isCorrectTrainingResult(item.result))) {
+    return TrainingResult.CORRECT;
+  }
+
+  return TrainingResult.PARTIAL;
 }
 
 function isPlannedDateInsideBucket(

@@ -31,6 +31,25 @@ export type QuestionSnapshotCompany = {
   name: string;
 };
 
+export type QuestionSnapshotCompetency = {
+  id: string;
+  name: string;
+  slug: string;
+  stack: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+};
+
+export type QuestionSnapshotEvaluationCriterion = {
+  title: string;
+  description: string | null;
+  weight: number;
+  position: number;
+  competency: QuestionSnapshotCompetency | null;
+};
+
 export type QuestionSnapshot = {
   text: string;
   answer: string;
@@ -39,6 +58,8 @@ export type QuestionSnapshot = {
   difficulty: QuestionDifficulty;
   company: QuestionSnapshotCompany | null;
   topics: QuestionSnapshotTopic[];
+  competencies: QuestionSnapshotCompetency[];
+  evaluationCriteria: QuestionSnapshotEvaluationCriterion[];
 };
 
 export type QuestionDraftPayload = {
@@ -47,6 +68,13 @@ export type QuestionDraftPayload = {
   difficulty: QuestionDifficulty;
   topicIds: string[];
   companyId?: string | null;
+  competencyIds?: string[];
+  evaluationCriteria?: Array<{
+    title: string;
+    description?: string | null;
+    weight?: number;
+    competencyId?: string | null;
+  }>;
 };
 
 export type NormalizedQuestionPayload = {
@@ -57,6 +85,14 @@ export type NormalizedQuestionPayload = {
   difficultyRank: QuestionDifficultyRank;
   companyId: string | null;
   topicIds: string[];
+  competencyIds: string[];
+  evaluationCriteria: Array<{
+    title: string;
+    description: string | null;
+    weight: number;
+    position: number;
+    competencyId: string | null;
+  }>;
   snapshot: QuestionSnapshot;
 };
 
@@ -64,6 +100,7 @@ export function normalizeQuestionPayload(
   payload: QuestionDraftPayload,
   topics: QuestionSnapshotTopic[],
   company: QuestionSnapshotCompany | null,
+  competencies: QuestionSnapshotCompetency[] = [],
 ): NormalizedQuestionPayload {
   const textContent = normalizeQuestionStructuredContent(payload.textContent, {
     fieldLabel: 'Question text',
@@ -78,10 +115,21 @@ export function normalizeQuestionPayload(
 
   const normalizedTopicIds = normalizeTopicIds(payload.topicIds);
   const snapshotTopics = sortTopics(topics);
+  const normalizedCompetencyIds = normalizeOptionalIdList(payload.competencyIds ?? []);
+  const snapshotCompetencies = sortCompetencies(competencies);
 
   if (snapshotTopics.length !== normalizedTopicIds.length) {
     throw new BadRequestException('Question topics are invalid');
   }
+
+  if (snapshotCompetencies.length !== normalizedCompetencyIds.length) {
+    throw new BadRequestException('Question competencies are invalid');
+  }
+
+  const evaluationCriteria = normalizeQuestionEvaluationCriteria(
+    payload.evaluationCriteria ?? [],
+    snapshotCompetencies,
+  );
 
   return {
     text,
@@ -91,6 +139,14 @@ export function normalizeQuestionPayload(
     difficultyRank: toDifficultyRank(payload.difficulty),
     companyId: company?.id ?? null,
     topicIds: snapshotTopics.map((topic) => topic.id),
+    competencyIds: snapshotCompetencies.map((competency) => competency.id),
+    evaluationCriteria: evaluationCriteria.map((criterion) => ({
+      title: criterion.title,
+      description: criterion.description,
+      weight: criterion.weight,
+      position: criterion.position,
+      competencyId: criterion.competency?.id ?? null,
+    })),
     snapshot: {
       text,
       answer,
@@ -99,6 +155,8 @@ export function normalizeQuestionPayload(
       difficulty: payload.difficulty,
       company,
       topics: snapshotTopics,
+      competencies: snapshotCompetencies,
+      evaluationCriteria,
     },
   };
 }
@@ -113,6 +171,8 @@ export function buildQuestionSnapshot(
     | 'difficulty'
     | 'company'
     | 'topics'
+    | 'competencies'
+    | 'evaluationCriteria'
   >,
 ): QuestionSnapshot {
   return {
@@ -134,6 +194,36 @@ export function buildQuestionSnapshot(
         slug: topic.slug,
       })),
     ),
+    competencies: sortCompetencies(
+      question.competencies.map((competency) => ({
+        id: competency.id,
+        name: competency.name,
+        slug: competency.slug,
+        stack: {
+          id: competency.stack.id,
+          name: competency.stack.name,
+          slug: competency.stack.slug,
+        },
+      })),
+    ),
+    evaluationCriteria: question.evaluationCriteria.map((criterion) => ({
+      title: criterion.title,
+      description: criterion.description,
+      weight: criterion.weight,
+      position: criterion.position,
+      competency: criterion.competency
+        ? {
+            id: criterion.competency.id,
+            name: criterion.competency.name,
+            slug: criterion.competency.slug,
+            stack: {
+              id: criterion.competency.stack.id,
+              name: criterion.competency.stack.name,
+              slug: criterion.competency.stack.slug,
+            },
+          }
+        : null,
+    })),
   };
 }
 
@@ -188,6 +278,18 @@ export function coerceQuestionSnapshot(value: unknown): QuestionSnapshot | null 
         .map((topic) => coerceQuestionSnapshotTopic(topic))
         .filter((topic): topic is QuestionSnapshotTopic => topic !== null)
     : [];
+  const competencies = Array.isArray(candidate.competencies)
+    ? candidate.competencies
+        .map((competency) => coerceQuestionSnapshotCompetency(competency))
+        .filter((competency): competency is QuestionSnapshotCompetency => competency !== null)
+    : [];
+  const evaluationCriteria = Array.isArray(candidate.evaluationCriteria)
+    ? candidate.evaluationCriteria
+        .map((criterion, index) =>
+          coerceQuestionSnapshotEvaluationCriterion(criterion, competencies, index),
+        )
+        .filter((criterion): criterion is QuestionSnapshotEvaluationCriterion => criterion !== null)
+    : [];
 
   if (!text || !answer || !difficulty || !textContent || !answerContent) {
     return null;
@@ -201,6 +303,8 @@ export function coerceQuestionSnapshot(value: unknown): QuestionSnapshot | null 
     difficulty,
     company,
     topics: sortTopics(topics),
+    competencies: sortCompetencies(competencies),
+    evaluationCriteria: sortEvaluationCriteria(evaluationCriteria),
   };
 }
 
@@ -210,6 +314,10 @@ export function extractTopicIdsFromSnapshot(snapshot: QuestionSnapshot) {
   }
 
   return snapshot.topics.map((topic) => topic.id);
+}
+
+export function extractCompetencyIdsFromSnapshot(snapshot: QuestionSnapshot) {
+  return snapshot.competencies.map((competency) => competency.id);
 }
 
 export function normalizeTopicIds(topicIds: string[]) {
@@ -230,6 +338,10 @@ export function normalizeTopicIds(topicIds: string[]) {
   }
 
   return Array.from(unique.values());
+}
+
+export function normalizeCompetencyIds(competencyIds: string[]) {
+  return normalizeOptionalIdList(competencyIds);
 }
 
 function canonicalizeSnapshot(snapshot: QuestionSnapshot | null) {
@@ -253,6 +365,32 @@ function canonicalizeSnapshot(snapshot: QuestionSnapshot | null) {
       name: topic.name,
       slug: topic.slug,
     })),
+    competencies: sortCompetencies(snapshot.competencies).map((competency) => ({
+      name: competency.name,
+      slug: competency.slug,
+      stack: {
+        name: competency.stack.name,
+        slug: competency.stack.slug,
+      },
+    })),
+    evaluationCriteria: sortEvaluationCriteria(snapshot.evaluationCriteria).map(
+      (criterion) => ({
+        title: criterion.title,
+        description: criterion.description,
+        weight: criterion.weight,
+        position: criterion.position,
+        competency: criterion.competency
+          ? {
+              name: criterion.competency.name,
+              slug: criterion.competency.slug,
+              stack: {
+                name: criterion.competency.stack.name,
+                slug: criterion.competency.stack.slug,
+              },
+            }
+          : null,
+      }),
+    ),
   };
 }
 
@@ -260,6 +398,94 @@ function sortTopics(topics: QuestionSnapshotTopic[]) {
   return [...topics].sort((left, right) =>
     left.slug.localeCompare(right.slug, 'ru-RU'),
   );
+}
+
+function sortCompetencies(competencies: QuestionSnapshotCompetency[]) {
+  return [...competencies].sort(
+    (left, right) =>
+      left.stack.slug.localeCompare(right.stack.slug, 'ru-RU') ||
+      left.slug.localeCompare(right.slug, 'ru-RU'),
+  );
+}
+
+function sortEvaluationCriteria(criteria: QuestionSnapshotEvaluationCriterion[]) {
+  return [...criteria].sort(
+    (left, right) =>
+      left.position - right.position ||
+      left.title.localeCompare(right.title, 'ru-RU'),
+  );
+}
+
+function normalizeOptionalIdList(values: string[]) {
+  const unique = new Map<string, string>();
+
+  for (const value of values) {
+    const normalized = typeof value === 'string' ? value.trim() : '';
+
+    if (!normalized) {
+      continue;
+    }
+
+    unique.set(normalized, normalized);
+  }
+
+  return Array.from(unique.values());
+}
+
+export function normalizeQuestionEvaluationCriteria(
+  values: NonNullable<QuestionDraftPayload['evaluationCriteria']>,
+  competencies: QuestionSnapshotCompetency[],
+) {
+  if (values.length > 12) {
+    throw new BadRequestException('Question evaluation criteria limit is 12');
+  }
+
+  const competenciesById = new Map(competencies.map((item) => [item.id, item]));
+
+  return values.map((value, index) => {
+    const title = typeof value.title === 'string' ? value.title.trim() : '';
+
+    if (!title) {
+      throw new BadRequestException('Question evaluation criterion title cannot be empty');
+    }
+
+    if (title.length > 160) {
+      throw new BadRequestException('Question evaluation criterion title is too long');
+    }
+
+    const description = typeof value.description === 'string'
+      ? value.description.trim()
+      : '';
+
+    if (description.length > 2000) {
+      throw new BadRequestException('Question evaluation criterion description is too long');
+    }
+
+    const weight = value.weight ?? 1;
+
+    if (!Number.isInteger(weight) || weight < 1 || weight > 5) {
+      throw new BadRequestException('Question evaluation criterion weight is invalid');
+    }
+
+    const competencyId = typeof value.competencyId === 'string'
+      ? value.competencyId.trim()
+      : '';
+    const competency = competencyId
+      ? competenciesById.get(competencyId) ?? null
+      : null;
+
+    if (competencyId && !competency) {
+      throw new BadRequestException('Question evaluation criterion competency is invalid');
+    }
+
+    return {
+      title,
+      description: description || null,
+      weight,
+      position: index,
+      competency,
+    };
+  });
 }
 
 function coerceQuestionSnapshotTopic(value: unknown): QuestionSnapshotTopic | null {
@@ -280,6 +506,81 @@ function coerceQuestionSnapshotTopic(value: unknown): QuestionSnapshotTopic | nu
     id: rawId || toLegacyTopicId(slug),
     name,
     slug,
+  };
+}
+
+function coerceQuestionSnapshotCompetency(
+  value: unknown,
+): QuestionSnapshotCompetency | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  const stackCandidate =
+    candidate.stack && typeof candidate.stack === 'object'
+      ? candidate.stack as Record<string, unknown>
+      : null;
+  const id = typeof candidate.id === 'string' ? candidate.id.trim() : '';
+  const name = typeof candidate.name === 'string' ? candidate.name.trim() : '';
+  const slug = typeof candidate.slug === 'string' ? candidate.slug.trim() : '';
+  const stackId = typeof stackCandidate?.id === 'string' ? stackCandidate.id.trim() : '';
+  const stackName = typeof stackCandidate?.name === 'string' ? stackCandidate.name.trim() : '';
+  const stackSlug = typeof stackCandidate?.slug === 'string' ? stackCandidate.slug.trim() : '';
+
+  if (!id || !name || !slug || !stackId || !stackName || !stackSlug) {
+    return null;
+  }
+
+  return {
+    id,
+    name,
+    slug,
+    stack: {
+      id: stackId,
+      name: stackName,
+      slug: stackSlug,
+    },
+  };
+}
+
+function coerceQuestionSnapshotEvaluationCriterion(
+  value: unknown,
+  competencies: QuestionSnapshotCompetency[],
+  fallbackPosition: number,
+): QuestionSnapshotEvaluationCriterion | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  const title = typeof candidate.title === 'string' ? candidate.title.trim() : '';
+  const description = typeof candidate.description === 'string'
+    ? candidate.description.trim()
+    : '';
+  const weight = typeof candidate.weight === 'number' && Number.isInteger(candidate.weight)
+    ? candidate.weight
+    : 1;
+  const position = typeof candidate.position === 'number' && Number.isInteger(candidate.position)
+    ? candidate.position
+    : fallbackPosition;
+  const competency = coerceQuestionSnapshotCompetency(candidate.competency);
+  const fallbackCompetencyId =
+    typeof candidate.competencyId === 'string' ? candidate.competencyId.trim() : '';
+  const resolvedCompetency = competency ??
+    competencies.find((item) => item.id === fallbackCompetencyId) ??
+    null;
+
+  if (!title) {
+    return null;
+  }
+
+  return {
+    title,
+    description: description || null,
+    weight,
+    position,
+    competency: resolvedCompetency,
   };
 }
 

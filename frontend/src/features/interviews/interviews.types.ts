@@ -10,6 +10,10 @@ type GeneratedMyInterviewCalendar =
 type GeneratedMyInterviewCalendarItem = GeneratedMyInterviewCalendar['items'][number];
 type GeneratedInterviewRuntime =
   paths['/api/interviews/{id}/runtime']['get']['responses'][200]['content']['application/json'];
+type GeneratedInterviewHistory =
+  paths['/api/interviews/my-history']['get']['responses'][200]['content']['application/json'];
+type GeneratedInterviewDetail =
+  paths['/api/interviews/{id}/detail']['get']['responses'][200]['content']['application/json'];
 
 export type InterviewUser = {
   id: string;
@@ -92,6 +96,19 @@ export type InterviewRuntime = Omit<
 > & {
   interview: InterviewItem;
   counterpart: InterviewUser;
+};
+
+export type InterviewHistory = Omit<GeneratedInterviewHistory, 'items'> & {
+  items: InterviewItem[];
+};
+
+export type InterviewDetail = Omit<
+  GeneratedInterviewDetail,
+  'interview' | 'interviewer' | 'interviewee'
+> & {
+  interview: InterviewItem;
+  interviewer: InterviewUser;
+  interviewee: InterviewUser;
 };
 
 export type CompleteInterviewPayload =

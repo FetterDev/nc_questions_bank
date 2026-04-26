@@ -68,6 +68,18 @@ const primaryNavItems = computed(() => {
       to: { name: 'my-interviews-dashboard' },
     });
     items.push({
+      label: 'История собеседований',
+      section: 'interview-history',
+      icon: mdiHistory,
+      to: { name: 'interview-history' },
+    });
+    items.push({
+      label: 'Матрица компетенций',
+      section: 'competency-matrix',
+      icon: mdiChartTimelineVariant,
+      to: { name: 'competency-matrix' },
+    });
+    items.push({
       label: 'Точки роста',
       section: 'growth',
       icon: mdiTrendingUp,
@@ -123,6 +135,12 @@ const primaryNavItems = computed(() => {
       section: 'interviews-dashboard',
       icon: mdiChartTimelineVariant,
       to: { name: 'interviews-dashboard' },
+    });
+    items.push({
+      label: 'Матрица компетенций',
+      section: 'competency-matrix',
+      icon: mdiChartTimelineVariant,
+      to: { name: 'competency-matrix' },
     });
     items.push({
       label: 'Анализ банка',

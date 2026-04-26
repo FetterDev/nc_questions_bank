@@ -30,6 +30,9 @@ const interviewInclude = {
   questions: {
     include: {
       topics: true,
+      criteria: {
+        orderBy: [{ position: 'asc' }, { id: 'asc' }],
+      },
     },
     orderBy: [{ position: 'asc' }, { id: 'asc' }],
   },
@@ -74,6 +77,19 @@ export type InterviewQuestionOutput = {
     id: string;
     name: string;
     slug: string;
+  }>;
+  criteria: Array<{
+    id: string;
+    sourceCriterionId: string | null;
+    competencyId: string | null;
+    competencyName: string | null;
+    competencySlug: string | null;
+    title: string;
+    description: string | null;
+    weight: number;
+    position: number;
+    result: TrainingSessionResultMark | null;
+    comment: string | null;
   }>;
 };
 
@@ -355,6 +371,16 @@ export class InterviewsRepository {
         name: string;
         slug: string;
       }>;
+      criteria?: Array<{
+        sourceCriterionId: string | null;
+        competencyId: string | null;
+        competencyName: string | null;
+        competencySlug: string | null;
+        title: string;
+        description: string | null;
+        weight: number;
+        position: number;
+      }>;
     }>,
     db?: DbClient,
   ) {
@@ -387,6 +413,20 @@ export class InterviewsRepository {
                 topicSlug: topic.slug,
               })),
             },
+            criteria: item.criteria
+              ? {
+                  create: item.criteria.map((criterion) => ({
+                    sourceCriterionId: criterion.sourceCriterionId,
+                    competencyId: criterion.competencyId,
+                    competencyName: criterion.competencyName,
+                    competencySlug: criterion.competencySlug,
+                    title: criterion.title,
+                    description: criterion.description,
+                    weight: criterion.weight,
+                    position: criterion.position,
+                  })),
+                }
+              : undefined,
           })),
         },
       },
@@ -398,6 +438,11 @@ export class InterviewsRepository {
     items: Array<{
       interviewQuestionId: string;
       result: TrainingSessionResultMark;
+      criteriaResults?: Array<{
+        criterionId: string;
+        result: TrainingSessionResultMark;
+        comment: string | null;
+      }>;
     }>,
     db?: DbClient,
   ) {
@@ -411,6 +456,22 @@ export class InterviewsRepository {
           result: item.result,
         },
       });
+
+      for (const criterion of item.criteriaResults ?? []) {
+        await this.getDb(db).interviewQuestionCriterion.updateMany({
+          where: {
+            id: criterion.criterionId,
+            interviewQuestion: {
+              id: item.interviewQuestionId,
+              interviewId,
+            },
+          },
+          data: {
+            result: criterion.result,
+            comment: criterion.comment,
+          },
+        });
+      }
     }
   }
 
@@ -471,6 +532,17 @@ export class InterviewsRepository {
         },
       },
       db,
+    );
+  }
+
+  listIntervieweeCompletedInterviews(intervieweeId: string, db?: DbClient) {
+    return this.findMany(
+      {
+        intervieweeId,
+        status: InterviewStatus.COMPLETED,
+      },
+      db,
+      [{ completedAt: 'desc' }, { id: 'desc' }],
     );
   }
 
@@ -600,6 +672,19 @@ export class InterviewsRepository {
           id: topic.topicId,
           name: topic.topicName,
           slug: topic.topicSlug,
+        })),
+        criteria: question.criteria.map((criterion) => ({
+          id: criterion.id,
+          sourceCriterionId: criterion.sourceCriterionId,
+          competencyId: criterion.competencyId,
+          competencyName: criterion.competencyName,
+          competencySlug: criterion.competencySlug,
+          title: criterion.title,
+          description: criterion.description,
+          weight: criterion.weight,
+          position: criterion.position,
+          result: criterion.result,
+          comment: criterion.comment,
         })),
       })),
     };

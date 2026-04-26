@@ -15,6 +15,7 @@ class ListUsersAppliedFiltersDto {
     example: UserStatus.ACTIVE,
   })
   status!: UserStatus | null;
+
 }
 
 class ListUsersMetaDto {

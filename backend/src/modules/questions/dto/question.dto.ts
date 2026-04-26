@@ -4,6 +4,8 @@ import { QuestionCompanyDto } from './question-company.dto';
 import { QuestionStructuredContentDto } from './question-structured-content.dto';
 import { QuestionTopicDto } from './question-topic.dto';
 import { QuestionPendingChangeRequestDto } from './question-pending-change-request.dto';
+import { QuestionCompetencyDto } from './question-competency.dto';
+import { QuestionEvaluationCriterionDto } from './question-evaluation-criterion.dto';
 import { QuestionDifficulty } from '../question-difficulty';
 
 export class QuestionDto {
@@ -30,6 +32,12 @@ export class QuestionDto {
 
   @ApiProperty({ type: [QuestionTopicDto] })
   topics!: QuestionTopicDto[];
+
+  @ApiProperty({ type: [QuestionCompetencyDto] })
+  competencies!: QuestionCompetencyDto[];
+
+  @ApiProperty({ type: [QuestionEvaluationCriterionDto] })
+  evaluationCriteria!: QuestionEvaluationCriterionDto[];
 
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: string;

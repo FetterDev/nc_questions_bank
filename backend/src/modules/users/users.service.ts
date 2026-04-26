@@ -203,6 +203,12 @@ export class UsersService {
       displayName: user.displayName,
       role: user.role,
       status: user.status,
+      stacks: user.stacks.map((item) => ({
+        id: item.stack.id,
+        name: item.stack.name,
+        slug: item.stack.slug,
+        competenciesCount: item.stack._count.competencies,
+      })),
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

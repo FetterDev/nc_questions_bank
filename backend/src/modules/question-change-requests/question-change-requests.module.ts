@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CompaniesAccessModule } from '../companies/companies-access.module';
+import { CompetenciesModule } from '../competencies/competencies.module';
 import { QuestionsAccessModule } from '../questions/questions-access.module';
 import { TopicsAccessModule } from '../topics/topics-access.module';
 import { QuestionChangeRequestsAccessModule } from './question-change-requests-access.module';
@@ -11,6 +12,7 @@ import { QuestionChangeRequestsService } from './question-change-requests.servic
     QuestionsAccessModule,
     QuestionChangeRequestsAccessModule,
     CompaniesAccessModule,
+    CompetenciesModule,
     TopicsAccessModule,
   ],
   controllers: [QuestionChangeRequestsController],
