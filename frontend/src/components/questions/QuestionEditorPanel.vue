@@ -1,22 +1,30 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import UiAutocomplete from '../ui/UiAutocomplete.vue';
 import UiButton from '../ui/UiButton.vue';
+import UiField from '../ui/UiField.vue';
 import UiPanel from '../ui/UiPanel.vue';
+import UiSelect from '../ui/UiSelect.vue';
 import QuestionContentBlockEditor from './QuestionContentBlockEditor.vue';
 import QuestionContentRenderer from './QuestionContentRenderer.vue';
+import { criterionWeightOptions } from '../../features/questions/questions.constants';
 import type {
   DifficultyOption,
   EditorMode,
   QuestionFormValues,
 } from '../../features/questions/questions.types';
 import type { Company } from '../../features/companies/companies.types';
+import type { Competency } from '../../features/competencies/competencies.types';
 import type { Topic } from '../../features/topics/topics.types';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   answerContentError?: string;
   cancelLabel: string;
   companiesLoading: boolean;
   companyOptions: Company[];
+  competenciesError?: string;
+  competenciesLoading?: boolean;
+  competencyOptions?: Competency[];
   difficultyOptions: DifficultyOption[];
   disabled: boolean;
   form: QuestionFormValues;
@@ -28,12 +36,34 @@ const props = defineProps<{
   topicOptions: Topic[];
   topicsError?: string;
   topicsLoading: boolean;
-}>();
+}>(), {
+  competenciesError: '',
+  competenciesLoading: false,
+  competencyOptions: () => [],
+});
 
 const emit = defineEmits<{
   (event: 'cancel'): void;
   (event: 'submit'): void;
 }>();
+
+const selectedCompetencyOptions = computed(() => {
+  const selectedIds = new Set(props.form.competencyIds);
+  return props.competencyOptions.filter((item) => selectedIds.has(item.id));
+});
+
+function addCriterion() {
+  props.form.evaluationCriteria.push({
+    title: '',
+    description: '',
+    competencyId: props.form.competencyIds[0] ?? null,
+    weight: 1,
+  });
+}
+
+function removeCriterion(index: number) {
+  props.form.evaluationCriteria.splice(index, 1);
+}
 </script>
 
 <template>
@@ -124,6 +154,88 @@ const emit = defineEmits<{
             placeholder="Выберите темы"
             required
           />
+        </div>
+      </section>
+
+      <section class="form-section">
+        <p class="section-label">Компетенции и критерии</p>
+
+        <UiAutocomplete
+          v-model="props.form.competencyIds"
+          :disabled="disabled"
+          :items="competencyOptions"
+          :loading="competenciesLoading"
+          chips
+          clearable
+          closable-chips
+          item-title="name"
+          item-value="id"
+          label="Компетенции"
+          multiple
+          placeholder="Выберите компетенции вопроса"
+        />
+
+        <div class="criteria-editor">
+          <article
+            v-for="(criterion, index) in props.form.evaluationCriteria"
+            :key="index"
+            class="criteria-editor__row"
+          >
+            <div class="criteria-editor__main">
+              <UiField
+                v-model="criterion.title"
+                :disabled="disabled"
+                hide-label
+                label="Критерий"
+                placeholder="Критерий оценки"
+              />
+
+              <UiAutocomplete
+                v-model="criterion.competencyId"
+                :disabled="disabled || selectedCompetencyOptions.length === 0"
+                :items="selectedCompetencyOptions"
+                clearable
+                hide-label
+                item-title="name"
+                item-value="id"
+                label="Компетенция критерия"
+                placeholder="Компетенция"
+              />
+
+              <UiSelect
+                v-model="criterion.weight"
+                :disabled="disabled"
+                :items="criterionWeightOptions"
+                hide-label
+                item-title="title"
+                item-value="value"
+                label="Вес"
+              />
+            </div>
+
+            <UiField
+              v-model="criterion.description"
+              :disabled="disabled"
+              hide-label
+              label="Описание"
+              placeholder="Описание критерия"
+              textarea
+            />
+
+            <div class="action-footer action-footer--end">
+              <UiButton tone="text" @click="removeCriterion(index)">
+                Удалить
+              </UiButton>
+            </div>
+          </article>
+
+          <v-alert v-if="competenciesError" type="error" variant="tonal">
+            {{ competenciesError }}
+          </v-alert>
+
+          <UiButton tone="secondary" @click="addCriterion">
+            Добавить критерий
+          </UiButton>
         </div>
       </section>
 

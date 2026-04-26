@@ -104,6 +104,27 @@
   text-transform: uppercase;
 }
 
+.criteria-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.criteria-editor__row {
+  display: grid;
+  gap: 12px;
+  padding: var(--panel-padding-compact);
+  border: 1px solid var(--panel-border);
+  border-radius: calc(var(--panel-radius) - 6px);
+  background: color-mix(in srgb, var(--color-paper) 92%, var(--color-ivory));
+}
+
+.criteria-editor__main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.8fr) minmax(96px, 0.28fr);
+  gap: 12px;
+  align-items: start;
+}
+
 .form-row {
   display: grid;
   grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1.2fr);
@@ -386,6 +407,7 @@
   .filters-grid,
   .form-row,
   .editor-preview-grid,
+  .criteria-editor__main,
   .csv-import-summary-grid,
   .csv-import-meta-grid {
     grid-template-columns: 1fr;

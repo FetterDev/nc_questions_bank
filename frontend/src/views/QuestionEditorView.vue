@@ -13,7 +13,10 @@ const {
   disabledForm,
   companyOptions,
   companiesLoading,
+  competencyOptions,
+  competenciesLoading,
   ensureCompanyOptions,
+  ensureCompetencyOptions,
   ensureTopicOptions,
   errorMessage,
   form,
@@ -67,7 +70,12 @@ async function loadEditorState(id: string | null) {
   }
 
   try {
-    await Promise.all([ensureTopicOptions(), ensureCompanyOptions(), loadQuestion(id)]);
+    await Promise.all([
+      ensureTopicOptions(),
+      ensureCompanyOptions(),
+      ensureCompetencyOptions(),
+      loadQuestion(id),
+    ]);
   } catch (error) {
     pushToast(
       error instanceof Error ? error.message : 'Не удалось подготовить редактор.',
@@ -146,6 +154,9 @@ watch(
         :cancel-label="'Назад к списку'"
         :companies-loading="companiesLoading"
         :company-options="companyOptions"
+        :competencies-error="validationErrors.evaluationCriteria"
+        :competencies-loading="competenciesLoading"
+        :competency-options="competencyOptions"
         :difficulty-options="difficultyOptions"
         :disabled="disabledForm"
         :form="form"

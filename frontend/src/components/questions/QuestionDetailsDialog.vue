@@ -29,8 +29,11 @@ const emit = defineEmits<{
 const {
   companyOptions,
   companiesLoading,
+  competencyOptions,
+  competenciesLoading,
   disabledForm,
   ensureCompanyOptions,
+  ensureCompetencyOptions,
   ensureTopicOptions,
   errorMessage,
   form,
@@ -108,7 +111,11 @@ async function openInMode(nextMode: 'view' | 'edit') {
     hydrateFromQuestion(localQuestion.value);
 
     try {
-      await Promise.all([ensureTopicOptions(), ensureCompanyOptions()]);
+      await Promise.all([
+        ensureTopicOptions(),
+        ensureCompanyOptions(),
+        ensureCompetencyOptions(),
+      ]);
     } catch (error) {
       emit('notify', {
         color: 'error',
@@ -240,6 +247,9 @@ watch(
       cancel-label="Вернуться к просмотру"
       :companies-loading="companiesLoading"
       :company-options="companyOptions"
+      :competencies-error="validationErrors.evaluationCriteria"
+      :competencies-loading="competenciesLoading"
+      :competency-options="competencyOptions"
       :difficulty-options="difficultyOptions"
       :disabled="disabledForm"
       :form="form"

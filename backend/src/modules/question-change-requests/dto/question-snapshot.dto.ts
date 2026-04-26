@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { QuestionCompanyDto } from '../../questions/dto/question-company.dto';
+import { QuestionCompetencyDto } from '../../questions/dto/question-competency.dto';
+import { QuestionEvaluationCriterionDto } from '../../questions/dto/question-evaluation-criterion.dto';
 import { QuestionStructuredContentDto } from '../../questions/dto/question-structured-content.dto';
 import { QuestionDifficulty } from '../../questions/question-difficulty';
 
@@ -35,4 +37,10 @@ export class QuestionSnapshotDto {
 
   @ApiProperty({ type: [QuestionSnapshotTopicDto] })
   topics!: QuestionSnapshotTopicDto[];
+
+  @ApiProperty({ type: [QuestionCompetencyDto] })
+  competencies!: QuestionCompetencyDto[];
+
+  @ApiProperty({ type: [QuestionEvaluationCriterionDto] })
+  evaluationCriteria!: QuestionEvaluationCriterionDto[];
 }

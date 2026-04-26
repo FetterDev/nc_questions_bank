@@ -5,6 +5,8 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthzModule } from './modules/authz/authz.module';
 import { CompaniesModule } from './modules/companies/companies.module';
+import { CompetencyMatrixModule } from './modules/competency-matrix/competency-matrix.module';
+import { CompetenciesModule } from './modules/competencies/competencies.module';
 import { HealthModule } from './modules/health/health.module';
 import { InterviewsModule } from './modules/interviews/interviews.module';
 import { QuestionChangeRequestsModule } from './modules/question-change-requests/question-change-requests.module';
@@ -23,6 +25,8 @@ import { JwtAuthMiddleware } from './modules/auth/jwt-auth.middleware';
     AuthzModule,
     AnalyticsModule,
     CompaniesModule,
+    CompetencyMatrixModule,
+    CompetenciesModule,
     UsersModule,
     HealthModule,
     InterviewsModule,

@@ -10,8 +10,36 @@ import { QuestionDifficultyRank } from './question-difficulty';
 
 type DbClient = Prisma.TransactionClient | PrismaClient | PrismaService;
 
+const questionInclude = {
+  company: true,
+  topics: {
+    include: {
+      topic: true,
+    },
+  },
+  competencies: {
+    include: {
+      competency: {
+        include: {
+          stack: true,
+        },
+      },
+    },
+  },
+  evaluationCriteria: {
+    include: {
+      competency: {
+        include: {
+          stack: true,
+        },
+      },
+    },
+    orderBy: [{ position: 'asc' }, { id: 'asc' }],
+  },
+} satisfies Prisma.QuestionInclude;
+
 type QuestionWithTopics = Prisma.QuestionGetPayload<{
-  include: { company: true; topics: { include: { topic: true } } };
+  include: typeof questionInclude;
 }>;
 
 export type QuestionOutput = {
@@ -30,6 +58,33 @@ export type QuestionOutput = {
     name: string;
     slug: string;
   }>;
+  competencies: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    stack: {
+      id: string;
+      name: string;
+      slug: string;
+    };
+  }>;
+  evaluationCriteria: Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    weight: number;
+    position: number;
+    competency: {
+      id: string;
+      name: string;
+      slug: string;
+      stack: {
+        id: string;
+        name: string;
+        slug: string;
+      };
+    } | null;
+  }>;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -47,6 +102,14 @@ export class QuestionsRepository {
       difficulty: QuestionDifficultyRank;
       companyId: string | null;
       topicIds: string[];
+      competencyIds?: string[];
+      evaluationCriteria?: Array<{
+        title: string;
+        description: string | null;
+        weight: number;
+        position: number;
+        competencyId: string | null;
+      }>;
     },
     db?: DbClient,
   ): Promise<QuestionOutput> {
@@ -75,15 +138,36 @@ export class QuestionsRepository {
             },
           })),
         },
+        competencies: data.competencyIds
+          ? {
+              create: data.competencyIds.map((competencyId) => ({
+                competency: {
+                  connect: {
+                    id: competencyId,
+                  },
+                },
+              })),
+            }
+          : undefined,
+        evaluationCriteria: data.evaluationCriteria
+          ? {
+              create: data.evaluationCriteria.map((criterion) => ({
+                title: criterion.title,
+                description: criterion.description,
+                weight: criterion.weight,
+                position: criterion.position,
+                competency: criterion.competencyId
+                  ? {
+                      connect: {
+                        id: criterion.competencyId,
+                      },
+                    }
+                  : undefined,
+              })),
+            }
+          : undefined,
       },
-      include: {
-        company: true,
-        topics: {
-          include: {
-            topic: true,
-          },
-        },
-      },
+      include: questionInclude,
     });
 
     return this.mapQuestion(created);
@@ -120,12 +204,7 @@ export class QuestionsRepository {
     const items = await this.getDb(db).question.findMany({
       where,
       include: {
-        company: true,
-        topics: {
-          include: {
-            topic: true,
-          },
-        },
+        ...questionInclude,
       },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: params.limit,
@@ -138,14 +217,7 @@ export class QuestionsRepository {
   async findOne(id: string, db?: DbClient): Promise<QuestionOutput | null> {
     const found = await this.getDb(db).question.findUnique({
       where: { id },
-      include: {
-        company: true,
-        topics: {
-          include: {
-            topic: true,
-          },
-        },
-      },
+      include: questionInclude,
     });
 
     if (!found) {
@@ -166,14 +238,7 @@ export class QuestionsRepository {
           in: ids,
         },
       },
-      include: {
-        company: true,
-        topics: {
-          include: {
-            topic: true,
-          },
-        },
-      },
+      include: questionInclude,
     });
 
     return items.map((item) => this.mapQuestion(item));
@@ -198,6 +263,14 @@ export class QuestionsRepository {
       difficulty?: QuestionDifficultyRank;
       companyId?: string | null;
       topicIds?: string[];
+      competencyIds?: string[];
+      evaluationCriteria?: Array<{
+        title: string;
+        description: string | null;
+        weight: number;
+        position: number;
+        competencyId: string | null;
+      }>;
     },
     db?: DbClient,
   ): Promise<QuestionOutput> {
@@ -248,17 +321,42 @@ export class QuestionsRepository {
       };
     }
 
+    if (data.competencyIds !== undefined) {
+      updateData.competencies = {
+        deleteMany: {},
+        create: data.competencyIds.map((competencyId) => ({
+          competency: {
+            connect: {
+              id: competencyId,
+            },
+          },
+        })),
+      };
+    }
+
+    if (data.evaluationCriteria !== undefined) {
+      updateData.evaluationCriteria = {
+        deleteMany: {},
+        create: data.evaluationCriteria.map((criterion) => ({
+          title: criterion.title,
+          description: criterion.description,
+          weight: criterion.weight,
+          position: criterion.position,
+          competency: criterion.competencyId
+            ? {
+                connect: {
+                  id: criterion.competencyId,
+                },
+              }
+            : undefined,
+        })),
+      };
+    }
+
     const updated = await this.getDb(db).question.update({
       where: { id },
       data: updateData,
-      include: {
-        company: true,
-        topics: {
-          include: {
-            topic: true,
-          },
-        },
-      },
+      include: questionInclude,
     });
 
     return this.mapQuestion(updated);
@@ -301,6 +399,44 @@ export class QuestionsRepository {
           name: topicLink.topic.name,
           slug: topicLink.topic.slug,
         })),
+      competencies: [...question.competencies]
+        .sort(
+          (left, right) =>
+            left.competency.stack.slug.localeCompare(
+              right.competency.stack.slug,
+              'ru-RU',
+            ) ||
+            left.competency.slug.localeCompare(right.competency.slug, 'ru-RU'),
+        )
+        .map((competencyLink) => ({
+          id: competencyLink.competency.id,
+          name: competencyLink.competency.name,
+          slug: competencyLink.competency.slug,
+          stack: {
+            id: competencyLink.competency.stack.id,
+            name: competencyLink.competency.stack.name,
+            slug: competencyLink.competency.stack.slug,
+          },
+        })),
+      evaluationCriteria: question.evaluationCriteria.map((criterion) => ({
+        id: criterion.id,
+        title: criterion.title,
+        description: criterion.description,
+        weight: criterion.weight,
+        position: criterion.position,
+        competency: criterion.competency
+          ? {
+              id: criterion.competency.id,
+              name: criterion.competency.name,
+              slug: criterion.competency.slug,
+              stack: {
+                id: criterion.competency.stack.id,
+                name: criterion.competency.stack.name,
+                slug: criterion.competency.stack.slug,
+              },
+            }
+          : null,
+      })),
       createdAt: question.createdAt,
       updatedAt: question.updatedAt,
     };

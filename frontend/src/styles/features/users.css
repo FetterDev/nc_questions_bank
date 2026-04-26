@@ -4,6 +4,7 @@
     minmax(0, 1.2fr)
     minmax(180px, 0.36fr)
     minmax(180px, 0.36fr)
+    minmax(180px, 0.38fr)
     minmax(180px, 0.3fr);
 }
 
@@ -17,6 +18,7 @@
   grid-template-columns:
     minmax(0, 1.4fr)
     minmax(160px, 0.44fr)
+    minmax(180px, 0.52fr)
     minmax(160px, 0.44fr)
     minmax(180px, 0.42fr)
     minmax(190px, 0.56fr);
@@ -33,10 +35,18 @@
 
 .user-identity-cell p,
 .user-identity-cell small,
-.user-updated-cell {
+.user-updated-cell,
+.muted-inline {
   color: var(--color-ink-muted);
   font-family: var(--font-mono);
   font-size: 0.78rem;
+}
+
+.user-stack-cell {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .users-dialog-card {

@@ -14,6 +14,7 @@ import UiIconButton from '../components/ui/UiIconButton.vue';
 import UiPanel from '../components/ui/UiPanel.vue';
 import UiSelect from '../components/ui/UiSelect.vue';
 import { pageSizeOptions } from '../features/questions/questions.constants';
+import type { Stack } from '../features/competencies/competencies.types';
 import type {
   UserRecord,
   UserRoleValue,
@@ -43,6 +44,7 @@ const saving = ref(false);
 const toggling = ref('');
 const errorMessage = ref('');
 const users = ref<UserRecord[]>([]);
+const stackOptions = ref<Stack[]>([]);
 const total = ref(0);
 const snackbar = reactive({
   open: false,
@@ -52,6 +54,7 @@ const snackbar = reactive({
 const filters = reactive({
   role: 'all' as 'all' | UserRoleValue,
   status: 'all' as 'all' | UserStatusValue,
+  stackId: 'all',
 });
 const pagination = reactive({
   page: 1,
@@ -66,6 +69,7 @@ const userDialog = reactive({
   email: '',
   password: '',
   role: 'USER' as UserRoleValue,
+  stackIds: [] as string[],
 });
 const passwordDialog = reactive({
   open: false,
@@ -99,6 +103,14 @@ const adminUsersCount = computed(
   () => users.value.filter((item) => item.role === 'ADMIN').length,
 );
 
+const stackSelectOptions = computed(() => [
+  { id: 'all', name: 'Все стеки' },
+  ...stackOptions.value.map((item) => ({
+    id: item.id,
+    name: item.name,
+  })),
+]);
+
 const dialogTitle = computed(() =>
   userDialog.mode === 'create' ? 'Новый пользователь' : 'Редактирование пользователя',
 );
@@ -122,6 +134,7 @@ function openCreateDialog() {
   userDialog.email = '';
   userDialog.password = '';
   userDialog.role = 'USER';
+  userDialog.stackIds = [];
 }
 
 function openEditDialog(user: UserRecord) {
@@ -133,6 +146,7 @@ function openEditDialog(user: UserRecord) {
   userDialog.email = user.email ?? '';
   userDialog.password = '';
   userDialog.role = user.role;
+  userDialog.stackIds = user.stacks.map((stack) => stack.id);
 }
 
 function openPasswordDialog(user: UserRecord) {
@@ -176,6 +190,7 @@ async function loadUsers() {
       q: userSearch.value.trim() || undefined,
       role: filters.role === 'all' ? undefined : filters.role,
       status: filters.status === 'all' ? undefined : filters.status,
+      stackId: filters.stackId === 'all' ? undefined : filters.stackId,
       limit: pagination.pageSize,
       offset: (pagination.page - 1) * pagination.pageSize,
     });
@@ -196,6 +211,17 @@ async function loadUsers() {
   }
 }
 
+async function loadStacks() {
+  try {
+    stackOptions.value = await apiService.listAllStacks();
+  } catch (error) {
+    pushToast(
+      toUserErrorMessage(error, 'Не удалось загрузить стеки.'),
+      'error',
+    );
+  }
+}
+
 async function saveUser() {
   saving.value = true;
 
@@ -207,6 +233,7 @@ async function saveUser() {
         displayName: userDialog.displayName,
         email: normalizeOptionalEmail(userDialog.email) ?? undefined,
         role: userDialog.role,
+        stackIds: userDialog.role === 'USER' ? userDialog.stackIds : [],
       });
       pushToast('Пользователь создан.');
     } else if (userDialog.userId) {
@@ -214,6 +241,7 @@ async function saveUser() {
         displayName: userDialog.displayName,
         email: normalizeOptionalEmail(userDialog.email),
         role: userDialog.role,
+        stackIds: userDialog.role === 'USER' ? userDialog.stackIds : [],
       });
       pushToast('Пользователь обновлён.');
     }
@@ -296,7 +324,7 @@ watch(
 );
 
 watch(
-  () => [filters.role, filters.status, pagination.pageSize],
+  () => [filters.role, filters.status, filters.stackId, pagination.pageSize],
   () => {
     if (pagination.page === 1) {
       void loadUsers();
@@ -314,6 +342,8 @@ watch(
   },
   { immediate: true },
 );
+
+void loadStacks();
 </script>
 
 <template>
@@ -364,6 +394,14 @@ watch(
         />
 
         <UiSelect
+          v-model="filters.stackId"
+          :items="stackSelectOptions"
+          item-title="name"
+          item-value="id"
+          label="Стек"
+        />
+
+        <UiSelect
           v-model="pagination.pageSize"
           :items="pageSizeOptions"
           item-title="title"
@@ -403,6 +441,7 @@ watch(
           <div class="list-head list-head--users">
             <span>Пользователь</span>
             <span>Роль</span>
+            <span>Стеки</span>
             <span>Статус</span>
             <span>Обновлено</span>
             <span>Действия</span>
@@ -423,6 +462,19 @@ watch(
               <span class="status-badge status-badge--ready">
                 {{ getRoleLabel(user.role) }}
               </span>
+            </div>
+
+            <div class="list-cell user-stack-cell">
+              <v-chip
+                v-for="stack in user.stacks"
+                :key="stack.id"
+                color="secondary"
+                size="small"
+                variant="tonal"
+              >
+                {{ stack.name }}
+              </v-chip>
+              <span v-if="user.stacks.length === 0" class="muted-inline">Не задан</span>
             </div>
 
             <div class="list-cell">
@@ -515,6 +567,18 @@ watch(
             item-title="title"
             item-value="value"
             label="Роль"
+          />
+
+          <UiSelect
+            v-if="userDialog.role === 'USER'"
+            v-model="userDialog.stackIds"
+            :items="stackOptions"
+            chips
+            clearable
+            item-title="name"
+            item-value="id"
+            label="Стеки"
+            multiple
           />
 
           <UiField

@@ -95,6 +95,15 @@
             }
           },
           {
+            "name": "stackId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "cm8q4x7r10001stack",
+              "type": "string"
+            }
+          },
+          {
             "name": "limit",
             "required": false,
             "in": "query",
@@ -308,6 +317,263 @@
         ]
       }
     },
+    "/api/stacks": {
+      "get": {
+        "operationId": "CompetenciesController_listStacks",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "frontend",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListStacksResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Список стеков",
+        "tags": [
+          "competencies"
+        ]
+      },
+      "post": {
+        "operationId": "CompetenciesController_createStack",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StackDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Создать стек",
+        "tags": [
+          "competencies"
+        ]
+      }
+    },
+    "/api/stacks/{id}": {
+      "patch": {
+        "operationId": "CompetenciesController_updateStack",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StackDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Переименовать стек",
+        "tags": [
+          "competencies"
+        ]
+      }
+    },
+    "/api/competencies": {
+      "get": {
+        "operationId": "CompetenciesController_listCompetencies",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "typescript",
+              "type": "string"
+            }
+          },
+          {
+            "name": "stackId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "cm8q4x7r10001stack",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCompetenciesResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Список компетенций",
+        "tags": [
+          "competencies"
+        ]
+      },
+      "post": {
+        "operationId": "CompetenciesController_createCompetency",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompetencyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetencyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Создать компетенцию",
+        "tags": [
+          "competencies"
+        ]
+      }
+    },
+    "/api/competencies/{id}": {
+      "patch": {
+        "operationId": "CompetenciesController_updateCompetency",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompetencyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetencyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Обновить компетенцию",
+        "tags": [
+          "competencies"
+        ]
+      }
+    },
     "/api/analytics/growth": {
       "get": {
         "operationId": "AnalyticsController_getGrowthAnalytics",
@@ -474,6 +740,91 @@
         "summary": "Переименовать компанию",
         "tags": [
           "companies"
+        ]
+      }
+    },
+    "/api/competency-matrix/me": {
+      "get": {
+        "operationId": "CompetencyMatrixController_getMyMatrix",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetencyMatrixUserResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Моя матрица компетенций по завершённым интервью",
+        "tags": [
+          "competency-matrix"
+        ]
+      }
+    },
+    "/api/competency-matrix": {
+      "get": {
+        "operationId": "CompetencyMatrixController_listMatrix",
+        "parameters": [
+          {
+            "name": "stackId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "cm8stack1",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCompetencyMatrixResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Матрицы компетенций сотрудников",
+        "tags": [
+          "competency-matrix"
+        ]
+      }
+    },
+    "/api/competency-matrix/users/{userId}": {
+      "get": {
+        "operationId": "CompetencyMatrixController_getUserMatrix",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetencyMatrixUserResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Матрица компетенций сотрудника",
+        "tags": [
+          "competency-matrix"
         ]
       }
     },
@@ -877,6 +1228,59 @@
           }
         },
         "summary": "User dashboard по интервью",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/interviews/my-history": {
+      "get": {
+        "operationId": "InterviewsController_getMyHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListInterviewHistoryResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "История завершённых интервью текущего user",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/interviews/{id}/detail": {
+      "get": {
+        "operationId": "InterviewsController_getInterviewDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewHistoryDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Детали интервью с результатами и критериями",
         "tags": [
           "interviews"
         ]
@@ -2096,6 +2500,33 @@
           "profile"
         ]
       },
+      "StackDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001stack"
+          },
+          "name": {
+            "type": "string",
+            "example": "Frontend"
+          },
+          "slug": {
+            "type": "string",
+            "example": "frontend"
+          },
+          "competenciesCount": {
+            "type": "number",
+            "example": 8
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "competenciesCount"
+        ]
+      },
       "UserDto": {
         "type": "object",
         "properties": {
@@ -2133,6 +2564,12 @@
             ],
             "example": "ACTIVE"
           },
+          "stacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StackDto"
+            }
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -2149,6 +2586,7 @@
           "displayName",
           "role",
           "status",
+          "stacks",
           "createdAt",
           "updatedAt"
         ]
@@ -2179,12 +2617,18 @@
               "DISABLED"
             ],
             "example": "ACTIVE"
+          },
+          "stackId": {
+            "type": "string",
+            "nullable": true,
+            "example": "cm8q4x7r10001stack"
           }
         },
         "required": [
           "q",
           "role",
-          "status"
+          "status",
+          "stackId"
         ]
       },
       "ListUsersMetaDto": {
@@ -2256,6 +2700,15 @@
               "ADMIN"
             ],
             "example": "USER"
+          },
+          "stackIds": {
+            "example": [
+              "cm8q4x7r10001stack"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -2285,6 +2738,15 @@
               "ADMIN"
             ],
             "example": "USER"
+          },
+          "stackIds": {
+            "example": [
+              "cm8q4x7r10001stack"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -2301,6 +2763,229 @@
         "required": [
           "password"
         ]
+      },
+      "ListStacksMetaDto": {
+        "type": "object",
+        "properties": {
+          "tookMs": {
+            "type": "number",
+            "example": 4
+          },
+          "appliedFilters": {
+            "type": "object",
+            "example": {
+              "q": null
+            }
+          }
+        },
+        "required": [
+          "tookMs",
+          "appliedFilters"
+        ]
+      },
+      "ListStacksResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StackDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 12
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ListStacksMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "meta"
+        ]
+      },
+      "CreateStackDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Frontend"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateStackDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Frontend"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CompetencyStackDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001stack"
+          },
+          "name": {
+            "type": "string",
+            "example": "Frontend"
+          },
+          "slug": {
+            "type": "string",
+            "example": "frontend"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ]
+      },
+      "CompetencyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001competency"
+          },
+          "stackId": {
+            "type": "string",
+            "example": "cm8q4x7r10001stack"
+          },
+          "stack": {
+            "$ref": "#/components/schemas/CompetencyStackDto"
+          },
+          "name": {
+            "type": "string",
+            "example": "TypeScript"
+          },
+          "slug": {
+            "type": "string",
+            "example": "typescript"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Static typing and type-system tradeoffs."
+          },
+          "position": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "id",
+          "stackId",
+          "stack",
+          "name",
+          "slug",
+          "position"
+        ]
+      },
+      "ListCompetenciesMetaDto": {
+        "type": "object",
+        "properties": {
+          "tookMs": {
+            "type": "number",
+            "example": 4
+          },
+          "appliedFilters": {
+            "type": "object",
+            "example": {
+              "q": null,
+              "stackId": null
+            }
+          }
+        },
+        "required": [
+          "tookMs",
+          "appliedFilters"
+        ]
+      },
+      "ListCompetenciesResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompetencyDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 12
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ListCompetenciesMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "meta"
+        ]
+      },
+      "CreateCompetencyDto": {
+        "type": "object",
+        "properties": {
+          "stackId": {
+            "type": "string",
+            "example": "cm8q4x7r10001stack"
+          },
+          "name": {
+            "type": "string",
+            "example": "TypeScript"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Static typing and type-system tradeoffs."
+          },
+          "position": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 1
+          }
+        },
+        "required": [
+          "stackId",
+          "name"
+        ]
+      },
+      "UpdateCompetencyDto": {
+        "type": "object",
+        "properties": {
+          "stackId": {
+            "type": "string",
+            "example": "cm8q4x7r10001stack"
+          },
+          "name": {
+            "type": "string",
+            "example": "TypeScript"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Static typing and type-system tradeoffs."
+          },
+          "position": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        }
       },
       "GrowthAnalyticsSummaryDto": {
         "type": "object",
@@ -2799,6 +3484,166 @@
           "name"
         ]
       },
+      "CompetencyMatrixUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "login": {
+            "type": "string",
+            "example": "ivan.petrov"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Иван Петров"
+          }
+        },
+        "required": [
+          "id",
+          "login",
+          "displayName"
+        ]
+      },
+      "CompetencyMatrixStackDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8stack1"
+          },
+          "name": {
+            "type": "string",
+            "example": "Frontend"
+          },
+          "slug": {
+            "type": "string",
+            "example": "frontend"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ]
+      },
+      "CompetencyMatrixCompetencyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8competency1"
+          },
+          "stack": {
+            "$ref": "#/components/schemas/CompetencyMatrixStackDto"
+          },
+          "name": {
+            "type": "string",
+            "example": "TypeScript"
+          },
+          "slug": {
+            "type": "string",
+            "example": "typescript"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "position": {
+            "type": "number",
+            "example": 1
+          },
+          "totalCount": {
+            "type": "number",
+            "example": 7
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 4
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 2
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 1
+          },
+          "accuracy": {
+            "type": "number",
+            "example": 57
+          },
+          "lastResult": {
+            "type": "string",
+            "enum": [
+              "correct",
+              "incorrect",
+              "partial"
+            ],
+            "nullable": true
+          },
+          "lastAssessedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "stack",
+          "name",
+          "slug",
+          "description",
+          "position",
+          "totalCount",
+          "correctCount",
+          "partialCount",
+          "incorrectCount",
+          "accuracy",
+          "lastResult",
+          "lastAssessedAt"
+        ]
+      },
+      "CompetencyMatrixUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/CompetencyMatrixUserDto"
+          },
+          "stacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompetencyMatrixStackDto"
+            }
+          },
+          "competencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompetencyMatrixCompetencyDto"
+            }
+          }
+        },
+        "required": [
+          "user",
+          "stacks",
+          "competencies"
+        ]
+      },
+      "ListCompetencyMatrixResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompetencyMatrixUserResponseDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
       "CreateInterviewCycleDto": {
         "type": "object",
         "properties": {
@@ -3254,6 +4099,55 @@
           "items"
         ]
       },
+      "InterviewRuntimeCriterionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8interviewcriterion1"
+          },
+          "sourceCriterionId": {
+            "type": "object",
+            "example": "cm8criterionSource1",
+            "nullable": true
+          },
+          "competency": {
+            "type": "object",
+            "nullable": true,
+            "example": {
+              "id": "cm8competency1",
+              "name": "TypeScript",
+              "slug": "typescript"
+            }
+          },
+          "title": {
+            "type": "string",
+            "example": "Называет tradeoff выбранного подхода"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Кандидат должен объяснить плюсы и минусы решения."
+          },
+          "weight": {
+            "type": "number",
+            "example": 2
+          },
+          "position": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "id",
+          "sourceCriterionId",
+          "competency",
+          "title",
+          "description",
+          "weight",
+          "position"
+        ]
+      },
       "InterviewRuntimeQuestionDto": {
         "type": "object",
         "properties": {
@@ -3304,6 +4198,12 @@
             "items": {
               "$ref": "#/components/schemas/QuestionTopicDto"
             }
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewRuntimeCriterionDto"
+            }
           }
         },
         "required": [
@@ -3315,7 +4215,8 @@
           "answerContent",
           "difficulty",
           "position",
-          "topics"
+          "topics",
+          "criteria"
         ]
       },
       "InterviewRuntimeResponseDto": {
@@ -3340,6 +4241,32 @@
           "items"
         ]
       },
+      "CompleteInterviewCriterionResultDto": {
+        "type": "object",
+        "properties": {
+          "criterionId": {
+            "type": "string",
+            "example": "cm8interviewcriterion1"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "correct",
+              "incorrect",
+              "partial"
+            ],
+            "example": "partial"
+          },
+          "comment": {
+            "type": "string",
+            "example": "Компромисс назван, но без привязки к ограничениям задачи."
+          }
+        },
+        "required": [
+          "criterionId",
+          "result"
+        ]
+      },
       "CompleteInterviewItemDto": {
         "type": "object",
         "properties": {
@@ -3355,6 +4282,12 @@
               "partial"
             ],
             "example": "partial"
+          },
+          "criteriaResults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompleteInterviewCriterionResultDto"
+            }
           }
         },
         "required": [
@@ -3771,6 +4704,237 @@
           "recentInterviews"
         ]
       },
+      "ListInterviewHistoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewItemDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "InterviewHistoryCriterionResultDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8criterion1"
+          },
+          "title": {
+            "type": "string",
+            "example": "Называет tradeoff выбранного подхода"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "weight": {
+            "type": "number",
+            "example": 2
+          },
+          "position": {
+            "type": "number",
+            "example": 0
+          },
+          "result": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "correct",
+              "incorrect",
+              "partial"
+            ]
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "competency": {
+            "type": "object",
+            "nullable": true,
+            "example": {
+              "id": "cm8competency1",
+              "name": "TypeScript",
+              "slug": "typescript"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "weight",
+          "position",
+          "result",
+          "comment",
+          "competency"
+        ]
+      },
+      "InterviewHistoryQuestionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8interviewQuestion1"
+          },
+          "questionId": {
+            "type": "string",
+            "example": "seed-question-bank-123456789abc"
+          },
+          "questionText": {
+            "type": "string",
+            "example": "Когда нужен составной индекс?"
+          },
+          "questionTextContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
+          },
+          "answer": {
+            "type": "string",
+            "example": "Нужно, когда фильтруешь и сортируешь по нескольким полям."
+          },
+          "answerContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionStructuredContentDto"
+            }
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ]
+          },
+          "result": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "correct",
+              "incorrect",
+              "partial"
+            ]
+          },
+          "position": {
+            "type": "number",
+            "example": 0
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionTopicDto"
+            }
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewHistoryCriterionResultDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "questionId",
+          "questionText",
+          "questionTextContent",
+          "answer",
+          "answerContent",
+          "difficulty",
+          "result",
+          "position",
+          "topics",
+          "criteria"
+        ]
+      },
+      "InterviewCompetencySummaryDto": {
+        "type": "object",
+        "properties": {
+          "competencyId": {
+            "type": "string",
+            "example": "cm8competency1"
+          },
+          "name": {
+            "type": "string",
+            "example": "TypeScript"
+          },
+          "slug": {
+            "type": "string",
+            "example": "typescript"
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 4
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 2
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 1
+          },
+          "accuracy": {
+            "type": "number",
+            "example": 57
+          }
+        },
+        "required": [
+          "competencyId",
+          "name",
+          "slug",
+          "correctCount",
+          "partialCount",
+          "incorrectCount",
+          "accuracy"
+        ]
+      },
+      "InterviewHistoryDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "interview": {
+            "$ref": "#/components/schemas/InterviewItemDto"
+          },
+          "interviewer": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "interviewee": {
+            "$ref": "#/components/schemas/InterviewUserDto"
+          },
+          "feedback": {
+            "type": "string",
+            "nullable": true
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewHistoryQuestionDto"
+            }
+          },
+          "competencySummary": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterviewCompetencySummaryDto"
+            }
+          }
+        },
+        "required": [
+          "interview",
+          "interviewer",
+          "interviewee",
+          "feedback",
+          "questions",
+          "competencySummary"
+        ]
+      },
       "TopicDto": {
         "type": "object",
         "properties": {
@@ -3883,6 +5047,35 @@
           "name"
         ]
       },
+      "QuestionEvaluationCriterionInputDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Называет tradeoff выбранного подхода"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Кандидат должен объяснить плюсы и минусы решения."
+          },
+          "competencyId": {
+            "type": "string",
+            "nullable": true,
+            "example": "cm8q4x7r10001competency"
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 1
+          }
+        },
+        "required": [
+          "title",
+          "weight"
+        ]
+      },
       "CreateQuestionDto": {
         "type": "object",
         "properties": {
@@ -3927,6 +5120,23 @@
             "description": "Опциональный companyId, если вопрос встречался на собеседовании в компании",
             "nullable": true,
             "example": "cm7y5z8qv0003x4f2w7sn1company"
+          },
+          "competencyIds": {
+            "description": "Список competencyId",
+            "example": [
+              "cm8q4x7r10001competency"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evaluationCriteria": {
+            "description": "Критерии оценки вопроса",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionEvaluationCriterionInputDto"
+            }
           }
         },
         "required": [
@@ -3951,6 +5161,95 @@
         "required": [
           "id",
           "name"
+        ]
+      },
+      "QuestionCompetencyStackDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001stack"
+          },
+          "name": {
+            "type": "string",
+            "example": "Frontend"
+          },
+          "slug": {
+            "type": "string",
+            "example": "frontend"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ]
+      },
+      "QuestionCompetencyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001competency"
+          },
+          "name": {
+            "type": "string",
+            "example": "TypeScript"
+          },
+          "slug": {
+            "type": "string",
+            "example": "typescript"
+          },
+          "stack": {
+            "$ref": "#/components/schemas/QuestionCompetencyStackDto"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "stack"
+        ]
+      },
+      "QuestionEvaluationCriterionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001criterion"
+          },
+          "title": {
+            "type": "string",
+            "example": "Называет tradeoff выбранного подхода"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Кандидат должен объяснить плюсы и минусы решения."
+          },
+          "weight": {
+            "type": "number",
+            "example": 2
+          },
+          "position": {
+            "type": "number",
+            "example": 0
+          },
+          "competency": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuestionCompetencyDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "weight",
+          "position",
+          "competency"
         ]
       },
       "QuestionPendingChangeRequestDto": {
@@ -4038,6 +5337,18 @@
               "$ref": "#/components/schemas/QuestionTopicDto"
             }
           },
+          "competencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionCompetencyDto"
+            }
+          },
+          "evaluationCriteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionEvaluationCriterionDto"
+            }
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -4062,6 +5373,8 @@
           "difficulty",
           "company",
           "topics",
+          "competencies",
+          "evaluationCriteria",
           "createdAt",
           "updatedAt",
           "pendingChangeRequest",
@@ -4108,6 +5421,20 @@
             "description": "Новый companyId или null для отвязки компании",
             "nullable": true,
             "example": "cm7y5z8qv0003x4f2w7sn1company"
+          },
+          "competencyIds": {
+            "description": "Список competencyId",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evaluationCriteria": {
+            "description": "Критерии оценки вопроса",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionEvaluationCriterionInputDto"
+            }
           }
         }
       },
@@ -4481,6 +5808,23 @@
             "description": "Опциональный companyId",
             "nullable": true,
             "example": "cm7y5z8qv0003x4f2w7sn1company"
+          },
+          "competencyIds": {
+            "description": "Список competencyId",
+            "example": [
+              "cm8q4x7r10001competency"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evaluationCriteria": {
+            "description": "Критерии оценки вопроса",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionEvaluationCriterionInputDto"
+            }
           }
         },
         "required": [
@@ -4616,6 +5960,18 @@
             "items": {
               "$ref": "#/components/schemas/QuestionSnapshotTopicDto"
             }
+          },
+          "competencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionCompetencyDto"
+            }
+          },
+          "evaluationCriteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionEvaluationCriterionDto"
+            }
           }
         },
         "required": [
@@ -4625,7 +5981,9 @@
           "answerContent",
           "difficulty",
           "company",
-          "topics"
+          "topics",
+          "competencies",
+          "evaluationCriteria"
         ]
       },
       "QuestionTextDiffDto": {

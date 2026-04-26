@@ -5,11 +5,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CompaniesRepository } from '../companies/companies.repository';
+import { CompetenciesRepository } from '../competencies/competencies.repository';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { ListQuestionsQueryDto } from './dto/list-questions.query.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { UserContext } from '../authz/user-context';
-import { normalizeQuestionPayload, normalizeTopicIds } from './question-payload';
+import {
+  normalizeCompetencyIds,
+  normalizeQuestionEvaluationCriteria,
+  normalizeQuestionPayload,
+  normalizeTopicIds,
+  QuestionSnapshotCompetency,
+} from './question-payload';
 import {
   QUESTION_ANSWER_PLAIN_LENGTH_LIMIT,
   QUESTION_TEXT_PLAIN_LENGTH_LIMIT,
@@ -33,12 +40,14 @@ export class QuestionsService {
     private readonly questionInterviewEncountersRepository: QuestionInterviewEncountersRepository,
     private readonly companiesRepository: CompaniesRepository,
     private readonly topicsRepository: TopicsRepository,
+    private readonly competenciesRepository: CompetenciesRepository,
   ) {}
 
   async create(currentUser: UserContext, dto: CreateQuestionDto) {
     const topics = await this.requireTopics(dto.topicIds);
     const company = await this.requireCompany(dto.companyId ?? null);
-    const payload = normalizeQuestionPayload(dto, topics, company);
+    const competencies = await this.requireCompetencies(dto.competencyIds ?? []);
+    const payload = normalizeQuestionPayload(dto, topics, company, competencies);
     const created = await this.questionsRepository.create({
       text: payload.text,
       textContent: payload.textContent,
@@ -47,6 +56,8 @@ export class QuestionsService {
       difficulty: payload.difficultyRank,
       companyId: payload.companyId,
       topicIds: payload.topicIds,
+      competencyIds: payload.competencyIds,
+      evaluationCriteria: payload.evaluationCriteria,
     });
 
     return this.attachModerationStateToQuestion(currentUser, created);
@@ -91,7 +102,7 @@ export class QuestionsService {
   }
 
   async update(currentUser: UserContext, id: string, dto: UpdateQuestionDto) {
-    await this.ensureQuestionExists(id);
+    const existing = await this.requireQuestion(id);
     await this.ensureNoPendingChangeRequest(id);
 
     const payload: {
@@ -102,6 +113,14 @@ export class QuestionsService {
       difficulty?: ReturnType<typeof toDifficultyRank>;
       companyId?: string | null;
       topicIds?: string[];
+      competencyIds?: string[];
+      evaluationCriteria?: Array<{
+        title: string;
+        description: string | null;
+        weight: number;
+        position: number;
+        competencyId: string | null;
+      }>;
     } = {};
 
     if (dto.textContent !== undefined) {
@@ -134,6 +153,31 @@ export class QuestionsService {
       payload.topicIds = (await this.requireTopics(dto.topicIds)).map(
         (topic) => topic.id,
       );
+    }
+
+    const effectiveCompetencyIds =
+      dto.competencyIds !== undefined
+        ? dto.competencyIds
+        : existing.competencies.map((competency) => competency.id);
+
+    if (dto.competencyIds !== undefined) {
+      payload.competencyIds = (await this.requireCompetencies(dto.competencyIds)).map(
+        (competency) => competency.id,
+      );
+    }
+
+    if (dto.evaluationCriteria !== undefined) {
+      const competencies = await this.requireCompetencies(effectiveCompetencyIds);
+      payload.evaluationCriteria = normalizeQuestionEvaluationCriteria(
+        dto.evaluationCriteria,
+        competencies,
+      ).map((criterion) => ({
+        title: criterion.title,
+        description: criterion.description,
+        weight: criterion.weight,
+        position: criterion.position,
+        competencyId: criterion.competency?.id ?? null,
+      }));
     }
 
     const updated = await this.questionsRepository.update(id, payload);
@@ -170,6 +214,16 @@ export class QuestionsService {
     if (!exists) {
       throw new NotFoundException(`Question with id '${id}' not found`);
     }
+  }
+
+  private async requireQuestion(id: string) {
+    const question = await this.questionsRepository.findOne(id);
+
+    if (!question) {
+      throw new NotFoundException(`Question with id '${id}' not found`);
+    }
+
+    return question;
   }
 
   private async ensureNoPendingChangeRequest(id: string) {
@@ -243,6 +297,45 @@ export class QuestionsService {
       }
 
       return topic;
+    });
+  }
+
+  private async requireCompetencies(
+    competencyIds: string[],
+  ): Promise<QuestionSnapshotCompetency[]> {
+    const normalizedCompetencyIds = normalizeCompetencyIds(competencyIds);
+
+    if (normalizedCompetencyIds.length === 0) {
+      return [];
+    }
+
+    const competencies = await this.competenciesRepository.findCompetenciesByIds(
+      normalizedCompetencyIds,
+    );
+
+    if (competencies.length !== normalizedCompetencyIds.length) {
+      throw new BadRequestException('Some competencies do not exist');
+    }
+
+    const competenciesById = new Map(competencies.map((competency) => [competency.id, competency]));
+
+    return normalizedCompetencyIds.map((competencyId) => {
+      const competency = competenciesById.get(competencyId);
+
+      if (!competency) {
+        throw new BadRequestException('Some competencies do not exist');
+      }
+
+      return {
+        id: competency.id,
+        name: competency.name,
+        slug: competency.slug,
+        stack: {
+          id: competency.stack.id,
+          name: competency.stack.name,
+          slug: competency.stack.slug,
+        },
+      };
     });
   }
 

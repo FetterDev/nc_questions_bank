@@ -243,6 +243,39 @@ const router = createRouter({
           },
         },
         {
+          path: 'interview-history',
+          name: 'interview-history',
+          component: () => import('../views/InterviewHistoryView.vue'),
+          meta: {
+            strictRoles: ['USER'] satisfies SessionRole[],
+            section: 'interview-history',
+            title: 'История собеседований',
+            subtitle: 'Завершённые интервью, критерии, комментарии и финальный feedback.',
+          },
+        },
+        {
+          path: 'interview-history/:id',
+          name: 'interview-history-detail',
+          component: () => import('../views/InterviewHistoryView.vue'),
+          meta: {
+            strictRoles: ['USER'] satisfies SessionRole[],
+            section: 'interview-history',
+            title: 'История собеседований',
+            subtitle: 'Detail завершённого интервью с результатами по критериям.',
+          },
+        },
+        {
+          path: 'competency-matrix',
+          name: 'competency-matrix',
+          component: () => import('../views/CompetencyMatrixView.vue'),
+          meta: {
+            roles: ['USER', 'MANAGER'] satisfies SessionRole[],
+            section: 'competency-matrix',
+            title: 'Матрица компетенций',
+            subtitle: 'Сводка по стеку, компетенциям и результатам завершённых интервью.',
+          },
+        },
+        {
           path: 'interviews/:id/run',
           name: 'interview-runtime',
           component: () => import('../views/InterviewRuntimeView.vue'),

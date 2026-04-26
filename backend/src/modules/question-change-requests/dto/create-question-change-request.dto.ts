@@ -11,6 +11,7 @@ import {
 import { Type } from 'class-transformer';
 import { QuestionChangeRequestType } from '@prisma/client';
 import { QuestionDifficulty } from '../../questions/question-difficulty';
+import { QuestionEvaluationCriterionInputDto } from '../../questions/dto/create-question.dto';
 import { QuestionStructuredContentDto } from '../../questions/dto/question-structured-content.dto';
 
 class QuestionChangeRequestPayloadDto {
@@ -63,6 +64,27 @@ class QuestionChangeRequestPayloadDto {
   @IsString()
   @MaxLength(191)
   companyId?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Список competencyId',
+    type: [String],
+    example: ['cm8q4x7r10001competency'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(191, { each: true })
+  competencyIds?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Критерии оценки вопроса',
+    type: [QuestionEvaluationCriterionInputDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => QuestionEvaluationCriterionInputDto)
+  evaluationCriteria?: QuestionEvaluationCriterionInputDto[];
 }
 
 export class CreateQuestionChangeRequestDto {

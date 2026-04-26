@@ -124,6 +124,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/stacks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список стеков */
+        get: operations["CompetenciesController_listStacks"];
+        put?: never;
+        /** Создать стек */
+        post: operations["CompetenciesController_createStack"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stacks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Переименовать стек */
+        patch: operations["CompetenciesController_updateStack"];
+        trace?: never;
+    };
+    "/api/competencies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список компетенций */
+        get: operations["CompetenciesController_listCompetencies"];
+        put?: never;
+        /** Создать компетенцию */
+        post: operations["CompetenciesController_createCompetency"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/competencies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Обновить компетенцию */
+        patch: operations["CompetenciesController_updateCompetency"];
+        trace?: never;
+    };
     "/api/analytics/growth": {
         parameters: {
             query?: never;
@@ -191,6 +261,57 @@ export interface paths {
         head?: never;
         /** Переименовать компанию */
         patch: operations["CompaniesController_update"];
+        trace?: never;
+    };
+    "/api/competency-matrix/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Моя матрица компетенций по завершённым интервью */
+        get: operations["CompetencyMatrixController_getMyMatrix"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/competency-matrix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Матрицы компетенций сотрудников */
+        get: operations["CompetencyMatrixController_listMatrix"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/competency-matrix/users/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Матрица компетенций сотрудника */
+        get: operations["CompetencyMatrixController_getUserMatrix"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/health": {
@@ -372,6 +493,40 @@ export interface paths {
         };
         /** User dashboard по интервью */
         get: operations["InterviewsController_getMyDashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/interviews/my-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** История завершённых интервью текущего user */
+        get: operations["InterviewsController_getMyHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/interviews/{id}/detail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Детали интервью с результатами и критериями */
+        get: operations["InterviewsController_getInterviewDetail"];
         put?: never;
         post?: never;
         delete?: never;
@@ -797,6 +952,16 @@ export interface components {
             expiresAt: string;
             profile: components["schemas"]["MeDto"];
         };
+        StackDto: {
+            /** @example cm8q4x7r10001stack */
+            id: string;
+            /** @example Frontend */
+            name: string;
+            /** @example frontend */
+            slug: string;
+            /** @example 8 */
+            competenciesCount: number;
+        };
         UserDto: {
             /** @example cm8q4x7r10001s2t3u4v5w6x7 */
             id: string;
@@ -816,6 +981,7 @@ export interface components {
              * @enum {string}
              */
             status: "ACTIVE" | "DISABLED";
+            stacks: components["schemas"]["StackDto"][];
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -834,6 +1000,8 @@ export interface components {
              * @enum {string|null}
              */
             status: "ACTIVE" | "DISABLED" | null;
+            /** @example cm8q4x7r10001stack */
+            stackId: string | null;
         };
         ListUsersMetaDto: {
             /** @example 7 */
@@ -860,6 +1028,12 @@ export interface components {
              * @enum {string}
              */
             role: "USER" | "MANAGER" | "ADMIN";
+            /**
+             * @example [
+             *       "cm8q4x7r10001stack"
+             *     ]
+             */
+            stackIds?: string[];
         };
         UpdateUserDto: {
             /** @example Nord User */
@@ -871,10 +1045,99 @@ export interface components {
              * @enum {string}
              */
             role?: "USER" | "MANAGER" | "ADMIN";
+            /**
+             * @example [
+             *       "cm8q4x7r10001stack"
+             *     ]
+             */
+            stackIds?: string[];
         };
         ResetUserPasswordDto: {
             /** @example new-password-2026 */
             password: string;
+        };
+        ListStacksMetaDto: {
+            /** @example 4 */
+            tookMs: number;
+            /**
+             * @example {
+             *       "q": null
+             *     }
+             */
+            appliedFilters: Record<string, never>;
+        };
+        ListStacksResponseDto: {
+            items: components["schemas"]["StackDto"][];
+            /** @example 12 */
+            total: number;
+            meta: components["schemas"]["ListStacksMetaDto"];
+        };
+        CreateStackDto: {
+            /** @example Frontend */
+            name: string;
+        };
+        UpdateStackDto: {
+            /** @example Frontend */
+            name: string;
+        };
+        CompetencyStackDto: {
+            /** @example cm8q4x7r10001stack */
+            id: string;
+            /** @example Frontend */
+            name: string;
+            /** @example frontend */
+            slug: string;
+        };
+        CompetencyDto: {
+            /** @example cm8q4x7r10001competency */
+            id: string;
+            /** @example cm8q4x7r10001stack */
+            stackId: string;
+            stack: components["schemas"]["CompetencyStackDto"];
+            /** @example TypeScript */
+            name: string;
+            /** @example typescript */
+            slug: string;
+            /** @example Static typing and type-system tradeoffs. */
+            description?: string | null;
+            /** @example 1 */
+            position: number;
+        };
+        ListCompetenciesMetaDto: {
+            /** @example 4 */
+            tookMs: number;
+            /**
+             * @example {
+             *       "q": null,
+             *       "stackId": null
+             *     }
+             */
+            appliedFilters: Record<string, never>;
+        };
+        ListCompetenciesResponseDto: {
+            items: components["schemas"]["CompetencyDto"][];
+            /** @example 12 */
+            total: number;
+            meta: components["schemas"]["ListCompetenciesMetaDto"];
+        };
+        CreateCompetencyDto: {
+            /** @example cm8q4x7r10001stack */
+            stackId: string;
+            /** @example TypeScript */
+            name: string;
+            /** @example Static typing and type-system tradeoffs. */
+            description?: string | null;
+            /** @default 1 */
+            position: number;
+        };
+        UpdateCompetencyDto: {
+            /** @example cm8q4x7r10001stack */
+            stackId?: string;
+            /** @example TypeScript */
+            name?: string;
+            /** @example Static typing and type-system tradeoffs. */
+            description?: string | null;
+            position?: number;
         };
         GrowthAnalyticsSummaryDto: {
             /** @example 42 */
@@ -1045,6 +1308,56 @@ export interface components {
              * @example Google Cloud
              */
             name: string;
+        };
+        CompetencyMatrixUserDto: {
+            /** @example cm8q4x7r10001s2t3u4v5w6x7 */
+            id: string;
+            /** @example ivan.petrov */
+            login: string;
+            /** @example Иван Петров */
+            displayName: string;
+        };
+        CompetencyMatrixStackDto: {
+            /** @example cm8stack1 */
+            id: string;
+            /** @example Frontend */
+            name: string;
+            /** @example frontend */
+            slug: string;
+        };
+        CompetencyMatrixCompetencyDto: {
+            /** @example cm8competency1 */
+            id: string;
+            stack: components["schemas"]["CompetencyMatrixStackDto"];
+            /** @example TypeScript */
+            name: string;
+            /** @example typescript */
+            slug: string;
+            description: string | null;
+            /** @example 1 */
+            position: number;
+            /** @example 7 */
+            totalCount: number;
+            /** @example 4 */
+            correctCount: number;
+            /** @example 2 */
+            partialCount: number;
+            /** @example 1 */
+            incorrectCount: number;
+            /** @example 57 */
+            accuracy: number;
+            /** @enum {string|null} */
+            lastResult: "correct" | "incorrect" | "partial" | null;
+            /** Format: date-time */
+            lastAssessedAt: string | null;
+        };
+        CompetencyMatrixUserResponseDto: {
+            user: components["schemas"]["CompetencyMatrixUserDto"];
+            stacks: components["schemas"]["CompetencyMatrixStackDto"][];
+            competencies: components["schemas"]["CompetencyMatrixCompetencyDto"][];
+        };
+        ListCompetencyMatrixResponseDto: {
+            items: components["schemas"]["CompetencyMatrixUserResponseDto"][];
         };
         CreateInterviewCycleDto: {
             /**
@@ -1230,6 +1543,28 @@ export interface components {
             days: components["schemas"]["InterviewCalendarDayDto"][];
             items: components["schemas"]["MyInterviewCalendarItemDto"][];
         };
+        InterviewRuntimeCriterionDto: {
+            /** @example cm8interviewcriterion1 */
+            id: string;
+            /** @example cm8criterionSource1 */
+            sourceCriterionId: Record<string, never> | null;
+            /**
+             * @example {
+             *       "id": "cm8competency1",
+             *       "name": "TypeScript",
+             *       "slug": "typescript"
+             *     }
+             */
+            competency: Record<string, never> | null;
+            /** @example Называет tradeoff выбранного подхода */
+            title: string;
+            /** @example Кандидат должен объяснить плюсы и минусы решения. */
+            description: string | null;
+            /** @example 2 */
+            weight: number;
+            /** @example 0 */
+            position: number;
+        };
         InterviewRuntimeQuestionDto: {
             /** @example cm8interviewquestion1 */
             id: string;
@@ -1249,11 +1584,23 @@ export interface components {
             /** @example 0 */
             position: number;
             topics: components["schemas"]["QuestionTopicDto"][];
+            criteria: components["schemas"]["InterviewRuntimeCriterionDto"][];
         };
         InterviewRuntimeResponseDto: {
             interview: components["schemas"]["InterviewItemDto"];
             counterpart: components["schemas"]["InterviewUserDto"];
             items: components["schemas"]["InterviewRuntimeQuestionDto"][];
+        };
+        CompleteInterviewCriterionResultDto: {
+            /** @example cm8interviewcriterion1 */
+            criterionId: string;
+            /**
+             * @example partial
+             * @enum {string}
+             */
+            result: "correct" | "incorrect" | "partial";
+            /** @example Компромисс назван, но без привязки к ограничениям задачи. */
+            comment?: string;
         };
         CompleteInterviewItemDto: {
             /** @example cm8interviewquestion1 */
@@ -1263,6 +1610,7 @@ export interface components {
              * @enum {string}
              */
             result: "correct" | "incorrect" | "partial";
+            criteriaResults?: components["schemas"]["CompleteInterviewCriterionResultDto"][];
         };
         CompleteInterviewDto: {
             /** @example Нужно точнее формулировать компромиссы и быстрее структурировать ответ. */
@@ -1400,6 +1748,75 @@ export interface components {
             feedbackEntries: components["schemas"]["InterviewFeedbackEntryDto"][];
             recentInterviews: components["schemas"]["InterviewDashboardRecentItemDto"][];
         };
+        ListInterviewHistoryResponseDto: {
+            items: components["schemas"]["InterviewItemDto"][];
+        };
+        InterviewHistoryCriterionResultDto: {
+            /** @example cm8criterion1 */
+            id: string;
+            /** @example Называет tradeoff выбранного подхода */
+            title: string;
+            description: string | null;
+            /** @example 2 */
+            weight: number;
+            /** @example 0 */
+            position: number;
+            /** @enum {string|null} */
+            result: "correct" | "incorrect" | "partial" | null;
+            comment: string | null;
+            /**
+             * @example {
+             *       "id": "cm8competency1",
+             *       "name": "TypeScript",
+             *       "slug": "typescript"
+             *     }
+             */
+            competency: Record<string, never> | null;
+        };
+        InterviewHistoryQuestionDto: {
+            /** @example cm8interviewQuestion1 */
+            id: string;
+            /** @example seed-question-bank-123456789abc */
+            questionId: string;
+            /** @example Когда нужен составной индекс? */
+            questionText: string;
+            questionTextContent: components["schemas"]["QuestionStructuredContentDto"][];
+            /** @example Нужно, когда фильтруешь и сортируешь по нескольким полям. */
+            answer: string;
+            answerContent: components["schemas"]["QuestionStructuredContentDto"][];
+            /** @enum {string} */
+            difficulty: "junior" | "middle" | "senior" | "lead";
+            /** @enum {string|null} */
+            result: "correct" | "incorrect" | "partial" | null;
+            /** @example 0 */
+            position: number;
+            topics: components["schemas"]["QuestionTopicDto"][];
+            criteria: components["schemas"]["InterviewHistoryCriterionResultDto"][];
+        };
+        InterviewCompetencySummaryDto: {
+            /** @example cm8competency1 */
+            competencyId: string;
+            /** @example TypeScript */
+            name: string;
+            /** @example typescript */
+            slug: string;
+            /** @example 4 */
+            correctCount: number;
+            /** @example 2 */
+            partialCount: number;
+            /** @example 1 */
+            incorrectCount: number;
+            /** @example 57 */
+            accuracy: number;
+        };
+        InterviewHistoryDetailResponseDto: {
+            interview: components["schemas"]["InterviewItemDto"];
+            interviewer: components["schemas"]["InterviewUserDto"];
+            interviewee: components["schemas"]["InterviewUserDto"];
+            feedback: string | null;
+            questions: components["schemas"]["InterviewHistoryQuestionDto"][];
+            competencySummary: components["schemas"]["InterviewCompetencySummaryDto"][];
+        };
         TopicDto: {
             /** @example cm7y5z8qv0003x4f2w7sn1abc */
             id: string;
@@ -1441,6 +1858,16 @@ export interface components {
              */
             name: string;
         };
+        QuestionEvaluationCriterionInputDto: {
+            /** @example Называет tradeoff выбранного подхода */
+            title: string;
+            /** @example Кандидат должен объяснить плюсы и минусы решения. */
+            description?: string | null;
+            /** @example cm8q4x7r10001competency */
+            competencyId?: string | null;
+            /** @default 1 */
+            weight: number;
+        };
         CreateQuestionDto: {
             /** @description Структурированное содержимое вопроса */
             textContent: components["schemas"]["QuestionStructuredContentDto"][];
@@ -1464,12 +1891,51 @@ export interface components {
              * @example cm7y5z8qv0003x4f2w7sn1company
              */
             companyId?: string | null;
+            /**
+             * @description Список competencyId
+             * @example [
+             *       "cm8q4x7r10001competency"
+             *     ]
+             */
+            competencyIds?: string[];
+            /** @description Критерии оценки вопроса */
+            evaluationCriteria?: components["schemas"]["QuestionEvaluationCriterionInputDto"][];
         };
         QuestionCompanyDto: {
             /** @example cm7y5z8qv0003x4f2w7sn1abc */
             id: string;
             /** @example Google */
             name: string;
+        };
+        QuestionCompetencyStackDto: {
+            /** @example cm8q4x7r10001stack */
+            id: string;
+            /** @example Frontend */
+            name: string;
+            /** @example frontend */
+            slug: string;
+        };
+        QuestionCompetencyDto: {
+            /** @example cm8q4x7r10001competency */
+            id: string;
+            /** @example TypeScript */
+            name: string;
+            /** @example typescript */
+            slug: string;
+            stack: components["schemas"]["QuestionCompetencyStackDto"];
+        };
+        QuestionEvaluationCriterionDto: {
+            /** @example cm8q4x7r10001criterion */
+            id: string;
+            /** @example Называет tradeoff выбранного подхода */
+            title: string;
+            /** @example Кандидат должен объяснить плюсы и минусы решения. */
+            description?: string | null;
+            /** @example 2 */
+            weight: number;
+            /** @example 0 */
+            position: number;
+            competency: components["schemas"]["QuestionCompetencyDto"] | null;
         };
         QuestionPendingChangeRequestDto: {
             /** @example true */
@@ -1499,6 +1965,8 @@ export interface components {
             difficulty: "junior" | "middle" | "senior" | "lead";
             company: components["schemas"]["QuestionCompanyDto"] | null;
             topics: components["schemas"]["QuestionTopicDto"][];
+            competencies: components["schemas"]["QuestionCompetencyDto"][];
+            evaluationCriteria: components["schemas"]["QuestionEvaluationCriterionDto"][];
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -1524,6 +1992,10 @@ export interface components {
              * @example cm7y5z8qv0003x4f2w7sn1company
              */
             companyId?: string | null;
+            /** @description Список competencyId */
+            competencyIds?: string[];
+            /** @description Критерии оценки вопроса */
+            evaluationCriteria?: components["schemas"]["QuestionEvaluationCriterionInputDto"][];
         };
         QuestionCsvImportTotalsDto: {
             /** @example 500 */
@@ -1670,6 +2142,15 @@ export interface components {
              * @example cm7y5z8qv0003x4f2w7sn1company
              */
             companyId?: string | null;
+            /**
+             * @description Список competencyId
+             * @example [
+             *       "cm8q4x7r10001competency"
+             *     ]
+             */
+            competencyIds?: string[];
+            /** @description Критерии оценки вопроса */
+            evaluationCriteria?: components["schemas"]["QuestionEvaluationCriterionInputDto"][];
         };
         CreateQuestionChangeRequestDto: {
             /**
@@ -1719,6 +2200,8 @@ export interface components {
             difficulty: "junior" | "middle" | "senior" | "lead";
             company: components["schemas"]["QuestionCompanyDto"] | null;
             topics: components["schemas"]["QuestionSnapshotTopicDto"][];
+            competencies: components["schemas"]["QuestionCompetencyDto"][];
+            evaluationCriteria: components["schemas"]["QuestionEvaluationCriterionDto"][];
         };
         QuestionTextDiffDto: {
             changed: boolean;
@@ -2084,6 +2567,7 @@ export interface operations {
                 q?: string;
                 role?: "USER" | "MANAGER" | "ADMIN";
                 status?: "ACTIVE" | "DISABLED";
+                stackId?: string;
                 limit?: number;
                 offset?: number;
             };
@@ -2218,6 +2702,149 @@ export interface operations {
             };
         };
     };
+    CompetenciesController_listStacks: {
+        parameters: {
+            query?: {
+                q?: string;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListStacksResponseDto"];
+                };
+            };
+        };
+    };
+    CompetenciesController_createStack: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStackDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StackDto"];
+                };
+            };
+        };
+    };
+    CompetenciesController_updateStack: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateStackDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StackDto"];
+                };
+            };
+        };
+    };
+    CompetenciesController_listCompetencies: {
+        parameters: {
+            query?: {
+                q?: string;
+                stackId?: string;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListCompetenciesResponseDto"];
+                };
+            };
+        };
+    };
+    CompetenciesController_createCompetency: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCompetencyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompetencyDto"];
+                };
+            };
+        };
+    };
+    CompetenciesController_updateCompetency: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCompetencyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompetencyDto"];
+                };
+            };
+        };
+    };
     AnalyticsController_getGrowthAnalytics: {
         parameters: {
             query?: never;
@@ -2324,6 +2951,67 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CompanyDto"];
+                };
+            };
+        };
+    };
+    CompetencyMatrixController_getMyMatrix: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompetencyMatrixUserResponseDto"];
+                };
+            };
+        };
+    };
+    CompetencyMatrixController_listMatrix: {
+        parameters: {
+            query?: {
+                stackId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListCompetencyMatrixResponseDto"];
+                };
+            };
+        };
+    };
+    CompetencyMatrixController_getUserMatrix: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompetencyMatrixUserResponseDto"];
                 };
             };
         };
@@ -2588,6 +3276,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MyInterviewDashboardResponseDto"];
+                };
+            };
+        };
+    };
+    InterviewsController_getMyHistory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListInterviewHistoryResponseDto"];
+                };
+            };
+        };
+    };
+    InterviewsController_getInterviewDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterviewHistoryDetailResponseDto"];
                 };
             };
         };

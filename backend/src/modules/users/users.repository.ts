@@ -22,6 +22,27 @@ export type UserRecord = {
   updatedAt: Date;
 };
 
+const userInclude = {
+  stacks: {
+    include: {
+      stack: {
+        include: {
+          _count: {
+            select: {
+              competencies: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: [{ stack: { name: 'asc' } }, { stackId: 'asc' }],
+  },
+} satisfies Prisma.UserInclude;
+
+export type UserOutput = Prisma.UserGetPayload<{
+  include: typeof userInclude;
+}>;
+
 @Injectable()
 export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -29,6 +50,7 @@ export class UsersRepository {
   findById(id: string, db?: DbClient) {
     return this.getDb(db).user.findUnique({
       where: { id },
+      include: userInclude,
     });
   }
 
@@ -49,6 +71,7 @@ export class UsersRepository {
   findByLogin(login: string, db?: DbClient) {
     return this.getDb(db).user.findUnique({
       where: { login },
+      include: userInclude,
     });
   }
 
@@ -76,6 +99,7 @@ export class UsersRepository {
       q?: string;
       role?: UserRole;
       status?: UserStatus;
+      stackId?: string;
       limit: number;
       offset: number;
     },
@@ -89,6 +113,14 @@ export class UsersRepository {
 
     if (params.status) {
       where.status = params.status;
+    }
+
+    if (params.stackId) {
+      where.stacks = {
+        some: {
+          stackId: params.stackId,
+        },
+      };
     }
 
     if (params.q) {
@@ -117,6 +149,7 @@ export class UsersRepository {
     const [items, total] = await Promise.all([
       this.getDb(db).user.findMany({
         where,
+        include: userInclude,
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         take: params.limit,
         skip: params.offset,
@@ -136,6 +169,7 @@ export class UsersRepository {
       role: UserRole;
       status?: UserStatus;
       tokenVersion?: number;
+      stackIds?: string[];
     },
     db?: DbClient,
   ) {
@@ -148,7 +182,19 @@ export class UsersRepository {
         role: data.role,
         status: data.status ?? UserStatus.ACTIVE,
         tokenVersion: data.tokenVersion ?? 0,
+        stacks: data.stackIds
+          ? {
+              create: data.stackIds.map((stackId) => ({
+                stack: {
+                  connect: {
+                    id: stackId,
+                  },
+                },
+              })),
+            }
+          : undefined,
       },
+      include: userInclude,
     });
   }
 
@@ -161,6 +207,7 @@ export class UsersRepository {
       status?: UserStatus;
       passwordHash?: string;
       incrementTokenVersion?: boolean;
+      stackIds?: string[];
     },
     db?: DbClient,
   ) {
@@ -192,9 +239,23 @@ export class UsersRepository {
       };
     }
 
+    if (data.stackIds !== undefined) {
+      updateData.stacks = {
+        deleteMany: {},
+        create: data.stackIds.map((stackId) => ({
+          stack: {
+            connect: {
+              id: stackId,
+            },
+          },
+        })),
+      };
+    }
+
     return this.getDb(db).user.update({
       where: { id },
       data: updateData,
+      include: userInclude,
     });
   }
 

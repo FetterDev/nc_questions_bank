@@ -36,6 +36,10 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.interview-history-layout {
+  grid-template-columns: minmax(280px, 0.65fr) minmax(0, 1.35fr);
+}
+
 .interviews-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -134,6 +138,7 @@
 .interview-draft-list,
 .interview-row-list,
 .interview-feedback-list,
+.runtime-criteria-list,
 .chart-frame,
 .chart-donut,
 .chart-donut__legend,
@@ -146,6 +151,7 @@
 .interview-draft-card,
 .interview-row-card,
 .interview-feedback-card,
+.runtime-criterion-card,
 .chart-frame {
   padding: var(--panel-padding-compact);
   border: 1px solid var(--panel-border);
@@ -159,6 +165,18 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+}
+
+.interview-row-card--button {
+  width: 100%;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.interview-row-card--button:hover,
+.interview-row-card--active {
+  border-color: var(--color-cyan);
 }
 
 .interview-status-pill {
@@ -194,9 +212,95 @@
 
 .interview-draft-card__copy,
 .interview-row-card__copy,
-.interview-feedback-card {
+.interview-feedback-card,
+.runtime-criterion-card {
   display: grid;
   gap: 4px;
+}
+
+.runtime-criterion-card {
+  gap: 12px;
+}
+
+.runtime-criterion-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.runtime-criterion-card__head p {
+  margin: 4px 0 0;
+  color: var(--color-ink-muted);
+}
+
+.interview-runtime-feedback {
+  min-width: min(100%, 380px);
+}
+
+.interview-detail-stack,
+.interview-history-question,
+.interview-competency-summary {
+  display: grid;
+  gap: 12px;
+}
+
+.interview-history-question {
+  padding: var(--panel-padding-compact);
+  border: 1px solid var(--panel-border);
+  border-radius: calc(var(--panel-radius) - 8px);
+  background: color-mix(in srgb, var(--color-paper) 90%, var(--color-ivory));
+}
+
+.interview-history-question__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.competency-matrix-toolbar {
+  grid-template-columns: minmax(220px, 320px);
+}
+
+.competency-matrix-list,
+.competency-matrix-card,
+.competency-matrix-grid,
+.competency-directory,
+.competency-directory__forms {
+  display: grid;
+  gap: 12px;
+}
+
+.competency-directory__form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.competency-directory__form--wide {
+  grid-template-columns: minmax(180px, 0.6fr) minmax(180px, 0.7fr) minmax(220px, 1fr) auto;
+}
+
+.competency-matrix-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(160px, 1fr) minmax(120px, auto);
+  gap: 12px;
+  align-items: center;
+  padding: var(--panel-padding-compact);
+  border: 1px solid var(--panel-border);
+  border-radius: calc(var(--panel-radius) - 8px);
+  background: color-mix(in srgb, var(--color-paper) 90%, var(--color-ivory));
+}
+
+.competency-matrix-row__copy {
+  display: grid;
+  gap: 4px;
+}
+
+.competency-matrix-row__copy small {
+  color: var(--color-ink-muted);
 }
 
 .interview-draft-card__copy small,
@@ -306,6 +410,10 @@
 @media (max-width: 900px) {
   .interviews-form-grid,
   .interviews-dashboard-layout,
+  .interview-history-layout,
+  .competency-matrix-row,
+  .competency-directory__form,
+  .competency-directory__form--wide,
   .chart-donut,
   .chart-bar-list__row,
   .chart-stacked-list__row {

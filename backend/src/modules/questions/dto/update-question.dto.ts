@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { QuestionStructuredContentDto } from './question-structured-content.dto';
+import { QuestionEvaluationCriterionInputDto } from './create-question.dto';
 import { QuestionDifficulty } from '../question-difficulty';
 
 export class UpdateQuestionDto {
@@ -61,4 +62,24 @@ export class UpdateQuestionDto {
   @IsString()
   @MaxLength(191)
   companyId?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Список competencyId',
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(191, { each: true })
+  competencyIds?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Критерии оценки вопроса',
+    type: [QuestionEvaluationCriterionInputDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => QuestionEvaluationCriterionInputDto)
+  evaluationCriteria?: QuestionEvaluationCriterionInputDto[];
 }

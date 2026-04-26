@@ -37,6 +37,11 @@ export class ListUsersQueryDto {
   @IsEnum(UserStatus)
   status?: UserStatus;
 
+  @ApiPropertyOptional({ example: 'cm8q4x7r10001stack' })
+  @IsOptional()
+  @IsString()
+  stackId?: string;
+
   @ApiPropertyOptional({ minimum: 1, maximum: 100, default: 50 })
   @IsOptional()
   @Transform(({ value }) => toNumberOrUndefined(value))

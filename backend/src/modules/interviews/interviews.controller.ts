@@ -34,6 +34,7 @@ import { InterviewCalendarQueryDto } from './dto/interview-calendar.query.dto';
 import { InterviewCycleDetailResponseDto } from './dto/interview-cycle-detail.response.dto';
 import { AdminInterviewDashboardResponseDto, MyInterviewDashboardResponseDto } from './dto/interview-dashboard.response.dto';
 import { InterviewDashboardQueryDto } from './dto/interview-dashboard.query.dto';
+import { InterviewHistoryDetailResponseDto, ListInterviewHistoryResponseDto } from './dto/interview-history.response.dto';
 import { InterviewItemDto } from './dto/interview-common.dto';
 import { InterviewRuntimeResponseDto } from './dto/interview-runtime.response.dto';
 import { UpdateInterviewDto } from './dto/update-interview.dto';
@@ -145,5 +146,24 @@ export class InterviewsController {
     @Query() query: InterviewDashboardQueryDto,
   ) {
     return this.interviewsService.getMyDashboard(currentUser, query);
+  }
+
+  @ApiOperation({ summary: 'История завершённых интервью текущего user' })
+  @ApiOkResponse({ type: ListInterviewHistoryResponseDto })
+  @StrictRoles(...USER_ONLY_ROLES)
+  @Get('my-history')
+  getMyHistory(@CurrentUser() currentUser: UserContext) {
+    return this.interviewsService.getMyHistory(currentUser);
+  }
+
+  @ApiOperation({ summary: 'Детали интервью с результатами и критериями' })
+  @ApiOkResponse({ type: InterviewHistoryDetailResponseDto })
+  @Roles(UserRole.USER, ...MANAGER_ONLY_ROLES)
+  @Get(':id/detail')
+  getInterviewDetail(
+    @CurrentUser() currentUser: UserContext,
+    @Param('id') id: string,
+  ) {
+    return this.interviewsService.getInterviewDetail(currentUser, id);
   }
 }

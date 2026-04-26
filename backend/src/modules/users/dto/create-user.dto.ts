@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
-import { IsEmail, IsEnum, IsOptional, IsString, Length, Matches } from 'class-validator';
+import { IsArray, IsEmail, IsEnum, IsOptional, IsString, Length, Matches, MaxLength } from 'class-validator';
 import {
   LOGIN_PATTERN,
   PASSWORD_MAX_LENGTH,
@@ -39,4 +39,14 @@ export class CreateUserDto {
   @ApiProperty({ enum: UserRole, example: UserRole.USER })
   @IsEnum(UserRole)
   role!: UserRole;
+
+  @ApiPropertyOptional({
+    type: [String],
+    example: ['cm8q4x7r10001stack'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(191, { each: true })
+  stackIds?: string[];
 }
