@@ -3,6 +3,11 @@ import { coerceQuestionStructuredContent } from '../questions/question-structure
 import { QuestionDifficulty, fromDifficultyRank } from '../questions/question-difficulty';
 import { fromTrainingResultDb, TrainingResult } from '../training/training-result';
 import { AnalyticsRepository } from './analytics.repository';
+import type {
+  TeamActivitySummaryRow,
+  TeamAnswerSummaryRow,
+  TeamGrowthTopicRow,
+} from './analytics.repository';
 
 function toPercent(value: number, total: number) {
   if (total <= 0) {
@@ -166,4 +171,137 @@ export class AnalyticsService {
         )
     };
   }
+
+  async getTeamAnalytics() {
+    const [
+      employees,
+      answerSummaries,
+      activitySummaries,
+      growthTopicRows,
+    ] = await Promise.all([
+      this.analyticsRepository.listTeamEmployees(),
+      this.analyticsRepository.getTeamAnswerSummaries(),
+      this.analyticsRepository.getTeamActivitySummaries(),
+      this.analyticsRepository.getTeamGrowthTopicStats(),
+    ]);
+    const answersByUser = new Map(
+      answerSummaries.map((item) => [item.userId, item]),
+    );
+    const activityByUser = new Map(
+      activitySummaries.map((item) => [item.userId, item]),
+    );
+    const growthTopicsByUser = groupGrowthTopics(growthTopicRows);
+    const totalAnswers = answerSummaries.reduce(
+      (total, item) => total + item.totalAnswers,
+      0,
+    );
+    const totalCorrect = answerSummaries.reduce(
+      (total, item) => total + item.correctCount,
+      0,
+    );
+
+    return {
+      summary: {
+        employeesCount: employees.length,
+        employeesWithAnswersCount: answerSummaries.filter(
+          (item) => item.totalAnswers > 0,
+        ).length,
+        totalAnswers,
+        averageAccuracy: toPercent(totalCorrect, totalAnswers),
+      },
+      items: employees.map((employee) => {
+        const answers = answersByUser.get(employee.id);
+        const activity = activityByUser.get(employee.id);
+        const lastActivityAt = resolveLastActivityAt(answers, activity);
+
+        return {
+          user: {
+            id: employee.id,
+            login: employee.login,
+            displayName: employee.displayName,
+          },
+          stacks: employee.stacks.map((item) => ({
+            id: item.stack.id,
+            name: item.stack.name,
+            slug: item.stack.slug,
+          })),
+          summary: {
+            totalAnswers: answers?.totalAnswers ?? 0,
+            correctCount: answers?.correctCount ?? 0,
+            incorrectCount: answers?.incorrectCount ?? 0,
+            partialCount: answers?.partialCount ?? 0,
+            accuracy: toPercent(
+              answers?.correctCount ?? 0,
+              answers?.totalAnswers ?? 0,
+            ),
+            trainingSessionsCount: activity?.trainingSessionsCount ?? 0,
+            completedInterviewsCount: activity?.completedInterviewsCount ?? 0,
+            feedbackCount: activity?.feedbackCount ?? 0,
+            lastActivityAt: lastActivityAt?.toISOString() ?? null,
+          },
+          growthTopics: growthTopicsByUser.get(employee.id) ?? [],
+        };
+      }),
+    };
+  }
+}
+
+function resolveLastActivityAt(
+  answers: TeamAnswerSummaryRow | undefined,
+  activity: TeamActivitySummaryRow | undefined,
+) {
+  const dates = [answers?.lastActivityAt, activity?.lastActivityAt].filter(
+    (item): item is Date => item instanceof Date,
+  );
+
+  if (!dates.length) {
+    return null;
+  }
+
+  return dates.sort((left, right) => right.getTime() - left.getTime())[0];
+}
+
+function groupGrowthTopics(rows: TeamGrowthTopicRow[]) {
+  const grouped = new Map<
+    string,
+    Array<TeamGrowthTopicRow & { accuracy: number }>
+  >();
+
+  for (const row of rows) {
+    const total = row.correctCount + row.incorrectCount + row.partialCount;
+    const items = grouped.get(row.userId) ?? [];
+
+    items.push({
+      ...row,
+      accuracy: toPercent(row.correctCount, total),
+    });
+    grouped.set(row.userId, items);
+  }
+
+  return new Map(
+    [...grouped.entries()].map(([userId, items]) => [
+      userId,
+      items
+        .sort(
+          (left, right) =>
+            right.incorrectCount +
+              right.partialCount -
+              left.incorrectCount -
+              left.partialCount ||
+            left.accuracy - right.accuracy ||
+            left.name.localeCompare(right.name, 'ru-RU') ||
+            left.topicId.localeCompare(right.topicId, 'ru-RU'),
+        )
+        .slice(0, 3)
+        .map((item) => ({
+          topicId: item.topicId,
+          name: item.name,
+          slug: item.slug,
+          correctCount: item.correctCount,
+          incorrectCount: item.incorrectCount,
+          partialCount: item.partialCount,
+          accuracy: item.accuracy,
+        })),
+    ]),
+  );
 }

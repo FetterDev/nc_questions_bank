@@ -199,6 +199,17 @@ const router = createRouter({
           },
         },
         {
+          path: 'team',
+          name: 'team-dashboard',
+          component: () => import('../views/TeamDashboardView.vue'),
+          meta: {
+            strictRoles: ['MANAGER'] satisfies SessionRole[],
+            section: 'team',
+            title: 'Сотрудники',
+            subtitle: 'Сводная статистика по сотрудникам, стеку, успешности и точкам роста.',
+          },
+        },
+        {
           path: 'interviews',
           name: 'interviews-admin',
           component: () => import('../views/InterviewsAdminView.vue'),

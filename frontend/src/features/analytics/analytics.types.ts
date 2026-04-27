@@ -14,3 +14,15 @@ export type GrowthAnalyticsFeedbackEntry =
 
 export type BankAnalytics =
   components['schemas']['BankAnalyticsResponseDto'];
+
+export type TeamAnalytics =
+  components['schemas']['TeamAnalyticsResponseDto'];
+
+export type TeamAnalyticsEmployee =
+  components['schemas']['TeamAnalyticsEmployeeDto'];
+
+export type TeamAnalyticsStack =
+  components['schemas']['TeamAnalyticsStackDto'];
+
+export type TeamAnalyticsGrowthTopic =
+  components['schemas']['TeamAnalyticsGrowthTopicDto'];

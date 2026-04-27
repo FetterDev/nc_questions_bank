@@ -8,6 +8,7 @@ import type {
   LoginResponse,
   SessionProfile,
 } from '../features/session/session.types';
+import type { TeamAnalytics } from '../features/analytics/analytics.types';
 import type {
   CreateUserPayload,
   ListUsersResponse,
@@ -403,6 +404,11 @@ export function createApiSdk(options?: ClientOptions) {
     async getBankAnalytics() {
       const result = await client.GET('/api/analytics/bank');
       return ensureData(result, 'getBankAnalytics');
+    },
+
+    async getTeamAnalytics(): Promise<TeamAnalytics> {
+      const result = await client.GET('/api/analytics/team');
+      return ensureData(result, 'getTeamAnalytics');
     },
 
     async listStacks(

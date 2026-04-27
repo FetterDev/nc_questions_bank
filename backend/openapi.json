@@ -352,6 +352,28 @@
         ]
       }
     },
+    "/api/analytics/team": {
+      "get": {
+        "operationId": "AnalyticsController_getTeamAnalytics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamAnalyticsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Сводная статистика сотрудников для менеджера",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
     "/api/companies": {
       "get": {
         "operationId": "CompaniesController_list",
@@ -3209,6 +3231,219 @@
           "difficultyMix",
           "topTopics",
           "sparseTopics"
+        ]
+      },
+      "TeamAnalyticsSummaryDto": {
+        "type": "object",
+        "properties": {
+          "employeesCount": {
+            "type": "number",
+            "example": 18
+          },
+          "employeesWithAnswersCount": {
+            "type": "number",
+            "example": 14
+          },
+          "totalAnswers": {
+            "type": "number",
+            "example": 410
+          },
+          "averageAccuracy": {
+            "type": "number",
+            "example": 67
+          }
+        },
+        "required": [
+          "employeesCount",
+          "employeesWithAnswersCount",
+          "totalAnswers",
+          "averageAccuracy"
+        ]
+      },
+      "TeamAnalyticsUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8q4x7r10001s2t3u4v5w6x7"
+          },
+          "login": {
+            "type": "string",
+            "example": "ivan.petrov"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Иван Петров"
+          }
+        },
+        "required": [
+          "id",
+          "login",
+          "displayName"
+        ]
+      },
+      "TeamAnalyticsStackDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cm8stack1"
+          },
+          "name": {
+            "type": "string",
+            "example": "Frontend"
+          },
+          "slug": {
+            "type": "string",
+            "example": "frontend"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ]
+      },
+      "TeamAnalyticsEmployeeSummaryDto": {
+        "type": "object",
+        "properties": {
+          "totalAnswers": {
+            "type": "number",
+            "example": 42
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 25
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 6
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 11
+          },
+          "accuracy": {
+            "type": "number",
+            "example": 60
+          },
+          "trainingSessionsCount": {
+            "type": "number",
+            "example": 8
+          },
+          "completedInterviewsCount": {
+            "type": "number",
+            "example": 3
+          },
+          "feedbackCount": {
+            "type": "number",
+            "example": 4
+          },
+          "lastActivityAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "totalAnswers",
+          "correctCount",
+          "partialCount",
+          "incorrectCount",
+          "accuracy",
+          "trainingSessionsCount",
+          "completedInterviewsCount",
+          "feedbackCount",
+          "lastActivityAt"
+        ]
+      },
+      "TeamAnalyticsGrowthTopicDto": {
+        "type": "object",
+        "properties": {
+          "topicId": {
+            "type": "string",
+            "example": "seed-topic-angular"
+          },
+          "name": {
+            "type": "string",
+            "example": "Angular"
+          },
+          "slug": {
+            "type": "string",
+            "example": "angular"
+          },
+          "correctCount": {
+            "type": "number",
+            "example": 3
+          },
+          "partialCount": {
+            "type": "number",
+            "example": 2
+          },
+          "incorrectCount": {
+            "type": "number",
+            "example": 5
+          },
+          "accuracy": {
+            "type": "number",
+            "example": 30
+          }
+        },
+        "required": [
+          "topicId",
+          "name",
+          "slug",
+          "correctCount",
+          "partialCount",
+          "incorrectCount",
+          "accuracy"
+        ]
+      },
+      "TeamAnalyticsEmployeeDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/TeamAnalyticsUserDto"
+          },
+          "stacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamAnalyticsStackDto"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/TeamAnalyticsEmployeeSummaryDto"
+          },
+          "growthTopics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamAnalyticsGrowthTopicDto"
+            }
+          }
+        },
+        "required": [
+          "user",
+          "stacks",
+          "summary",
+          "growthTopics"
+        ]
+      },
+      "TeamAnalyticsResponseDto": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/TeamAnalyticsSummaryDto"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamAnalyticsEmployeeDto"
+            }
+          }
+        },
+        "required": [
+          "summary",
+          "items"
         ]
       },
       "CompanyDto": {

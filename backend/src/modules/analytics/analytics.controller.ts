@@ -1,6 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { UserRole } from '@prisma/client';
 import { CurrentUser } from '../authz/current-user.decorator';
 import {
   MANAGER_ONLY_ROLES,
@@ -11,6 +10,7 @@ import { UserContext } from '../authz/user-context';
 import { AnalyticsService } from './analytics.service';
 import { BankAnalyticsResponseDto } from './dto/bank-analytics.response.dto';
 import { GrowthAnalyticsResponseDto } from './dto/growth-analytics.response.dto';
+import { TeamAnalyticsResponseDto } from './dto/team-analytics.response.dto';
 
 @ApiTags('analytics')
 @Controller('analytics')
@@ -31,5 +31,13 @@ export class AnalyticsController {
   @Get('bank')
   getBankAnalytics() {
     return this.analyticsService.getBankAnalytics();
+  }
+
+  @ApiOperation({ summary: 'Сводная статистика сотрудников для менеджера' })
+  @ApiOkResponse({ type: TeamAnalyticsResponseDto })
+  @StrictRoles(...MANAGER_ONLY_ROLES)
+  @Get('team')
+  getTeamAnalytics() {
+    return this.analyticsService.getTeamAnalytics();
   }
 }

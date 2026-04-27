@@ -125,6 +125,12 @@ const primaryNavItems = computed(() => {
       to: { name: 'training-presets' },
     });
     items.push({
+      label: 'Сотрудники',
+      section: 'team',
+      icon: mdiAccountGroupOutline,
+      to: { name: 'team-dashboard' },
+    });
+    items.push({
       label: 'Собеседования',
       section: 'interviews',
       icon: mdiCalendarMonthOutline,

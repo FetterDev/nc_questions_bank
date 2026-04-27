@@ -158,6 +158,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/analytics/team": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Сводная статистика сотрудников для менеджера */
+        get: operations["AnalyticsController_getTeamAnalytics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/companies": {
         parameters: {
             query?: never;
@@ -1193,6 +1210,78 @@ export interface components {
             difficultyMix: components["schemas"]["BankAnalyticsDifficultyMixItemDto"][];
             topTopics: components["schemas"]["BankAnalyticsTopicStatDto"][];
             sparseTopics: components["schemas"]["BankAnalyticsTopicStatDto"][];
+        };
+        TeamAnalyticsSummaryDto: {
+            /** @example 18 */
+            employeesCount: number;
+            /** @example 14 */
+            employeesWithAnswersCount: number;
+            /** @example 410 */
+            totalAnswers: number;
+            /** @example 67 */
+            averageAccuracy: number;
+        };
+        TeamAnalyticsUserDto: {
+            /** @example cm8q4x7r10001s2t3u4v5w6x7 */
+            id: string;
+            /** @example ivan.petrov */
+            login: string;
+            /** @example Иван Петров */
+            displayName: string;
+        };
+        TeamAnalyticsStackDto: {
+            /** @example cm8stack1 */
+            id: string;
+            /** @example Frontend */
+            name: string;
+            /** @example frontend */
+            slug: string;
+        };
+        TeamAnalyticsEmployeeSummaryDto: {
+            /** @example 42 */
+            totalAnswers: number;
+            /** @example 25 */
+            correctCount: number;
+            /** @example 6 */
+            partialCount: number;
+            /** @example 11 */
+            incorrectCount: number;
+            /** @example 60 */
+            accuracy: number;
+            /** @example 8 */
+            trainingSessionsCount: number;
+            /** @example 3 */
+            completedInterviewsCount: number;
+            /** @example 4 */
+            feedbackCount: number;
+            /** Format: date-time */
+            lastActivityAt: string | null;
+        };
+        TeamAnalyticsGrowthTopicDto: {
+            /** @example seed-topic-angular */
+            topicId: string;
+            /** @example Angular */
+            name: string;
+            /** @example angular */
+            slug: string;
+            /** @example 3 */
+            correctCount: number;
+            /** @example 2 */
+            partialCount: number;
+            /** @example 5 */
+            incorrectCount: number;
+            /** @example 30 */
+            accuracy: number;
+        };
+        TeamAnalyticsEmployeeDto: {
+            user: components["schemas"]["TeamAnalyticsUserDto"];
+            stacks: components["schemas"]["TeamAnalyticsStackDto"][];
+            summary: components["schemas"]["TeamAnalyticsEmployeeSummaryDto"];
+            growthTopics: components["schemas"]["TeamAnalyticsGrowthTopicDto"][];
+        };
+        TeamAnalyticsResponseDto: {
+            summary: components["schemas"]["TeamAnalyticsSummaryDto"];
+            items: components["schemas"]["TeamAnalyticsEmployeeDto"][];
         };
         CompanyDto: {
             /** @example cm7y5z8qv0003x4f2w7sn1abc */
@@ -2748,6 +2837,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BankAnalyticsResponseDto"];
+                };
+            };
+        };
+    };
+    AnalyticsController_getTeamAnalytics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamAnalyticsResponseDto"];
                 };
             };
         };
