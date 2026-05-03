@@ -25,8 +25,14 @@ const loading = ref(false);
 const detailLoading = ref(false);
 const errorMessage = ref('');
 
+const selectedUserId = computed(() =>
+  typeof route.params.userId === 'string' ? route.params.userId : null,
+);
 const selectedId = computed(() =>
   typeof route.params.id === 'string' ? route.params.id : null,
+);
+const historyTitle = computed(() =>
+  selectedUserId.value ? 'История сотрудника' : 'Завершённые интервью',
 );
 
 async function loadHistory() {
@@ -34,7 +40,9 @@ async function loadHistory() {
   errorMessage.value = '';
 
   try {
-    history.value = await apiService.listMyInterviewHistory();
+    history.value = selectedUserId.value
+      ? await apiService.listUserInterviewHistory(selectedUserId.value)
+      : await apiService.listMyInterviewHistory();
   } catch (error) {
     errorMessage.value = toUserErrorMessage(
       error,
@@ -67,6 +75,14 @@ async function loadDetail(id: string | null) {
 }
 
 function openDetail(id: string) {
+  if (selectedUserId.value) {
+    void router.push({
+      name: 'employee-interview-history-detail',
+      params: { userId: selectedUserId.value, id },
+    });
+    return;
+  }
+
   void router.push({ name: 'interview-history-detail', params: { id } });
 }
 
@@ -81,6 +97,13 @@ watch(
 onMounted(() => {
   void loadHistory();
 });
+
+watch(
+  () => selectedUserId.value,
+  () => {
+    void loadHistory();
+  },
+);
 </script>
 
 <template>
@@ -93,7 +116,7 @@ onMounted(() => {
       <UiPanel class="detail-panel" variant="detail">
         <div class="panel-header">
           <div class="panel-copy">
-            <h2>Завершённые интервью</h2>
+            <h2>{{ historyTitle }}</h2>
           </div>
         </div>
 
@@ -207,7 +230,10 @@ onMounted(() => {
     </div>
 
     <div class="action-footer">
-      <UiButton tone="text" :to="{ name: 'my-interviews-dashboard' }">
+      <UiButton
+        tone="text"
+        :to="selectedUserId ? { name: 'team-dashboard' } : { name: 'my-interviews-dashboard' }"
+      >
         К статистике
       </UiButton>
     </div>

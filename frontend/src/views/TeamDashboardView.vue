@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mdiAccountGroupOutline, mdiRefresh } from '@mdi/js';
+import { mdiAccountGroupOutline, mdiHistory, mdiRefresh } from '@mdi/js';
 import { computed, onMounted, ref } from 'vue';
 import UiButton from '../components/ui/UiButton.vue';
 import UiField from '../components/ui/UiField.vue';
@@ -284,6 +284,7 @@ onMounted(() => {
             <span>Ответы</span>
             <span>Success</span>
             <span>Точки роста</span>
+            <span>История</span>
           </div>
 
           <article
@@ -361,6 +362,20 @@ onMounted(() => {
               <span v-else class="muted-inline">
                 {{ employee.summary.totalAnswers ? 'Нет явных точек роста' : 'Нет данных' }}
               </span>
+            </div>
+
+            <div class="row-actions row-actions--compact team-history-cell">
+              <UiButton
+                :icon="mdiHistory"
+                size="sm"
+                tone="secondary"
+                :to="{
+                  name: 'employee-interview-history',
+                  params: { userId: employee.user.id },
+                }"
+              >
+                История
+              </UiButton>
             </div>
           </article>
         </div>

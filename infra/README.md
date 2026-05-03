@@ -7,7 +7,14 @@ cp .env.example .env
 docker compose -f infra/compose/docker-compose.prod.yml --env-file .env up -d --build
 ```
 
+Прод-сборка на VM с Caddy edge:
+
+```bash
+docker compose -f infra/compose/docker-compose.vm.yml --env-file /opt/nord/.env.public up -d --build
+```
+
 Сервисы:
+- `edge` - Caddy edge с TLS и reverse proxy до frontend
 - `postgres` - БД PostgreSQL с volume `postgres_data`
 - `backend-migrate` - одноразовый запуск `prisma migrate deploy`, `npm run bootstrap:admin` и `npm run seed:question-bank`
 - `backend` - NestJS API

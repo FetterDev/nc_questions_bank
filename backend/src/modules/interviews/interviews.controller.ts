@@ -156,6 +156,14 @@ export class InterviewsController {
     return this.interviewsService.getMyHistory(currentUser);
   }
 
+  @ApiOperation({ summary: 'История завершённых интервью сотрудника' })
+  @ApiOkResponse({ type: ListInterviewHistoryResponseDto })
+  @Roles(...MANAGER_ONLY_ROLES)
+  @Get('users/:userId/history')
+  getUserHistory(@Param('userId') userId: string) {
+    return this.interviewsService.getUserHistory(userId);
+  }
+
   @ApiOperation({ summary: 'Детали интервью с результатами и критериями' })
   @ApiOkResponse({ type: InterviewHistoryDetailResponseDto })
   @Roles(UserRole.USER, ...MANAGER_ONLY_ROLES)

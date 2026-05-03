@@ -1353,6 +1353,37 @@
         ]
       }
     },
+    "/api/interviews/users/{userId}/history": {
+      "get": {
+        "operationId": "InterviewsController_getUserHistory",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListInterviewHistoryResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "История завершённых интервью сотрудника",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
     "/api/interviews/{id}/detail": {
       "get": {
         "operationId": "InterviewsController_getInterviewDetail",

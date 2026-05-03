@@ -210,6 +210,28 @@ const router = createRouter({
           },
         },
         {
+          path: 'team/:userId/interview-history',
+          name: 'employee-interview-history',
+          component: () => import('../views/InterviewHistoryView.vue'),
+          meta: {
+            strictRoles: ['MANAGER'] satisfies SessionRole[],
+            section: 'team',
+            title: 'История собеседований',
+            subtitle: 'Завершённые интервью выбранного сотрудника.',
+          },
+        },
+        {
+          path: 'team/:userId/interview-history/:id',
+          name: 'employee-interview-history-detail',
+          component: () => import('../views/InterviewHistoryView.vue'),
+          meta: {
+            strictRoles: ['MANAGER'] satisfies SessionRole[],
+            section: 'team',
+            title: 'История собеседований',
+            subtitle: 'Detail завершённого интервью сотрудника с результатами по критериям.',
+          },
+        },
+        {
           path: 'interviews',
           name: 'interviews-admin',
           component: () => import('../views/InterviewsAdminView.vue'),

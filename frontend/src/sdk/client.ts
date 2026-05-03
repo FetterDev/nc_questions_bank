@@ -873,6 +873,18 @@ export function createApiSdk(options?: ClientOptions) {
       };
     },
 
+    async listUserInterviewHistory(userId: string): Promise<InterviewHistory> {
+      const result = await client.GET('/api/interviews/users/{userId}/history', {
+        params: { path: { userId } },
+      });
+      const data = ensureData(result, 'listUserInterviewHistory');
+
+      return {
+        ...data,
+        items: data.items.map((item) => normalizeInterviewItem(item)),
+      };
+    },
+
     async getInterviewDetail(id: string): Promise<InterviewDetail> {
       const result = await client.GET('/api/interviews/{id}/detail', {
         params: { path: { id } },

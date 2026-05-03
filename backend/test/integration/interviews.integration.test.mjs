@@ -503,6 +503,23 @@ test('completed interview detail and competency matrix include criterion results
   assert.equal(history.response.status, 200);
   assert.ok(history.payload.items.some((item) => item.id === scheduledInterview.id));
 
+  const managerHistory = await api(
+    `/interviews/users/${scheduled.payload.interviewee.id}/history`,
+    {},
+    'manager',
+  );
+
+  assert.equal(managerHistory.response.status, 200);
+  assert.ok(managerHistory.payload.items.some((item) => item.id === scheduledInterview.id));
+
+  const forbiddenManagerHistory = await api(
+    `/interviews/users/${scheduled.payload.interviewee.id}/history`,
+    {},
+    scheduled.payload.interviewer.id,
+  );
+
+  assert.equal(forbiddenManagerHistory.response.status, 403);
+
   const detail = await api(
     `/interviews/${scheduledInterview.id}/detail`,
     {},

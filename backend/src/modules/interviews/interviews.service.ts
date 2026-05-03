@@ -21,6 +21,10 @@ import { QuestionsRepository } from '../questions/questions.repository';
 import { fromDifficultyRank } from '../questions/question-difficulty';
 import { TrainingPresetsRepository } from '../training/training-presets.repository';
 import {
+  buildInterviewFeedback,
+  type InterviewFeedbackCriterionInput,
+} from './interview-feedback';
+import {
   fromTrainingResultDb,
   isCorrectTrainingResult,
   isIncorrectTrainingResult,
@@ -375,12 +379,21 @@ export class InterviewsService {
         tx,
       );
 
+      const feedback = normalizeNullableText(dto.feedback) ??
+        buildInterviewFeedback({
+          resultsCount: payloadItems.length,
+          correctCount,
+          partialCount,
+          incorrectCount,
+          criteria: buildFeedbackCriteria(interview, normalizedItems),
+        });
+
       await this.interviewsRepository.updateInterview(
         interview.id,
         {
           status: InterviewStatus.COMPLETED,
           completedAt,
-          feedback: normalizeNullableText(dto.feedback),
+          feedback,
           resultsCount: payloadItems.length,
           correctCount,
           incorrectCount,
@@ -536,6 +549,19 @@ export class InterviewsService {
     };
   }
 
+  async getUserHistory(userId: string) {
+    const user = await this.requireActiveInterviewUser(
+      normalizeRequiredId(userId, 'userId'),
+    );
+    const interviews = await this.interviewsRepository.listIntervieweeCompletedInterviews(
+      user.id,
+    );
+
+    return {
+      items: interviews.map((item) => this.toInterviewItemResponse(item)),
+    };
+  }
+
   async getInterviewDetail(currentUser: UserContext, id: string) {
     const interview = await this.requireInterview(id);
 
@@ -617,6 +643,16 @@ export class InterviewsService {
     }
 
     return users;
+  }
+
+  private async requireActiveInterviewUser(id: string) {
+    const users = await this.interviewsRepository.findActiveUsersByIds([id]);
+
+    if (users.length !== 1) {
+      throw new NotFoundException(`Active interview user with id '${id}' not found`);
+    }
+
+    return users[0];
   }
 
   private ensureNotSelfPair(interviewerId: string, intervieweeId: string) {
@@ -1061,6 +1097,52 @@ function deriveQuestionResultFromCriteria(
   }
 
   return TrainingResult.PARTIAL;
+}
+
+function buildFeedbackCriteria(
+  interview: {
+    questions: Array<{
+      criteria: Array<{
+        id: string;
+        title: string;
+        competencyName: string | null;
+      }>;
+    }>;
+  },
+  items: Array<{
+    interviewQuestionId: string;
+    criteriaResults: Array<{
+      criterionId: string;
+      result: TrainingResult;
+      comment: string | null;
+    }>;
+  }>,
+): InterviewFeedbackCriterionInput[] {
+  const resultsByCriterionId = new Map(
+    items.flatMap((item) =>
+      item.criteriaResults.map((criterion) => [
+        criterion.criterionId,
+        criterion,
+      ] as const),
+    ),
+  );
+
+  return interview.questions.flatMap((question) =>
+    question.criteria.flatMap((criterion) => {
+      const result = resultsByCriterionId.get(criterion.id);
+
+      if (!result) {
+        return [];
+      }
+
+      return [{
+        title: criterion.title,
+        competencyName: criterion.competencyName,
+        result: result.result as InterviewFeedbackCriterionInput['result'],
+        comment: result.comment,
+      }];
+    }),
+  );
 }
 
 function isPlannedDateInsideBucket(

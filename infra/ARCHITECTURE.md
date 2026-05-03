@@ -8,9 +8,11 @@
 ## Текущая архитектура
 - Прод-запуск: Docker Compose.
 - Файлы:
+  - `infra/compose/docker-compose.vm.yml` (Caddy edge + frontend + backend + db для prod VM),
   - `infra/compose/docker-compose.prod.yml` (frontend + backend + db),
   - `infra/compose/docker-compose.backend.yml` (backend + db).
 - Сервисы:
+  - `edge`: Caddy reverse proxy с TLS для prod VM.
   - `postgres`: основная БД (PostgreSQL 16).
   - `backend-migrate`: одноразовый контейнер для `prisma migrate deploy`, `bootstrap:admin` и `seed:question-bank`.
   - `backend`: NestJS API на порту `3000` внутри сети.
@@ -20,7 +22,8 @@
 - Для локального запуска через корневой `run-local.sh` `postgres` в `infra/compose/docker-compose.backend.yml` публикует порт `5432` на хост (`${POSTGRES_PORT:-5432}:5432`).
 
 ## Маршрутизация трафика
-- Входящий трафик приходит в `frontend` (nginx) на порт `80` контейнера.
+- На prod VM входящий трафик приходит в `edge` (Caddy) на порты `80/443` и проксируется в `frontend`.
+- В compose без edge входящий трафик приходит в `frontend` (nginx) на порт `80` контейнера.
 - `GET /` и прочие не-API пути: отдаются как SPA (`index.html`).
 - `/*` под `/api/`: проксируются nginx в `http://backend:3000/api/`.
 

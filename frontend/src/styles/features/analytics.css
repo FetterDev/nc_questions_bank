@@ -259,7 +259,8 @@
     minmax(180px, 0.7fr)
     minmax(180px, 0.62fr)
     minmax(140px, 0.42fr)
-    minmax(230px, 0.84fr);
+    minmax(230px, 0.84fr)
+    minmax(112px, 0.34fr);
 }
 
 .team-employee-row {
@@ -329,6 +330,10 @@
 
 .team-success-cell {
   align-content: center;
+}
+
+.team-history-cell {
+  justify-content: start;
 }
 
 .team-success-cell .v-progress-linear {

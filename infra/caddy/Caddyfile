@@ -1,0 +1,30 @@
+{
+  email {$ACME_EMAIL}
+}
+
+http://192.168.0.124 {
+  encode zstd gzip
+
+  header {
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    -Server
+  }
+
+  reverse_proxy frontend:80
+}
+
+{$PUBLIC_DOMAIN} {
+  encode zstd gzip
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    -Server
+  }
+
+  reverse_proxy frontend:80
+}
