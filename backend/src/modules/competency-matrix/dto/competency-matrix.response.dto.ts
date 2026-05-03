@@ -64,6 +64,23 @@ class CompetencyMatrixCompetencyDto {
   lastAssessedAt!: string | null;
 }
 
+class CompetencyMatrixStackLevelDto {
+  @ApiProperty({ type: CompetencyMatrixStackDto })
+  stack!: CompetencyMatrixStackDto;
+
+  @ApiProperty({ example: 7 })
+  assessedCount!: number;
+
+  @ApiProperty({ example: 57 })
+  accuracy!: number;
+
+  @ApiProperty({
+    enum: ['not_assessed', 'junior', 'middle', 'senior', 'lead'],
+    example: 'middle',
+  })
+  level!: 'not_assessed' | 'junior' | 'middle' | 'senior' | 'lead';
+}
+
 export class CompetencyMatrixUserResponseDto {
   @ApiProperty({ type: CompetencyMatrixUserDto })
   user!: CompetencyMatrixUserDto;
@@ -73,6 +90,9 @@ export class CompetencyMatrixUserResponseDto {
 
   @ApiProperty({ type: [CompetencyMatrixCompetencyDto] })
   competencies!: CompetencyMatrixCompetencyDto[];
+
+  @ApiProperty({ type: [CompetencyMatrixStackLevelDto] })
+  stackLevels!: CompetencyMatrixStackLevelDto[];
 }
 
 export class ListCompetencyMatrixResponseDto {

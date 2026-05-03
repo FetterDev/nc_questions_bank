@@ -2,11 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { coerceQuestionStructuredContent } from '../questions/question-structured-content';
 import { QuestionDifficulty, fromDifficultyRank } from '../questions/question-difficulty';
 import { fromTrainingResultDb, TrainingResult } from '../training/training-result';
+import {
+  buildGrowthRecommendations,
+  buildManagerReport,
+  resolveStackLevel,
+  type GrowthAreaProgressItem,
+} from './analytics-derived';
 import { AnalyticsRepository } from './analytics.repository';
 import type {
+  GrowthAreaCriterionRow,
   TeamActivitySummaryRow,
   TeamAnswerSummaryRow,
   TeamGrowthTopicRow,
+  TeamStackLevelRow,
 } from './analytics.repository';
 
 function toPercent(value: number, total: number) {
@@ -82,11 +90,18 @@ export class AnalyticsService {
   }
 
   async getGrowthAnalytics(userId: string) {
-    const [summaryRow, feedbackRows, weakTopicsRows, questionRows] = await Promise.all([
+    const [
+      summaryRow,
+      feedbackRows,
+      weakTopicsRows,
+      questionRows,
+      growthAreaRows,
+    ] = await Promise.all([
       this.analyticsRepository.getGrowthSummary(userId),
       this.analyticsRepository.getGrowthFeedbackEntries(userId),
       this.analyticsRepository.getGrowthTopicStats(userId),
       this.analyticsRepository.getGrowthQuestionStats(userId),
+      this.analyticsRepository.listGrowthAreaCriteria(userId),
     ]);
 
     const questionStats = questionRows.map((item) => ({
@@ -106,6 +121,49 @@ export class AnalyticsService {
       lastAnsweredAt: item.lastAnsweredAt,
       lastResult: fromTrainingResultDb(item.lastResult),
     }));
+
+    const weakTopics = weakTopicsRows
+      .map((item) => ({
+        topicId: item.topicId,
+        name: item.name,
+        slug: item.slug,
+        correctCount: item.correctCount,
+        incorrectCount: item.incorrectCount,
+        partialCount: item.partialCount,
+        accuracy: toPercent(
+          item.correctCount,
+          item.correctCount + item.incorrectCount + item.partialCount,
+        ),
+      }))
+      .sort(
+        (left, right) =>
+          right.incorrectCount +
+            right.partialCount -
+            left.incorrectCount -
+            left.partialCount ||
+          left.accuracy - right.accuracy ||
+          right.topicId.localeCompare(left.topicId, 'ru-RU'),
+      );
+    const failedQuestions = questionStats
+      .filter((item) => item.lastResult !== TrainingResult.CORRECT)
+      .sort(
+        (left, right) =>
+          right.incorrectCount +
+            right.partialCount -
+            left.incorrectCount -
+            left.partialCount ||
+          right.lastAnsweredAt.getTime() - left.lastAnsweredAt.getTime() ||
+          right.questionId.localeCompare(left.questionId, 'ru-RU'),
+      );
+    const answeredQuestions = questionStats
+      .filter((item) => item.lastResult === TrainingResult.CORRECT)
+      .sort(
+        (left, right) =>
+          right.correctCount - left.correctCount ||
+          right.lastAnsweredAt.getTime() - left.lastAnsweredAt.getTime() ||
+          right.questionId.localeCompare(left.questionId, 'ru-RU'),
+      );
+    const growthAreaProgress = buildGrowthAreaProgress(growthAreaRows);
 
     return {
       summary: {
@@ -128,47 +186,15 @@ export class AnalyticsService {
         feedback: item.feedback,
         finishedAt: item.finishedAt,
       })),
-      weakTopics: weakTopicsRows
-        .map((item) => ({
-          topicId: item.topicId,
-          name: item.name,
-          slug: item.slug,
-          correctCount: item.correctCount,
-          incorrectCount: item.incorrectCount,
-          partialCount: item.partialCount,
-          accuracy: toPercent(
-            item.correctCount,
-            item.correctCount + item.incorrectCount + item.partialCount,
-          ),
-        }))
-        .sort(
-          (left, right) =>
-            right.incorrectCount +
-              right.partialCount -
-              left.incorrectCount -
-              left.partialCount ||
-            left.accuracy - right.accuracy ||
-            right.topicId.localeCompare(left.topicId, 'ru-RU'),
-        ),
-      failedQuestions: questionStats
-        .filter((item) => item.lastResult !== TrainingResult.CORRECT)
-        .sort(
-          (left, right) =>
-            right.incorrectCount +
-              right.partialCount -
-              left.incorrectCount -
-              left.partialCount ||
-            right.lastAnsweredAt.getTime() - left.lastAnsweredAt.getTime() ||
-            right.questionId.localeCompare(left.questionId, 'ru-RU'),
-        ),
-      answeredQuestions: questionStats
-        .filter((item) => item.lastResult === TrainingResult.CORRECT)
-        .sort(
-          (left, right) =>
-            right.correctCount - left.correctCount ||
-            right.lastAnsweredAt.getTime() - left.lastAnsweredAt.getTime() ||
-            right.questionId.localeCompare(left.questionId, 'ru-RU'),
-        )
+      weakTopics,
+      failedQuestions,
+      answeredQuestions,
+      growthAreaProgress,
+      recommendations: buildGrowthRecommendations({
+        weakTopics,
+        failedQuestions,
+        growthAreaProgress,
+      }),
     };
   }
 
@@ -178,11 +204,13 @@ export class AnalyticsService {
       answerSummaries,
       activitySummaries,
       growthTopicRows,
+      stackLevelRows,
     ] = await Promise.all([
       this.analyticsRepository.listTeamEmployees(),
       this.analyticsRepository.getTeamAnswerSummaries(),
       this.analyticsRepository.getTeamActivitySummaries(),
       this.analyticsRepository.getTeamGrowthTopicStats(),
+      this.analyticsRepository.getTeamStackLevelRows(),
     ]);
     const answersByUser = new Map(
       answerSummaries.map((item) => [item.userId, item]),
@@ -191,6 +219,7 @@ export class AnalyticsService {
       activitySummaries.map((item) => [item.userId, item]),
     );
     const growthTopicsByUser = groupGrowthTopics(growthTopicRows);
+    const stackLevelsByUser = groupStackLevels(stackLevelRows);
     const totalAnswers = answerSummaries.reduce(
       (total, item) => total + item.totalAnswers,
       0,
@@ -200,47 +229,57 @@ export class AnalyticsService {
       0,
     );
 
-    return {
-      summary: {
-        employeesCount: employees.length,
-        employeesWithAnswersCount: answerSummaries.filter(
-          (item) => item.totalAnswers > 0,
-        ).length,
-        totalAnswers,
-        averageAccuracy: toPercent(totalCorrect, totalAnswers),
-      },
-      items: employees.map((employee) => {
-        const answers = answersByUser.get(employee.id);
-        const activity = activityByUser.get(employee.id);
-        const lastActivityAt = resolveLastActivityAt(answers, activity);
+    const summary = {
+      employeesCount: employees.length,
+      employeesWithAnswersCount: answerSummaries.filter(
+        (item) => item.totalAnswers > 0,
+      ).length,
+      totalAnswers,
+      averageAccuracy: toPercent(totalCorrect, totalAnswers),
+    };
+    const items = employees.map((employee) => {
+      const answers = answersByUser.get(employee.id);
+      const activity = activityByUser.get(employee.id);
+      const lastActivityAt = resolveLastActivityAt(answers, activity);
 
-        return {
-          user: {
-            id: employee.id,
-            login: employee.login,
-            displayName: employee.displayName,
-          },
-          stacks: employee.stacks.map((item) => ({
-            id: item.stack.id,
-            name: item.stack.name,
-            slug: item.stack.slug,
-          })),
-          summary: {
-            totalAnswers: answers?.totalAnswers ?? 0,
-            correctCount: answers?.correctCount ?? 0,
-            incorrectCount: answers?.incorrectCount ?? 0,
-            partialCount: answers?.partialCount ?? 0,
-            accuracy: toPercent(
-              answers?.correctCount ?? 0,
-              answers?.totalAnswers ?? 0,
-            ),
-            trainingSessionsCount: activity?.trainingSessionsCount ?? 0,
-            completedInterviewsCount: activity?.completedInterviewsCount ?? 0,
-            feedbackCount: activity?.feedbackCount ?? 0,
-            lastActivityAt: lastActivityAt?.toISOString() ?? null,
-          },
-          growthTopics: growthTopicsByUser.get(employee.id) ?? [],
-        };
+      return {
+        user: {
+          id: employee.id,
+          login: employee.login,
+          displayName: employee.displayName,
+          role: employee.role,
+        },
+        stacks: employee.stacks.map((item) => ({
+          id: item.stack.id,
+          name: item.stack.name,
+          slug: item.stack.slug,
+        })),
+        stackLevels: stackLevelsByUser.get(employee.id) ?? [],
+        summary: {
+          totalAnswers: answers?.totalAnswers ?? 0,
+          correctCount: answers?.correctCount ?? 0,
+          incorrectCount: answers?.incorrectCount ?? 0,
+          partialCount: answers?.partialCount ?? 0,
+          accuracy: toPercent(
+            answers?.correctCount ?? 0,
+            answers?.totalAnswers ?? 0,
+          ),
+          trainingSessionsCount: activity?.trainingSessionsCount ?? 0,
+          completedInterviewsCount: activity?.completedInterviewsCount ?? 0,
+          feedbackCount: activity?.feedbackCount ?? 0,
+          lastActivityAt: lastActivityAt?.toISOString() ?? null,
+        },
+        growthTopics: growthTopicsByUser.get(employee.id) ?? [],
+      };
+    });
+
+    return {
+      summary,
+      items,
+      managerReport: buildManagerReport({
+        generatedAt: new Date(),
+        summary,
+        employees: items,
       }),
     };
   }
@@ -259,6 +298,121 @@ function resolveLastActivityAt(
   }
 
   return dates.sort((left, right) => right.getTime() - left.getTime())[0];
+}
+
+function groupStackLevels(rows: TeamStackLevelRow[]) {
+  const grouped = new Map<
+    string,
+    Array<{
+      stack: {
+        id: string;
+        name: string;
+        slug: string;
+      };
+      assessedCount: number;
+      accuracy: number;
+      level: ReturnType<typeof resolveStackLevel>;
+    }>
+  >();
+
+  for (const row of rows) {
+    const total = row.correctCount + row.partialCount + row.incorrectCount;
+    const accuracy = toPercent(row.correctCount, total);
+    const items = grouped.get(row.userId) ?? [];
+
+    items.push({
+      stack: {
+        id: row.stackId,
+        name: row.stackName,
+        slug: row.stackSlug,
+      },
+      assessedCount: row.totalCount,
+      accuracy,
+      level: resolveStackLevel({
+        assessedCount: row.totalCount,
+        accuracy,
+      }),
+    });
+    grouped.set(row.userId, items);
+  }
+
+  return new Map(
+    [...grouped.entries()].map(([userId, items]) => [
+      userId,
+      items.sort(
+        (left, right) =>
+          left.stack.name.localeCompare(right.stack.name, 'ru-RU') ||
+          left.stack.id.localeCompare(right.stack.id, 'ru-RU'),
+      ),
+    ]),
+  );
+}
+
+function buildGrowthAreaProgress(
+  rows: GrowthAreaCriterionRow[],
+): GrowthAreaProgressItem[] {
+  const grouped = new Map<string, GrowthAreaCriterionRow[]>();
+
+  for (const row of rows) {
+    const items = grouped.get(row.competencyId) ?? [];
+    items.push(row);
+    grouped.set(row.competencyId, items);
+  }
+
+  return [...grouped.entries()]
+    .map(([competencyId, items]) => {
+      const sorted = [...items].sort(
+        (left, right) =>
+          right.assessedAt.getTime() - left.assessedAt.getTime() ||
+          right.criterionId.localeCompare(left.criterionId, 'ru-RU'),
+      );
+      const latest = sorted[0];
+      const correctCount = items.reduce(
+        (total, item) =>
+          total + (item.result === 'CORRECT' ? Math.max(1, item.weight) : 0),
+        0,
+      );
+      const totalCount = items.reduce(
+        (total, item) => total + Math.max(1, item.weight),
+        0,
+      );
+      const resolvedCount = items.filter((item) => item.result === 'CORRECT').length;
+
+      return {
+        competencyId,
+        name: latest.competencyName,
+        slug: latest.competencySlug,
+        latestGrowthArea:
+          latest.growthArea ??
+          `${latest.title}${latest.comment ? ` - ${latest.comment}` : ''}`,
+        firstSeenAt: sorted[sorted.length - 1].assessedAt.toISOString(),
+        lastSeenAt: latest.assessedAt.toISOString(),
+        totalGrowthPoints: items.length,
+        resolvedCount,
+        currentStatus:
+          latest.result === 'CORRECT'
+            ? 'resolved' as const
+            : 'in_progress' as const,
+        accuracy: toPercent(correctCount, totalCount),
+        entries: sorted.slice(0, 5).map((item) => ({
+          interviewId: item.interviewId,
+          criterionId: item.criterionId,
+          result: fromTrainingResultDb(item.result),
+          growthArea:
+            item.growthArea ??
+            `${item.title}${item.comment ? ` - ${item.comment}` : ''}`,
+          assessedAt: item.assessedAt.toISOString(),
+        })),
+      };
+    })
+    .sort(
+      (left, right) =>
+        Number(left.currentStatus === 'resolved') -
+          Number(right.currentStatus === 'resolved') ||
+        right.totalGrowthPoints - left.totalGrowthPoints ||
+        left.accuracy - right.accuracy ||
+        left.name.localeCompare(right.name, 'ru-RU'),
+    );
 }
 
 function groupGrowthTopics(rows: TeamGrowthTopicRow[]) {

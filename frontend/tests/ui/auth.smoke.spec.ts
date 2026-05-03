@@ -118,20 +118,32 @@ function createBankQuestion() {
   return {
     id: 'question-prisma-search',
     text: 'Почему сложный поиск в сервисе нельзя оставлять на Prisma query builder?',
-    textContent: {
-      text: 'Почему сложный поиск в сервисе нельзя оставлять на Prisma query builder?',
-      code: 'const results = await prisma.question.findMany({ where, orderBy });',
-      codeLanguage: 'typescript',
-    },
+    textContent: [
+      {
+        kind: 'text',
+        content: 'Почему сложный поиск в сервисе нельзя оставлять на Prisma query builder?',
+      },
+      {
+        kind: 'code',
+        content: 'const results = await prisma.question.findMany({ where, orderBy });',
+        language: 'typescript',
+      },
+    ],
     answer: 'Потому что ранжирование и FTS должны жить в SearchRepository.',
-    answerContent: {
-      text: 'Потому что ранжирование и FTS должны жить в SearchRepository.',
-    },
+    answerContent: [
+      {
+        kind: 'text',
+        content: 'Потому что ранжирование и FTS должны жить в SearchRepository.',
+      },
+    ],
     difficulty: 'senior',
+    company: null,
     topics: [
       { id: 'topic-prisma', name: 'Prisma', slug: 'prisma' },
       { id: 'topic-search', name: 'Search', slug: 'search' },
     ],
+    competencies: [],
+    evaluationCriteria: [],
     createdAt: '2026-03-06T09:00:00.000Z',
     updatedAt: '2026-03-08T09:00:00.000Z',
     pendingChangeRequest: {
@@ -219,6 +231,17 @@ async function mockBankFlow(
     });
   });
 
+  await page.route(/\/api\/competencies(?:\?.*)?$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [],
+        total: 0,
+      }),
+    });
+  });
+
   await page.route(/\/api\/search\/questions(?:\?.*)?$/, async (route) => {
     await route.fulfill({
       status: 200,
@@ -268,9 +291,17 @@ async function mockBankFlow(
     async (route) => {
     if (route.request().method() === 'PATCH') {
       const payload = route.request().postDataJSON();
-      question.text = payload.textContent.text;
+      question.text =
+        payload.textContent.find(
+          (block: { kind: string; content?: string }) => block.kind === 'text',
+        )
+          ?.content ?? '';
       question.textContent = payload.textContent;
-      question.answer = payload.answerContent.text;
+      question.answer =
+        payload.answerContent.find(
+          (block: { kind: string; content?: string }) => block.kind === 'text',
+        )
+          ?.content ?? '';
       question.answerContent = payload.answerContent;
 
       await route.fulfill({

@@ -39,6 +39,14 @@ export function useGrowthCard() {
     analytics.value?.answeredQuestions ?? [],
   );
 
+  const growthAreaProgress = computed(() =>
+    analytics.value?.growthAreaProgress ?? [],
+  );
+
+  const recommendations = computed(() =>
+    analytics.value?.recommendations ?? [],
+  );
+
   const snapshotLabel = computed(() => {
     if (!summary.value.totalResults) {
       return 'нет данных';
@@ -72,7 +80,9 @@ export function useGrowthCard() {
     errorMessage,
     feedbackEntries,
     failedQuestions,
+    growthAreaProgress,
     loading,
+    recommendations,
     snapshotLabel,
     summary,
     weakTopics,

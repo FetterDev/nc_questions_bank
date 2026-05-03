@@ -418,6 +418,18 @@ function competencyMeta(item: CompetencyMatrix['competencies'][number]) {
   return `${item.accuracy}% · ${item.correctCount} / ${item.partialCount} / ${item.incorrectCount}`;
 }
 
+function formatStackLevel(level: CompetencyMatrix['stackLevels'][number]) {
+  return `${level.stack.name}: ${formatLevel(level.level)} · ${level.accuracy}% · ${level.assessedCount}`;
+}
+
+function formatLevel(value: CompetencyMatrix['stackLevels'][number]['level']) {
+  if (value === 'not_assessed') {
+    return 'нет оценки';
+  }
+
+  return value;
+}
+
 function handleDragStart(competencyId: string) {
   draggingCompetencyId.value = competencyId;
 }
@@ -738,6 +750,17 @@ onMounted(async () => {
                 <div class="topic-name-cell">
                   <strong>{{ matrix.user.displayName }}</strong>
                   <p>{{ matrix.user.login }}</p>
+                  <div v-if="matrix.stackLevels.length" class="competency-level-list">
+                    <v-chip
+                      v-for="level in matrix.stackLevels"
+                      :key="level.stack.id"
+                      color="primary"
+                      size="small"
+                      variant="tonal"
+                    >
+                      {{ formatStackLevel(level) }}
+                    </v-chip>
+                  </div>
                 </div>
 
                 <UiAutocomplete
@@ -920,6 +943,18 @@ onMounted(async () => {
                 {{ stack.name }}
               </v-chip>
             </div>
+          </div>
+
+          <div v-if="myMatrix.stackLevels.length" class="competency-level-list">
+            <v-chip
+              v-for="level in myMatrix.stackLevels"
+              :key="level.stack.id"
+              color="primary"
+              size="small"
+              variant="tonal"
+            >
+              {{ formatStackLevel(level) }}
+            </v-chip>
           </div>
 
           <div v-if="myMatrix.competencies.length" class="competency-matrix-grid">

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { TrainingSessionResultMark, UserRole, UserStatus } from '@prisma/client';
+import { resolveStackLevel } from '../analytics/analytics-derived';
 import { fromTrainingResultDb, isCorrectTrainingResult, isPartialTrainingResult } from '../training/training-result';
 import {
   CompetencyMatrixCompetencyRecord,
@@ -124,6 +125,11 @@ export class CompetencyMatrixService {
     criteriaResults: CompetencyMatrixCriterionResultRecord[],
     stackId?: string,
   ) {
+    const aggregatedCompetencies = this.aggregateCompetencies(
+      competencies,
+      criteriaResults,
+    );
+
     return {
       user: {
         id: user.id,
@@ -136,8 +142,58 @@ export class CompetencyMatrixService {
           name: item.stack.name,
           slug: item.stack.slug,
         })),
-      competencies: this.aggregateCompetencies(competencies, criteriaResults),
+      competencies: aggregatedCompetencies,
+      stackLevels: this.aggregateStackLevels(aggregatedCompetencies),
     };
+  }
+
+  private aggregateStackLevels(
+    competencies: ReturnType<CompetencyMatrixService['aggregateCompetencies']>,
+  ) {
+    const grouped = new Map<
+      string,
+      {
+        stack: {
+          id: string;
+          name: string;
+          slug: string;
+        };
+        assessedCount: number;
+        correctCount: number;
+      }
+    >();
+
+    for (const competency of competencies) {
+      const existing = grouped.get(competency.stack.id) ?? {
+        stack: competency.stack,
+        assessedCount: 0,
+        correctCount: 0,
+      };
+
+      existing.assessedCount += competency.totalCount;
+      existing.correctCount += competency.correctCount;
+      grouped.set(competency.stack.id, existing);
+    }
+
+    return [...grouped.values()]
+      .map((item) => {
+        const accuracy = toPercent(item.correctCount, item.assessedCount);
+
+        return {
+          stack: item.stack,
+          assessedCount: item.assessedCount,
+          accuracy,
+          level: resolveStackLevel({
+            assessedCount: item.assessedCount,
+            accuracy,
+          }),
+        };
+      })
+      .sort(
+        (left, right) =>
+          left.stack.name.localeCompare(right.stack.name, 'ru-RU') ||
+          left.stack.id.localeCompare(right.stack.id, 'ru-RU'),
+      );
   }
 
   private aggregateCompetencies(

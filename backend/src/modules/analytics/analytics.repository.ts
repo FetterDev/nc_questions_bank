@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  InterviewStatus,
   Prisma,
   TrainingSessionResultMark,
   UserRole,
@@ -66,6 +67,7 @@ const teamEmployeeSelect = {
   id: true,
   login: true,
   displayName: true,
+  role: true,
   stacks: {
     include: {
       stack: true,
@@ -103,6 +105,32 @@ export type TeamGrowthTopicRow = {
   correctCount: number;
   incorrectCount: number;
   partialCount: number;
+};
+
+export type TeamStackLevelRow = {
+  userId: string;
+  stackId: string;
+  stackName: string;
+  stackSlug: string;
+  totalCount: number;
+  correctCount: number;
+  partialCount: number;
+  incorrectCount: number;
+};
+
+export type GrowthAreaCriterionRow = {
+  interviewId: string;
+  criterionId: string;
+  competencyId: string;
+  competencyName: string;
+  competencySlug: string;
+  result: TrainingSessionResultMark;
+  weight: number;
+  growthArea: string | null;
+  isGrowthPoint: boolean;
+  comment: string | null;
+  title: string;
+  assessedAt: Date;
 };
 
 @Injectable()
@@ -463,5 +491,111 @@ export class AnalyticsRepository {
         tr."topicName" ASC,
         tr."topicId" DESC
     `);
+  }
+
+  getTeamStackLevelRows() {
+    return this.prisma.$queryRaw<TeamStackLevelRow[]>(Prisma.sql`
+      SELECT
+        i."intervieweeId" AS "userId",
+        c."stackId",
+        s.name AS "stackName",
+        s.slug AS "stackSlug",
+        COALESCE(SUM(GREATEST(iqc.weight, 1)), 0)::int AS "totalCount",
+        COALESCE(SUM(GREATEST(iqc.weight, 1)) FILTER (WHERE iqc.result = 'CORRECT'), 0)::int AS "correctCount",
+        COALESCE(SUM(GREATEST(iqc.weight, 1)) FILTER (WHERE iqc.result = 'PARTIAL'), 0)::int AS "partialCount",
+        COALESCE(SUM(GREATEST(iqc.weight, 1)) FILTER (WHERE iqc.result = 'INCORRECT'), 0)::int AS "incorrectCount"
+      FROM interview_question_criteria iqc
+      INNER JOIN competencies c ON c.id = iqc."competencyId"
+      INNER JOIN technology_stacks s ON s.id = c."stackId"
+      INNER JOIN interview_questions iq ON iq.id = iqc."interviewQuestionId"
+      INNER JOIN interviews i ON i.id = iq."interviewId"
+      WHERE
+        i.status = 'COMPLETED'
+        AND i."completedAt" IS NOT NULL
+        AND iqc.result IS NOT NULL
+      GROUP BY i."intervieweeId", c."stackId", s.name, s.slug
+    `);
+  }
+
+  async listGrowthAreaCriteria(userId: string): Promise<GrowthAreaCriterionRow[]> {
+    const rows = await this.prisma.interviewQuestionCriterion.findMany({
+      where: {
+        competencyId: {
+          not: null,
+        },
+        result: {
+          not: null,
+        },
+        interviewQuestion: {
+          interview: {
+            status: InterviewStatus.COMPLETED,
+            completedAt: {
+              not: null,
+            },
+            intervieweeId: userId,
+          },
+        },
+        OR: [
+          { isGrowthPoint: true },
+          { growthArea: { not: null } },
+          { result: { not: TrainingSessionResultMark.CORRECT } },
+        ],
+      },
+      select: {
+        id: true,
+        competencyId: true,
+        competencyName: true,
+        competencySlug: true,
+        result: true,
+        weight: true,
+        growthArea: true,
+        isGrowthPoint: true,
+        comment: true,
+        title: true,
+        interviewQuestion: {
+          select: {
+            interview: {
+              select: {
+                id: true,
+                completedAt: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: [
+        {
+          interviewQuestion: {
+            interview: {
+              completedAt: 'desc',
+            },
+          },
+        },
+        { id: 'desc' },
+      ],
+    });
+
+    return rows.flatMap((row) => {
+      const assessedAt = row.interviewQuestion.interview.completedAt;
+
+      if (!row.competencyId || !row.competencyName || !row.competencySlug || !row.result || !assessedAt) {
+        return [];
+      }
+
+      return [{
+        interviewId: row.interviewQuestion.interview.id,
+        criterionId: row.id,
+        competencyId: row.competencyId,
+        competencyName: row.competencyName,
+        competencySlug: row.competencySlug,
+        result: row.result,
+        weight: row.weight,
+        growthArea: row.growthArea,
+        isGrowthPoint: row.isGrowthPoint,
+        comment: row.comment,
+        title: row.title,
+        assessedAt,
+      }];
+    });
   }
 }

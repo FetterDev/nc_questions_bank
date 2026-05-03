@@ -25,6 +25,11 @@ import {
   type InterviewFeedbackCriterionInput,
 } from './interview-feedback';
 import {
+  buildCriterionGrowthArea,
+  buildInterviewGrowthAreas,
+  shouldMarkCriterionAsGrowthPoint,
+} from './interview-growth-areas';
+import {
   fromTrainingResultDb,
   isCorrectTrainingResult,
   isIncorrectTrainingResult,
@@ -308,6 +313,8 @@ export class InterviewsService {
         criterionId: normalizeRequiredId(criterion.criterionId, 'criterionId'),
         result: criterion.result,
         comment: normalizeNullableText(criterion.comment),
+        isGrowthPoint: Boolean(criterion.isGrowthPoint),
+        growthArea: normalizeNullableText(criterion.growthArea),
       })),
     }));
     const uniqueIds = new Set(payloadItems.map((item) => item.interviewQuestionId));
@@ -363,6 +370,15 @@ export class InterviewsService {
       isPartialTrainingResult(item.result),
     ).length;
     const completedAt = new Date();
+    const feedbackCriteria = buildFeedbackCriteria(interview, normalizedItems);
+    const growthCriteria = buildGrowthCriteria(interview, normalizedItems);
+    const growthByCriterionId = new Map(
+      growthCriteria.map((criterion) => [criterion.criterionId, criterion]),
+    );
+    const growthAreas = buildInterviewGrowthAreas({
+      manualGrowthAreas: dto.growthAreas,
+      criteria: growthCriteria,
+    });
 
     const updated = await this.prisma.$transaction(async (tx) => {
       await this.interviewsRepository.updateQuestionResults(
@@ -374,6 +390,10 @@ export class InterviewsService {
             criterionId: criterion.criterionId,
             result: toTrainingResultDb(criterion.result),
             comment: criterion.comment,
+            isGrowthPoint:
+              growthByCriterionId.get(criterion.criterionId)?.isGrowthPoint ?? false,
+            growthArea:
+              growthByCriterionId.get(criterion.criterionId)?.growthArea ?? null,
           })),
         })),
         tx,
@@ -385,7 +405,7 @@ export class InterviewsService {
           correctCount,
           partialCount,
           incorrectCount,
-          criteria: buildFeedbackCriteria(interview, normalizedItems),
+          criteria: feedbackCriteria,
         });
 
       await this.interviewsRepository.updateInterview(
@@ -394,6 +414,7 @@ export class InterviewsService {
           status: InterviewStatus.COMPLETED,
           completedAt,
           feedback,
+          growthAreas,
           resultsCount: payloadItems.length,
           correctCount,
           incorrectCount,
@@ -526,6 +547,7 @@ export class InterviewsService {
           interviewId: item.id,
           interviewer: this.toUserResponse(item.interviewer),
           feedback: item.feedback ?? '',
+          growthAreas: item.growthAreas,
           completedAt: item.completedAt?.toISOString() ?? new Date(0).toISOString(),
         })),
       recentInterviews: completed
@@ -582,6 +604,7 @@ export class InterviewsService {
       interviewer: this.toUserResponse(interview.interviewer),
       interviewee: this.toUserResponse(interview.interviewee),
       feedback: interview.feedback,
+      growthAreas: interview.growthAreas,
       questions: interview.questions.map((question) => ({
         id: question.id,
         questionId: question.questionId,
@@ -601,6 +624,8 @@ export class InterviewsService {
           position: criterion.position,
           result: criterion.result ? fromTrainingResultDb(criterion.result) : null,
           comment: criterion.comment,
+          isGrowthPoint: criterion.isGrowthPoint,
+          growthArea: criterion.growthArea,
           competency: criterion.competencyId
             ? {
                 id: criterion.competencyId,
@@ -1062,8 +1087,8 @@ function normalizeIdList(values: string[]) {
   return normalized;
 }
 
-function normalizeNullableText(value: string | undefined) {
-  if (value === undefined) {
+function normalizeNullableText(value: string | null | undefined) {
+  if (value === undefined || value === null) {
     return null;
   }
 
@@ -1140,6 +1165,63 @@ function buildFeedbackCriteria(
         competencyName: criterion.competencyName,
         result: result.result as InterviewFeedbackCriterionInput['result'],
         comment: result.comment,
+      }];
+    }),
+  );
+}
+
+function buildGrowthCriteria(
+  interview: {
+    questions: Array<{
+      criteria: Array<{
+        id: string;
+        title: string;
+        competencyName: string | null;
+      }>;
+    }>;
+  },
+  items: Array<{
+    criteriaResults: Array<{
+      criterionId: string;
+      result: TrainingResult;
+      comment: string | null;
+      isGrowthPoint: boolean;
+      growthArea: string | null;
+    }>;
+  }>,
+) {
+  const resultsByCriterionId = new Map(
+    items.flatMap((item) =>
+      item.criteriaResults.map((criterion) => [
+        criterion.criterionId,
+        criterion,
+      ] as const),
+    ),
+  );
+
+  return interview.questions.flatMap((question) =>
+    question.criteria.flatMap((criterion) => {
+      const result = resultsByCriterionId.get(criterion.id);
+
+      if (!result) {
+        return [];
+      }
+
+      const input = {
+        criterionId: criterion.id,
+        title: criterion.title,
+        competencyName: criterion.competencyName,
+        result: result.result,
+        comment: result.comment,
+        isGrowthPoint: result.isGrowthPoint,
+        growthArea: result.growthArea,
+      };
+      const growthArea = buildCriterionGrowthArea(input);
+
+      return [{
+        ...input,
+        isGrowthPoint: shouldMarkCriterionAsGrowthPoint(input),
+        growthArea,
       }];
     }),
   );

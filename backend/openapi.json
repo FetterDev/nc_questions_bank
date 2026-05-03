@@ -3125,6 +3125,138 @@
           "lastAnsweredAt"
         ]
       },
+      "GrowthAreaProgressEntryDto": {
+        "type": "object",
+        "properties": {
+          "interviewId": {
+            "type": "string",
+            "example": "cm8interview1"
+          },
+          "criterionId": {
+            "type": "string",
+            "example": "cm8criterion1"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "correct",
+              "incorrect",
+              "partial"
+            ],
+            "example": "partial"
+          },
+          "growthArea": {
+            "type": "string",
+            "example": "Закрепить edge cases."
+          },
+          "assessedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "interviewId",
+          "criterionId",
+          "result",
+          "growthArea",
+          "assessedAt"
+        ]
+      },
+      "GrowthAreaProgressItemDto": {
+        "type": "object",
+        "properties": {
+          "competencyId": {
+            "type": "string",
+            "example": "cm8competency1"
+          },
+          "name": {
+            "type": "string",
+            "example": "Testing"
+          },
+          "slug": {
+            "type": "string",
+            "example": "testing"
+          },
+          "latestGrowthArea": {
+            "type": "string",
+            "example": "Добавить практику edge cases."
+          },
+          "firstSeenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSeenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalGrowthPoints": {
+            "type": "number",
+            "example": 3
+          },
+          "resolvedCount": {
+            "type": "number",
+            "example": 1
+          },
+          "currentStatus": {
+            "type": "string",
+            "enum": [
+              "resolved",
+              "in_progress"
+            ],
+            "example": "in_progress"
+          },
+          "accuracy": {
+            "type": "number",
+            "example": 40
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrowthAreaProgressEntryDto"
+            }
+          }
+        },
+        "required": [
+          "competencyId",
+          "name",
+          "slug",
+          "latestGrowthArea",
+          "firstSeenAt",
+          "lastSeenAt",
+          "totalGrowthPoints",
+          "resolvedCount",
+          "currentStatus",
+          "accuracy",
+          "entries"
+        ]
+      },
+      "GrowthRecommendationDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "topic",
+              "question",
+              "growth_area"
+            ],
+            "example": "topic"
+          },
+          "text": {
+            "type": "string",
+            "example": "Повторить тему TypeScript."
+          },
+          "priority": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "kind",
+          "text",
+          "priority"
+        ]
+      },
       "GrowthAnalyticsResponseDto": {
         "type": "object",
         "properties": {
@@ -3154,6 +3286,18 @@
             "items": {
               "$ref": "#/components/schemas/GrowthAnalyticsQuestionStatDto"
             }
+          },
+          "growthAreaProgress": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrowthAreaProgressItemDto"
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrowthRecommendationDto"
+            }
           }
         },
         "required": [
@@ -3161,7 +3305,9 @@
           "feedbackEntries",
           "weakTopics",
           "failedQuestions",
-          "answeredQuestions"
+          "answeredQuestions",
+          "growthAreaProgress",
+          "recommendations"
         ]
       },
       "BankAnalyticsDifficultyMixItemDto": {
@@ -3305,12 +3451,17 @@
           "displayName": {
             "type": "string",
             "example": "Иван Петров"
+          },
+          "role": {
+            "type": "string",
+            "example": "USER"
           }
         },
         "required": [
           "id",
           "login",
-          "displayName"
+          "displayName",
+          "role"
         ]
       },
       "TeamAnalyticsStackDto": {
@@ -3333,6 +3484,39 @@
           "id",
           "name",
           "slug"
+        ]
+      },
+      "TeamAnalyticsStackLevelDto": {
+        "type": "object",
+        "properties": {
+          "stack": {
+            "$ref": "#/components/schemas/TeamAnalyticsStackDto"
+          },
+          "assessedCount": {
+            "type": "number",
+            "example": 6
+          },
+          "accuracy": {
+            "type": "number",
+            "example": 78
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "not_assessed",
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "senior"
+          }
+        },
+        "required": [
+          "stack",
+          "assessedCount",
+          "accuracy",
+          "level"
         ]
       },
       "TeamAnalyticsEmployeeSummaryDto": {
@@ -3442,6 +3626,12 @@
               "$ref": "#/components/schemas/TeamAnalyticsStackDto"
             }
           },
+          "stackLevels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamAnalyticsStackLevelDto"
+            }
+          },
           "summary": {
             "$ref": "#/components/schemas/TeamAnalyticsEmployeeSummaryDto"
           },
@@ -3455,8 +3645,75 @@
         "required": [
           "user",
           "stacks",
+          "stackLevels",
           "summary",
           "growthTopics"
+        ]
+      },
+      "TeamAnalyticsReportRiskEmployeeDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/TeamAnalyticsUserDto"
+          },
+          "accuracy": {
+            "type": "number",
+            "example": 42
+          },
+          "totalAnswers": {
+            "type": "number",
+            "example": 15
+          },
+          "growthTopics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamAnalyticsGrowthTopicDto"
+            }
+          },
+          "stackLevels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamAnalyticsStackLevelDto"
+            }
+          }
+        },
+        "required": [
+          "user",
+          "accuracy",
+          "totalAnswers",
+          "growthTopics",
+          "stackLevels"
+        ]
+      },
+      "TeamAnalyticsManagerReportDto": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summaryText": {
+            "type": "string",
+            "example": "18 сотрудников, 14 с данными, средняя успешность 67%."
+          },
+          "riskEmployees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamAnalyticsReportRiskEmployeeDto"
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "generatedAt",
+          "summaryText",
+          "riskEmployees",
+          "recommendations"
         ]
       },
       "TeamAnalyticsResponseDto": {
@@ -3470,11 +3727,15 @@
             "items": {
               "$ref": "#/components/schemas/TeamAnalyticsEmployeeDto"
             }
+          },
+          "managerReport": {
+            "$ref": "#/components/schemas/TeamAnalyticsManagerReportDto"
           }
         },
         "required": [
           "summary",
-          "items"
+          "items",
+          "managerReport"
         ]
       },
       "CompanyDto": {
@@ -3700,6 +3961,39 @@
           "lastAssessedAt"
         ]
       },
+      "CompetencyMatrixStackLevelDto": {
+        "type": "object",
+        "properties": {
+          "stack": {
+            "$ref": "#/components/schemas/CompetencyMatrixStackDto"
+          },
+          "assessedCount": {
+            "type": "number",
+            "example": 7
+          },
+          "accuracy": {
+            "type": "number",
+            "example": 57
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "not_assessed",
+              "junior",
+              "middle",
+              "senior",
+              "lead"
+            ],
+            "example": "middle"
+          }
+        },
+        "required": [
+          "stack",
+          "assessedCount",
+          "accuracy",
+          "level"
+        ]
+      },
       "CompetencyMatrixUserResponseDto": {
         "type": "object",
         "properties": {
@@ -3717,12 +4011,19 @@
             "items": {
               "$ref": "#/components/schemas/CompetencyMatrixCompetencyDto"
             }
+          },
+          "stackLevels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompetencyMatrixStackLevelDto"
+            }
           }
         },
         "required": [
           "user",
           "stacks",
-          "competencies"
+          "competencies",
+          "stackLevels"
         ]
       },
       "ListCompetencyMatrixResponseDto": {
@@ -4595,6 +4896,14 @@
           "comment": {
             "type": "string",
             "example": "Компромисс назван, но без привязки к ограничениям задачи."
+          },
+          "isGrowthPoint": {
+            "type": "boolean",
+            "example": true
+          },
+          "growthArea": {
+            "type": "string",
+            "example": "Закрепить формулирование tradeoff через ограничения задачи."
           }
         },
         "required": [
@@ -4636,6 +4945,10 @@
           "feedback": {
             "type": "string",
             "example": "Нужно точнее формулировать компромиссы и быстрее структурировать ответ."
+          },
+          "growthAreas": {
+            "type": "string",
+            "example": "Потренировать tradeoff-и, edge cases и объяснение выбранных ограничений."
           },
           "items": {
             "type": "array",
@@ -4988,6 +5301,10 @@
             "type": "string",
             "example": "Нужно точнее объяснять компромиссы."
           },
+          "growthAreas": {
+            "type": "string",
+            "nullable": true
+          },
           "completedAt": {
             "type": "string",
             "format": "date-time"
@@ -4997,6 +5314,7 @@
           "interviewId",
           "interviewer",
           "feedback",
+          "growthAreas",
           "completedAt"
         ]
       },
@@ -5089,6 +5407,14 @@
             "type": "string",
             "nullable": true
           },
+          "isGrowthPoint": {
+            "type": "boolean",
+            "example": true
+          },
+          "growthArea": {
+            "type": "string",
+            "nullable": true
+          },
           "competency": {
             "type": "object",
             "nullable": true,
@@ -5107,6 +5433,8 @@
           "position",
           "result",
           "comment",
+          "isGrowthPoint",
+          "growthArea",
           "competency"
         ]
       },
@@ -5248,6 +5576,10 @@
             "type": "string",
             "nullable": true
           },
+          "growthAreas": {
+            "type": "string",
+            "nullable": true
+          },
           "questions": {
             "type": "array",
             "items": {
@@ -5266,6 +5598,7 @@
           "interviewer",
           "interviewee",
           "feedback",
+          "growthAreas",
           "questions",
           "competencySummary"
         ]

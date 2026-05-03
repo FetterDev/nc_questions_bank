@@ -15,7 +15,9 @@ const {
   errorMessage,
   failedQuestions,
   feedbackEntries,
+  growthAreaProgress,
   loading,
+  recommendations,
   snapshotLabel,
   summary,
   weakTopics,
@@ -88,6 +90,33 @@ const {
         <UiPanel class="growth-stack-panel detail-panel" padding="default" variant="detail">
           <div class="growth-stack-panel__head">
             <div>
+              <h2>Рекомендации</h2>
+            </div>
+          </div>
+
+          <div v-if="recommendations.length" class="growth-topic-list">
+            <article
+              v-for="item in recommendations"
+              :key="`${item.kind}-${item.priority}`"
+              class="growth-topic-row"
+            >
+              <div>
+                <strong>{{ item.kind }}</strong>
+                <small>{{ item.text }}</small>
+              </div>
+              <v-chip color="secondary" rounded="pill" size="small" variant="tonal">
+                P{{ item.priority }}
+              </v-chip>
+            </article>
+          </div>
+          <div v-else class="empty-state empty-state-panel">
+            <p>Нет рекомендаций</p>
+          </div>
+        </UiPanel>
+
+        <UiPanel class="growth-stack-panel detail-panel" padding="default" variant="detail">
+          <div class="growth-stack-panel__head">
+            <div>
               <h2>Последние комментарии</h2>
             </div>
             <UiButton
@@ -155,6 +184,41 @@ const {
           </div>
           <div v-else class="empty-state empty-state-panel">
             <p>Пусто</p>
+          </div>
+        </UiPanel>
+
+        <UiPanel class="growth-stack-panel detail-panel" padding="default" variant="detail">
+          <div class="growth-stack-panel__head">
+            <div>
+              <h2>Прогресс по зонам роста</h2>
+            </div>
+          </div>
+
+          <div v-if="growthAreaProgress.length" class="growth-topic-list">
+            <article
+              v-for="item in growthAreaProgress"
+              :key="item.competencyId"
+              class="growth-topic-row"
+            >
+              <div>
+                <strong>{{ item.name }}</strong>
+                <small>{{ item.latestGrowthArea }}</small>
+                <small>
+                  {{ item.totalGrowthPoints }} точек · {{ item.resolvedCount }} закрыто · {{ item.accuracy }}%
+                </small>
+              </div>
+              <v-chip
+                :color="item.currentStatus === 'resolved' ? 'success' : 'warning'"
+                rounded="pill"
+                size="small"
+                variant="tonal"
+              >
+                {{ item.currentStatus }}
+              </v-chip>
+            </article>
+          </div>
+          <div v-else class="empty-state empty-state-panel">
+            <p>Пока нет зон роста</p>
           </div>
         </UiPanel>
       </div>

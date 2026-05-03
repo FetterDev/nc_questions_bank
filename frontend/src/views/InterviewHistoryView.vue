@@ -167,6 +167,11 @@ watch(
             <p>{{ detail.feedback }}</p>
           </div>
 
+          <div v-if="detail.growthAreas" class="interview-feedback-card">
+            <strong>Зоны роста</strong>
+            <p>{{ detail.growthAreas }}</p>
+          </div>
+
           <div v-if="detail.competencySummary.length" class="interview-competency-summary">
             <article
               v-for="item in detail.competencySummary"
@@ -218,6 +223,9 @@ watch(
                   </v-chip>
                 </div>
                 <small v-if="criterion.comment">{{ criterion.comment }}</small>
+                <small v-if="criterion.isGrowthPoint || criterion.growthArea">
+                  Зона роста: {{ criterion.growthArea ?? 'зафиксирована по результату критерия' }}
+                </small>
               </article>
             </div>
           </article>

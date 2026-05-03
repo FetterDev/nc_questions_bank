@@ -4,11 +4,13 @@ import { computed, onMounted, ref } from 'vue';
 import UiButton from '../components/ui/UiButton.vue';
 import UiField from '../components/ui/UiField.vue';
 import UiPanel from '../components/ui/UiPanel.vue';
+import UiAutocomplete from '../components/ui/UiAutocomplete.vue';
 import UiSelect from '../components/ui/UiSelect.vue';
 import type {
   TeamAnalytics,
   TeamAnalyticsEmployee,
   TeamAnalyticsGrowthTopic,
+  TeamAnalyticsStackLevel,
 } from '../features/analytics/analytics.types';
 import { toUserErrorMessage } from '../features/system/error.utils';
 import { apiService } from '../services/api.service';
@@ -21,6 +23,7 @@ const errorMessage = ref('');
 const searchQuery = ref('');
 const stackFilter = ref('all');
 const sortMode = ref<SortMode>('growth');
+const compareUserIds = ref<string[]>([]);
 
 const sortOptions: Array<{ title: string; value: SortMode }> = [
   { title: 'Сначала зоны риска', value: 'growth' },
@@ -84,6 +87,23 @@ const employees = computed(() => {
 const visibleEmployeesLabel = computed(() =>
   `${employees.value.length} из ${summary.value.employeesCount}`,
 );
+
+const compareOptions = computed(() =>
+  (analytics.value?.items ?? []).map((employee) => ({
+    title: `${employee.user.displayName} · ${employee.user.login}`,
+    value: employee.user.id,
+  })),
+);
+
+const compareEmployeesList = computed(() => {
+  const ids = new Set(compareUserIds.value);
+
+  return (analytics.value?.items ?? []).filter((employee) =>
+    ids.has(employee.user.id),
+  );
+});
+
+const managerReport = computed(() => analytics.value?.managerReport ?? null);
 
 async function loadTeamAnalytics() {
   loading.value = true;
@@ -155,12 +175,36 @@ function formatGrowthTopic(topic: TeamAnalyticsGrowthTopic) {
   return `${topic.accuracy}% · ${topic.incorrectCount} incorrect / ${topic.partialCount} partial`;
 }
 
+function formatStackLevel(level: TeamAnalyticsStackLevel) {
+  return `${level.stack.name}: ${formatLevel(level.level)} · ${level.accuracy}% · ${level.assessedCount}`;
+}
+
+function formatLevel(value: TeamAnalyticsStackLevel['level']) {
+  if (value === 'not_assessed') {
+    return 'нет оценки';
+  }
+
+  return value;
+}
+
 function formatStackList(employee: TeamAnalyticsEmployee) {
   if (!employee.stacks.length) {
     return 'Стек не назначен';
   }
 
   return employee.stacks.map((stack) => stack.name).join(', ');
+}
+
+function formatRole(role: string) {
+  if (role === 'ADMIN') {
+    return 'Администратор';
+  }
+
+  if (role === 'MANAGER') {
+    return 'Менеджер';
+  }
+
+  return 'Пользователь';
 }
 
 function getAccuracyTone(employee: TeamAnalyticsEmployee) {
@@ -267,6 +311,104 @@ onMounted(() => {
       </div>
     </UiPanel>
 
+    <div class="team-dashboard-insights">
+      <UiPanel
+        v-if="managerReport"
+        class="team-manager-report detail-panel"
+        padding="default"
+        variant="detail"
+      >
+        <div class="panel-header">
+          <div class="panel-copy">
+            <h2>Отчет руководителя</h2>
+            <small>{{ new Date(managerReport.generatedAt).toLocaleString('ru-RU') }}</small>
+          </div>
+        </div>
+
+        <p class="team-manager-summary">{{ managerReport.summaryText }}</p>
+
+        <div class="team-report-grid">
+          <div class="team-report-block">
+            <strong>Риски</strong>
+            <article
+              v-for="employee in managerReport.riskEmployees"
+              :key="employee.user.id"
+              class="team-report-item"
+            >
+              <span>{{ employee.user.displayName }}</span>
+              <small>{{ employee.accuracy }}% · {{ employee.totalAnswers }} ответов</small>
+            </article>
+            <small v-if="!managerReport.riskEmployees.length" class="muted-inline">
+              Нет сотрудников в зоне риска
+            </small>
+          </div>
+
+          <div class="team-report-block">
+            <strong>Рекомендации</strong>
+            <p
+              v-for="recommendation in managerReport.recommendations"
+              :key="recommendation"
+            >
+              {{ recommendation }}
+            </p>
+            <small v-if="!managerReport.recommendations.length" class="muted-inline">
+              Нет рекомендаций
+            </small>
+          </div>
+        </div>
+      </UiPanel>
+
+      <UiPanel class="team-compare-panel detail-panel" padding="default" variant="detail">
+        <div class="panel-header">
+          <div class="panel-copy">
+            <h2>Сравнение сотрудников</h2>
+          </div>
+        </div>
+
+        <UiAutocomplete
+          v-model="compareUserIds"
+          :items="compareOptions"
+          chips
+          clearable
+          closable-chips
+          item-title="title"
+          item-value="value"
+          label="Сотрудники"
+          multiple
+          placeholder="Выберите сотрудников"
+        />
+
+        <div v-if="compareEmployeesList.length" class="team-compare-grid">
+          <article
+            v-for="employee in compareEmployeesList"
+            :key="employee.user.id"
+            class="team-compare-card"
+          >
+            <strong>{{ employee.user.displayName }}</strong>
+            <small>{{ formatRole(employee.user.role) }} · {{ employee.user.login }}</small>
+            <span>{{ employee.summary.accuracy }}% success</span>
+            <span>{{ employee.summary.totalAnswers }} ответов</span>
+            <small>{{ formatStackList(employee) }}</small>
+            <div v-if="employee.stackLevels.length" class="team-level-list">
+              <v-chip
+                v-for="level in employee.stackLevels"
+                :key="level.stack.id"
+                color="primary"
+                size="small"
+                variant="tonal"
+              >
+                {{ formatStackLevel(level) }}
+              </v-chip>
+            </div>
+          </article>
+        </div>
+
+        <div v-else class="empty-state empty-state-panel">
+          <p>Сотрудники не выбраны</p>
+        </div>
+      </UiPanel>
+    </div>
+
     <UiPanel class="table-frame team-dashboard-panel" variant="table">
       <div class="table-frame__header">
         <span class="table-card__caption">{{ visibleEmployeesLabel }}</span>
@@ -299,6 +441,7 @@ onMounted(() => {
               <div>
                 <strong>{{ employee.user.displayName }}</strong>
                 <p>{{ employee.user.login }}</p>
+                <small>{{ formatRole(employee.user.role) }}</small>
                 <small>{{ formatDate(employee.summary.lastActivityAt) }}</small>
               </div>
             </div>
@@ -317,6 +460,17 @@ onMounted(() => {
               </div>
               <span v-else class="muted-inline">Стек не назначен</span>
               <small>{{ formatStackList(employee) }}</small>
+              <div v-if="employee.stackLevels.length" class="team-level-list">
+                <v-chip
+                  v-for="level in employee.stackLevels"
+                  :key="level.stack.id"
+                  color="primary"
+                  size="small"
+                  variant="tonal"
+                >
+                  {{ formatStackLevel(level) }}
+                </v-chip>
+              </div>
             </div>
 
             <div class="team-answer-cell">

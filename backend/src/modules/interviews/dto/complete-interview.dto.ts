@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsEnum,
   IsOptional,
   IsString,
@@ -27,6 +28,19 @@ class CompleteInterviewCriterionResultDto {
   @IsString()
   @MaxLength(1000)
   comment?: string;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  isGrowthPoint?: boolean;
+
+  @ApiPropertyOptional({
+    example: 'Закрепить формулирование tradeoff через ограничения задачи.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  growthArea?: string;
 }
 
 class CompleteInterviewItemDto {
@@ -54,6 +68,14 @@ export class CompleteInterviewDto {
   @IsString()
   @MaxLength(4000)
   feedback?: string;
+
+  @ApiPropertyOptional({
+    example: 'Потренировать tradeoff-и, edge cases и объяснение выбранных ограничений.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  growthAreas?: string;
 
   @ApiProperty({ type: [CompleteInterviewItemDto] })
   @IsArray()

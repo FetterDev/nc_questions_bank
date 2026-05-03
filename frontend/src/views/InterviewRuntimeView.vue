@@ -33,6 +33,8 @@ type RuntimeState = {
     id: string;
     result: TrainingResultValue | null;
     comment: string;
+    isGrowthPoint: boolean;
+    growthArea: string;
   }>;
 };
 
@@ -46,6 +48,7 @@ const errorMessage = ref('');
 const activeIndex = ref(0);
 const results = ref<RuntimeState[]>([]);
 const feedback = ref('');
+const growthAreas = ref('');
 
 const currentItem = computed(() => runtime.value?.items[activeIndex.value] ?? null);
 const answeredCount = computed(() => results.value.filter((item) => isQuestionAnswered(item)).length);
@@ -92,6 +95,8 @@ async function loadRuntime() {
         id: criterion.id,
         result: null,
         comment: '',
+        isGrowthPoint: false,
+        growthArea: '',
       })),
     }));
   } catch (error) {
@@ -176,8 +181,11 @@ async function submit() {
           criterionId: criterion.id,
           result: criterion.result ?? 'incorrect',
           comment: criterion.comment.trim() || undefined,
+          isGrowthPoint: criterion.isGrowthPoint,
+          growthArea: criterion.growthArea.trim() || undefined,
         })),
       })),
+      growthAreas: growthAreas.value.trim() || undefined,
     };
     await apiService.completeInterview(id, payload);
     void router.push({ name: 'my-interviews' });
@@ -342,6 +350,22 @@ void loadRuntime();
                 placeholder="Комментарий по критерию"
                 textarea
               />
+
+              <v-checkbox
+                v-model="row.state.isGrowthPoint"
+                color="primary"
+                density="compact"
+                hide-details
+                label="Точка роста"
+              />
+
+              <UiField
+                v-model="row.state.growthArea"
+                hide-label
+                label="Зона роста"
+                placeholder="Что нужно подтянуть по этому навыку"
+                textarea
+              />
             </article>
           </div>
 
@@ -369,6 +393,14 @@ void loadRuntime();
             hide-label
             label="Финальный feedback"
             placeholder="Финальный feedback по собеседованию"
+            textarea
+          />
+          <UiField
+            v-model="growthAreas"
+            class="interview-runtime-feedback"
+            hide-label
+            label="Зоны роста"
+            placeholder="Общие зоны роста кандидата"
             textarea
           />
           <UiButton tone="text" :to="{ name: 'my-interviews' }">

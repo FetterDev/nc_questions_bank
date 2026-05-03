@@ -9,6 +9,9 @@ class TeamAnalyticsUserDto {
 
   @ApiProperty({ example: 'Иван Петров' })
   displayName!: string;
+
+  @ApiProperty({ example: 'USER' })
+  role!: string;
 }
 
 class TeamAnalyticsStackDto {
@@ -49,6 +52,23 @@ class TeamAnalyticsEmployeeSummaryDto {
 
   @ApiProperty({ type: String, format: 'date-time', nullable: true })
   lastActivityAt!: string | null;
+}
+
+class TeamAnalyticsStackLevelDto {
+  @ApiProperty({ type: TeamAnalyticsStackDto })
+  stack!: TeamAnalyticsStackDto;
+
+  @ApiProperty({ example: 6 })
+  assessedCount!: number;
+
+  @ApiProperty({ example: 78 })
+  accuracy!: number;
+
+  @ApiProperty({
+    enum: ['not_assessed', 'junior', 'middle', 'senior', 'lead'],
+    example: 'senior',
+  })
+  level!: 'not_assessed' | 'junior' | 'middle' | 'senior' | 'lead';
 }
 
 class TeamAnalyticsGrowthTopicDto {
@@ -95,11 +115,45 @@ class TeamAnalyticsEmployeeDto {
   @ApiProperty({ type: [TeamAnalyticsStackDto] })
   stacks!: TeamAnalyticsStackDto[];
 
+  @ApiProperty({ type: [TeamAnalyticsStackLevelDto] })
+  stackLevels!: TeamAnalyticsStackLevelDto[];
+
   @ApiProperty({ type: TeamAnalyticsEmployeeSummaryDto })
   summary!: TeamAnalyticsEmployeeSummaryDto;
 
   @ApiProperty({ type: [TeamAnalyticsGrowthTopicDto] })
   growthTopics!: TeamAnalyticsGrowthTopicDto[];
+}
+
+class TeamAnalyticsReportRiskEmployeeDto {
+  @ApiProperty({ type: TeamAnalyticsUserDto })
+  user!: TeamAnalyticsUserDto;
+
+  @ApiProperty({ example: 42 })
+  accuracy!: number;
+
+  @ApiProperty({ example: 15 })
+  totalAnswers!: number;
+
+  @ApiProperty({ type: [TeamAnalyticsGrowthTopicDto] })
+  growthTopics!: TeamAnalyticsGrowthTopicDto[];
+
+  @ApiProperty({ type: [TeamAnalyticsStackLevelDto] })
+  stackLevels!: TeamAnalyticsStackLevelDto[];
+}
+
+class TeamAnalyticsManagerReportDto {
+  @ApiProperty({ type: String, format: 'date-time' })
+  generatedAt!: string;
+
+  @ApiProperty({ example: '18 сотрудников, 14 с данными, средняя успешность 67%.' })
+  summaryText!: string;
+
+  @ApiProperty({ type: [TeamAnalyticsReportRiskEmployeeDto] })
+  riskEmployees!: TeamAnalyticsReportRiskEmployeeDto[];
+
+  @ApiProperty({ type: [String] })
+  recommendations!: string[];
 }
 
 export class TeamAnalyticsResponseDto {
@@ -108,4 +162,7 @@ export class TeamAnalyticsResponseDto {
 
   @ApiProperty({ type: [TeamAnalyticsEmployeeDto] })
   items!: TeamAnalyticsEmployeeDto[];
+
+  @ApiProperty({ type: TeamAnalyticsManagerReportDto })
+  managerReport!: TeamAnalyticsManagerReportDto;
 }

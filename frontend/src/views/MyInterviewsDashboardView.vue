@@ -132,6 +132,7 @@ onMounted(() => {
               <strong>{{ entry.interviewer?.displayName ?? 'Interviewer' }}</strong>
               <small>{{ formatDateTime(entry.completedAt) }}</small>
               <p>{{ entry.feedback }}</p>
+              <small v-if="entry.growthAreas">Зоны роста: {{ entry.growthAreas }}</small>
             </article>
           </div>
           <div v-else class="empty-state empty-state-panel">

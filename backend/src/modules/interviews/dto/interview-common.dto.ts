@@ -107,6 +107,9 @@ export class InterviewFeedbackEntryDto {
   @ApiProperty({ example: 'Нужно точнее объяснять компромиссы.' })
   feedback!: string;
 
+  @ApiProperty({ type: String, nullable: true })
+  growthAreas!: string | null;
+
   @ApiProperty({ type: String, format: 'date-time' })
   completedAt!: string;
 }

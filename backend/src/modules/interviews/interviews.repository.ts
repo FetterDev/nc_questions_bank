@@ -90,6 +90,8 @@ export type InterviewQuestionOutput = {
     position: number;
     result: TrainingSessionResultMark | null;
     comment: string | null;
+    isGrowthPoint: boolean;
+    growthArea: string | null;
   }>;
 };
 
@@ -99,6 +101,7 @@ export type InterviewOutput = {
   plannedDate: Date | null;
   completedAt: Date | null;
   feedback: string | null;
+  growthAreas: string | null;
   resultsCount: number;
   correctCount: number;
   incorrectCount: number;
@@ -272,6 +275,7 @@ export class InterviewsRepository {
       status?: InterviewStatus;
       completedAt?: Date | null;
       feedback?: string | null;
+      growthAreas?: string | null;
       resultsCount?: number;
       correctCount?: number;
       incorrectCount?: number;
@@ -323,6 +327,10 @@ export class InterviewsRepository {
 
     if (data.feedback !== undefined) {
       updateData.feedback = data.feedback;
+    }
+
+    if (data.growthAreas !== undefined) {
+      updateData.growthAreas = data.growthAreas;
     }
 
     if (data.resultsCount !== undefined) {
@@ -442,6 +450,8 @@ export class InterviewsRepository {
         criterionId: string;
         result: TrainingSessionResultMark;
         comment: string | null;
+        isGrowthPoint: boolean;
+        growthArea: string | null;
       }>;
     }>,
     db?: DbClient,
@@ -469,6 +479,8 @@ export class InterviewsRepository {
           data: {
             result: criterion.result,
             comment: criterion.comment,
+            isGrowthPoint: criterion.isGrowthPoint,
+            growthArea: criterion.growthArea,
           },
         });
       }
@@ -633,6 +645,7 @@ export class InterviewsRepository {
       plannedDate: interview.plannedDate,
       completedAt: interview.completedAt,
       feedback: interview.feedback,
+      growthAreas: interview.growthAreas,
       resultsCount: interview.resultsCount,
       correctCount: interview.correctCount,
       incorrectCount: interview.incorrectCount,
@@ -685,6 +698,8 @@ export class InterviewsRepository {
           position: criterion.position,
           result: criterion.result,
           comment: criterion.comment,
+          isGrowthPoint: criterion.isGrowthPoint,
+          growthArea: criterion.growthArea,
         })),
       })),
     };

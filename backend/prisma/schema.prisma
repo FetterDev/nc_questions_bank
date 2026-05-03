@@ -345,6 +345,7 @@ model Interview {
   status         InterviewStatus @default(DRAFT)
   completedAt    DateTime?
   feedback       String?
+  growthAreas    String?
   resultsCount   Int             @default(0)
   correctCount   Int             @default(0)
   incorrectCount Int             @default(0)
@@ -399,6 +400,8 @@ model InterviewQuestionCriterion {
   position            Int
   result              TrainingSessionResultMark?
   comment             String?
+  isGrowthPoint       Boolean                    @default(false)
+  growthArea          String?
   createdAt           DateTime                   @default(now())
   interviewQuestion   InterviewQuestion          @relation(fields: [interviewQuestionId], references: [id], onDelete: Cascade)
 

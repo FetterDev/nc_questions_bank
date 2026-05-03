@@ -15,11 +15,12 @@
 .list-head--users,
 .user-row {
   grid-template-columns:
-    minmax(0, 1.4fr)
-    minmax(160px, 0.44fr)
-    minmax(160px, 0.44fr)
-    minmax(180px, 0.42fr)
-    minmax(190px, 0.56fr);
+    minmax(0, 1.25fr)
+    minmax(140px, 0.36fr)
+    minmax(180px, 0.54fr)
+    minmax(140px, 0.34fr)
+    minmax(170px, 0.38fr)
+    minmax(190px, 0.5fr);
 }
 
 .user-identity-cell {
@@ -37,6 +38,10 @@
   color: var(--color-ink-muted);
   font-family: var(--font-mono);
   font-size: 0.78rem;
+}
+
+.user-stack-cell {
+  min-width: 0;
 }
 
 .users-dialog-card {

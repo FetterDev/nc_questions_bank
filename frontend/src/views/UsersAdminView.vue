@@ -99,6 +99,10 @@ const adminUsersCount = computed(
   () => users.value.filter((item) => item.role === 'ADMIN').length,
 );
 
+const usersWithStacksCount = computed(
+  () => users.value.filter((item) => item.stacks.length > 0).length,
+);
+
 const dialogTitle = computed(() =>
   userDialog.mode === 'create' ? 'Новый пользователь' : 'Редактирование пользователя',
 );
@@ -165,6 +169,14 @@ function getRoleLabel(role: UserRoleValue) {
   }
 
   return 'Пользователь';
+}
+
+function formatUserStacks(user: UserRecord) {
+  if (!user.stacks.length) {
+    return 'Стек не назначен';
+  }
+
+  return user.stacks.map((stack) => stack.name).join(', ');
 }
 
 async function loadUsers() {
@@ -336,6 +348,12 @@ watch(
         <strong>{{ adminUsersCount }}</strong>
         <small>Роли ADMIN на текущей странице</small>
       </article>
+
+      <article class="surface-card summary-stat">
+        <span>Со стеком</span>
+        <strong>{{ usersWithStacksCount }}</strong>
+        <small>Есть назначенный стек на текущей странице</small>
+      </article>
     </section>
 
     <UiPanel class="toolbar-panel" variant="toolbar">
@@ -403,6 +421,7 @@ watch(
           <div class="list-head list-head--users">
             <span>Пользователь</span>
             <span>Роль</span>
+            <span>Стек</span>
             <span>Статус</span>
             <span>Обновлено</span>
             <span>Действия</span>
@@ -423,6 +442,21 @@ watch(
               <span class="status-badge status-badge--ready">
                 {{ getRoleLabel(user.role) }}
               </span>
+            </div>
+
+            <div class="list-cell user-stack-cell">
+              <div v-if="user.stacks.length" class="topic-stack">
+                <v-chip
+                  v-for="stack in user.stacks"
+                  :key="stack.id"
+                  color="secondary"
+                  size="small"
+                  variant="tonal"
+                >
+                  {{ stack.name }}
+                </v-chip>
+              </div>
+              <span v-else class="muted-inline">{{ formatUserStacks(user) }}</span>
             </div>
 
             <div class="list-cell">

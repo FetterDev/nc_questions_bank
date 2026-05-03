@@ -106,6 +106,69 @@ class GrowthAnalyticsFeedbackItemDto {
   finishedAt!: string;
 }
 
+class GrowthAreaProgressEntryDto {
+  @ApiProperty({ example: 'cm8interview1' })
+  interviewId!: string;
+
+  @ApiProperty({ example: 'cm8criterion1' })
+  criterionId!: string;
+
+  @ApiProperty({ enum: TrainingResult, example: TrainingResult.PARTIAL })
+  result!: TrainingResult;
+
+  @ApiProperty({ example: 'Закрепить edge cases.' })
+  growthArea!: string;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  assessedAt!: string;
+}
+
+class GrowthAreaProgressItemDto {
+  @ApiProperty({ example: 'cm8competency1' })
+  competencyId!: string;
+
+  @ApiProperty({ example: 'Testing' })
+  name!: string;
+
+  @ApiProperty({ example: 'testing' })
+  slug!: string;
+
+  @ApiProperty({ example: 'Добавить практику edge cases.' })
+  latestGrowthArea!: string;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  firstSeenAt!: string;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  lastSeenAt!: string;
+
+  @ApiProperty({ example: 3 })
+  totalGrowthPoints!: number;
+
+  @ApiProperty({ example: 1 })
+  resolvedCount!: number;
+
+  @ApiProperty({ enum: ['resolved', 'in_progress'], example: 'in_progress' })
+  currentStatus!: 'resolved' | 'in_progress';
+
+  @ApiProperty({ example: 40 })
+  accuracy!: number;
+
+  @ApiProperty({ type: [GrowthAreaProgressEntryDto] })
+  entries!: GrowthAreaProgressEntryDto[];
+}
+
+class GrowthRecommendationDto {
+  @ApiProperty({ enum: ['topic', 'question', 'growth_area'], example: 'topic' })
+  kind!: 'topic' | 'question' | 'growth_area';
+
+  @ApiProperty({ example: 'Повторить тему TypeScript.' })
+  text!: string;
+
+  @ApiProperty({ example: 1 })
+  priority!: number;
+}
+
 export class GrowthAnalyticsResponseDto {
   @ApiProperty({ type: GrowthAnalyticsSummaryDto })
   summary!: GrowthAnalyticsSummaryDto;
@@ -121,4 +184,10 @@ export class GrowthAnalyticsResponseDto {
 
   @ApiProperty({ type: [GrowthAnalyticsQuestionStatDto] })
   answeredQuestions!: GrowthAnalyticsQuestionStatDto[];
+
+  @ApiProperty({ type: [GrowthAreaProgressItemDto] })
+  growthAreaProgress!: GrowthAreaProgressItemDto[];
+
+  @ApiProperty({ type: [GrowthRecommendationDto] })
+  recommendations!: GrowthRecommendationDto[];
 }

@@ -24,5 +24,8 @@ export type TeamAnalyticsEmployee =
 export type TeamAnalyticsStack =
   components['schemas']['TeamAnalyticsStackDto'];
 
+export type TeamAnalyticsStackLevel =
+  components['schemas']['TeamAnalyticsStackLevelDto'];
+
 export type TeamAnalyticsGrowthTopic =
   components['schemas']['TeamAnalyticsGrowthTopicDto'];

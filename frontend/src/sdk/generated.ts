@@ -1188,12 +1188,66 @@ export interface components {
             /** Format: date-time */
             lastAnsweredAt: string;
         };
+        GrowthAreaProgressEntryDto: {
+            /** @example cm8interview1 */
+            interviewId: string;
+            /** @example cm8criterion1 */
+            criterionId: string;
+            /**
+             * @example partial
+             * @enum {string}
+             */
+            result: "correct" | "incorrect" | "partial";
+            /** @example Закрепить edge cases. */
+            growthArea: string;
+            /** Format: date-time */
+            assessedAt: string;
+        };
+        GrowthAreaProgressItemDto: {
+            /** @example cm8competency1 */
+            competencyId: string;
+            /** @example Testing */
+            name: string;
+            /** @example testing */
+            slug: string;
+            /** @example Добавить практику edge cases. */
+            latestGrowthArea: string;
+            /** Format: date-time */
+            firstSeenAt: string;
+            /** Format: date-time */
+            lastSeenAt: string;
+            /** @example 3 */
+            totalGrowthPoints: number;
+            /** @example 1 */
+            resolvedCount: number;
+            /**
+             * @example in_progress
+             * @enum {string}
+             */
+            currentStatus: "resolved" | "in_progress";
+            /** @example 40 */
+            accuracy: number;
+            entries: components["schemas"]["GrowthAreaProgressEntryDto"][];
+        };
+        GrowthRecommendationDto: {
+            /**
+             * @example topic
+             * @enum {string}
+             */
+            kind: "topic" | "question" | "growth_area";
+            /** @example Повторить тему TypeScript. */
+            text: string;
+            /** @example 1 */
+            priority: number;
+        };
         GrowthAnalyticsResponseDto: {
             summary: components["schemas"]["GrowthAnalyticsSummaryDto"];
             feedbackEntries: components["schemas"]["GrowthAnalyticsFeedbackItemDto"][];
             weakTopics: components["schemas"]["GrowthAnalyticsTopicStatDto"][];
             failedQuestions: components["schemas"]["GrowthAnalyticsQuestionStatDto"][];
             answeredQuestions: components["schemas"]["GrowthAnalyticsQuestionStatDto"][];
+            growthAreaProgress: components["schemas"]["GrowthAreaProgressItemDto"][];
+            recommendations: components["schemas"]["GrowthRecommendationDto"][];
         };
         BankAnalyticsDifficultyMixItemDto: {
             /**
@@ -1245,6 +1299,8 @@ export interface components {
             login: string;
             /** @example Иван Петров */
             displayName: string;
+            /** @example USER */
+            role: string;
         };
         TeamAnalyticsStackDto: {
             /** @example cm8stack1 */
@@ -1253,6 +1309,18 @@ export interface components {
             name: string;
             /** @example frontend */
             slug: string;
+        };
+        TeamAnalyticsStackLevelDto: {
+            stack: components["schemas"]["TeamAnalyticsStackDto"];
+            /** @example 6 */
+            assessedCount: number;
+            /** @example 78 */
+            accuracy: number;
+            /**
+             * @example senior
+             * @enum {string}
+             */
+            level: "not_assessed" | "junior" | "middle" | "senior" | "lead";
         };
         TeamAnalyticsEmployeeSummaryDto: {
             /** @example 42 */
@@ -1293,12 +1361,31 @@ export interface components {
         TeamAnalyticsEmployeeDto: {
             user: components["schemas"]["TeamAnalyticsUserDto"];
             stacks: components["schemas"]["TeamAnalyticsStackDto"][];
+            stackLevels: components["schemas"]["TeamAnalyticsStackLevelDto"][];
             summary: components["schemas"]["TeamAnalyticsEmployeeSummaryDto"];
             growthTopics: components["schemas"]["TeamAnalyticsGrowthTopicDto"][];
+        };
+        TeamAnalyticsReportRiskEmployeeDto: {
+            user: components["schemas"]["TeamAnalyticsUserDto"];
+            /** @example 42 */
+            accuracy: number;
+            /** @example 15 */
+            totalAnswers: number;
+            growthTopics: components["schemas"]["TeamAnalyticsGrowthTopicDto"][];
+            stackLevels: components["schemas"]["TeamAnalyticsStackLevelDto"][];
+        };
+        TeamAnalyticsManagerReportDto: {
+            /** Format: date-time */
+            generatedAt: string;
+            /** @example 18 сотрудников, 14 с данными, средняя успешность 67%. */
+            summaryText: string;
+            riskEmployees: components["schemas"]["TeamAnalyticsReportRiskEmployeeDto"][];
+            recommendations: string[];
         };
         TeamAnalyticsResponseDto: {
             summary: components["schemas"]["TeamAnalyticsSummaryDto"];
             items: components["schemas"]["TeamAnalyticsEmployeeDto"][];
+            managerReport: components["schemas"]["TeamAnalyticsManagerReportDto"];
         };
         CompanyDto: {
             /** @example cm7y5z8qv0003x4f2w7sn1abc */
@@ -1379,10 +1466,23 @@ export interface components {
             /** Format: date-time */
             lastAssessedAt: string | null;
         };
+        CompetencyMatrixStackLevelDto: {
+            stack: components["schemas"]["CompetencyMatrixStackDto"];
+            /** @example 7 */
+            assessedCount: number;
+            /** @example 57 */
+            accuracy: number;
+            /**
+             * @example middle
+             * @enum {string}
+             */
+            level: "not_assessed" | "junior" | "middle" | "senior" | "lead";
+        };
         CompetencyMatrixUserResponseDto: {
             user: components["schemas"]["CompetencyMatrixUserDto"];
             stacks: components["schemas"]["CompetencyMatrixStackDto"][];
             competencies: components["schemas"]["CompetencyMatrixCompetencyDto"][];
+            stackLevels: components["schemas"]["CompetencyMatrixStackLevelDto"][];
         };
         ListCompetencyMatrixResponseDto: {
             items: components["schemas"]["CompetencyMatrixUserResponseDto"][];
@@ -1720,6 +1820,10 @@ export interface components {
             result: "correct" | "incorrect" | "partial";
             /** @example Компромисс назван, но без привязки к ограничениям задачи. */
             comment?: string;
+            /** @example true */
+            isGrowthPoint?: boolean;
+            /** @example Закрепить формулирование tradeoff через ограничения задачи. */
+            growthArea?: string;
         };
         CompleteInterviewItemDto: {
             /** @example cm8interviewquestion1 */
@@ -1734,6 +1838,8 @@ export interface components {
         CompleteInterviewDto: {
             /** @example Нужно точнее формулировать компромиссы и быстрее структурировать ответ. */
             feedback?: string;
+            /** @example Потренировать tradeoff-и, edge cases и объяснение выбранных ограничений. */
+            growthAreas?: string;
             items: components["schemas"]["CompleteInterviewItemDto"][];
         };
         InterviewDashboardSummaryDto: {
@@ -1857,6 +1963,7 @@ export interface components {
             interviewer: components["schemas"]["InterviewUserDto"] | null;
             /** @example Нужно точнее объяснять компромиссы. */
             feedback: string;
+            growthAreas: string | null;
             /** Format: date-time */
             completedAt: string;
         };
@@ -1883,6 +1990,9 @@ export interface components {
             /** @enum {string|null} */
             result: "correct" | "incorrect" | "partial" | null;
             comment: string | null;
+            /** @example true */
+            isGrowthPoint: boolean;
+            growthArea: string | null;
             /**
              * @example {
              *       "id": "cm8competency1",
@@ -1933,6 +2043,7 @@ export interface components {
             interviewer: components["schemas"]["InterviewUserDto"];
             interviewee: components["schemas"]["InterviewUserDto"];
             feedback: string | null;
+            growthAreas: string | null;
             questions: components["schemas"]["InterviewHistoryQuestionDto"][];
             competencySummary: components["schemas"]["InterviewCompetencySummaryDto"][];
         };

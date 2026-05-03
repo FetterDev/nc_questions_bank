@@ -27,6 +27,12 @@ class InterviewHistoryCriterionResultDto {
   @ApiProperty({ type: String, nullable: true })
   comment!: string | null;
 
+  @ApiProperty({ example: true })
+  isGrowthPoint!: boolean;
+
+  @ApiProperty({ type: String, nullable: true })
+  growthArea!: string | null;
+
   @ApiProperty({
     nullable: true,
     example: {
@@ -117,6 +123,9 @@ export class InterviewHistoryDetailResponseDto {
 
   @ApiProperty({ type: String, nullable: true })
   feedback!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  growthAreas!: string | null;
 
   @ApiProperty({ type: [InterviewHistoryQuestionDto] })
   questions!: InterviewHistoryQuestionDto[];
