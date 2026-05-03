@@ -346,7 +346,7 @@ watch(
       <article class="surface-card summary-stat">
         <span>Админы</span>
         <strong>{{ adminUsersCount }}</strong>
-        <small>Роли ADMIN на текущей странице</small>
+        <small>Роли администратора на текущей странице</small>
       </article>
 
       <article class="surface-card summary-stat">
@@ -362,7 +362,7 @@ watch(
           v-model="userSearch"
           clearable
           label="Поиск пользователя"
-          placeholder="login, имя или email"
+          placeholder="логин, имя или почта"
         />
 
         <UiSelect
@@ -435,7 +435,7 @@ watch(
             <div class="user-identity-cell">
               <strong>{{ user.displayName }}</strong>
               <p>{{ user.login }}</p>
-              <small>{{ user.email ?? 'Email не задан' }}</small>
+              <small>{{ user.email ?? 'Почта не задана' }}</small>
             </div>
 
             <div class="list-cell">
@@ -533,13 +533,13 @@ watch(
           <UiField
             v-model="userDialog.displayName"
             label="Имя"
-            placeholder="Nord User"
+            placeholder="Имя сотрудника"
             required
           />
 
           <UiField
             v-model="userDialog.email"
-            label="Email"
+            label="Почта"
             placeholder="user@example.com"
           />
 

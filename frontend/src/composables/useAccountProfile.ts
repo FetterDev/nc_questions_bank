@@ -15,7 +15,7 @@ export function useAccountProfile() {
   const session = useSession();
 
   const profile = computed<AccountProfile>(() => {
-    const email = session.profile.value?.email ?? 'Email не задан';
+    const email = session.profile.value?.email ?? 'Почта не задана';
     const displayName = session.profile.value?.displayName ?? 'Пользователь';
     const avatarLabel = displayName
       .split(/\s+/)

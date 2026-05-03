@@ -189,7 +189,7 @@ watch(
       <article class="surface-card summary-stat">
         <span>Всего тем</span>
         <strong>{{ total }}</strong>
-        <small>Контролируемый словарь frontend-тем</small>
+        <small>Контролируемый словарь тем фронтенда</small>
       </article>
 
       <article class="surface-card summary-stat">
@@ -211,7 +211,7 @@ watch(
           v-model="searchQuery"
           clearable
           label="Поиск темы"
-          placeholder="Название или slug"
+          placeholder="Название или слаг"
         />
 
         <UiSelect
@@ -257,7 +257,7 @@ watch(
         <div v-else-if="topics.length" class="topic-admin-list">
           <div class="list-head list-head--topics">
             <span>Тема</span>
-            <span>Slug</span>
+            <span>Слаг</span>
             <span>Вопросы</span>
             <span>Действия</span>
           </div>

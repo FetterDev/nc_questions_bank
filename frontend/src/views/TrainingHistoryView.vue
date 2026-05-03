@@ -11,6 +11,7 @@ import type {
   TrainingHistorySession,
 } from '../features/training/training.types';
 import {
+  formatTrainingResultCounts,
   formatTrainingResult,
   trainingResultColor,
 } from '../features/training/training.utils';
@@ -48,7 +49,7 @@ function trainerLabel(session: TrainingHistorySession) {
 }
 
 function trainerMeta(session: TrainingHistorySession) {
-  return session.trainer?.login ?? 'self';
+  return session.trainer?.login ?? 'самостоятельно';
 }
 
 async function loadHistory() {
@@ -136,11 +137,11 @@ void loadHistory();
       <article class="surface-card summary-stat">
         <span>Завершено</span>
         <strong>{{ summary.completed }}</strong>
-        <small>Сессии со статусом completed</small>
+        <small>Сессии со статусом «завершено»</small>
       </article>
 
       <article class="surface-card summary-stat">
-        <span>С фидбеком</span>
+        <span>С обратной связью</span>
         <strong>{{ summary.withFeedback }}</strong>
         <small>Есть текстовый комментарий тренера</small>
       </article>
@@ -190,7 +191,7 @@ void loadHistory();
             </div>
             <p>{{ trainerMeta(session) }} · {{ formatDate(session.finishedAt) }}</p>
             <small>
-              {{ session.correctCount }} correct · {{ session.partialCount }} partial · {{ session.incorrectCount }} incorrect
+              {{ formatTrainingResultCounts(session, ' · ') }}
             </small>
           </button>
         </div>
@@ -224,19 +225,19 @@ void loadHistory();
 
           <div class="metrics-grid">
             <article class="surface-card summary-stat">
-              <span>Correct</span>
+              <span>Засчитано</span>
               <strong>{{ detail.correctCount }}</strong>
               <small>Полностью засчитано</small>
             </article>
 
             <article class="surface-card summary-stat">
-              <span>Partial</span>
+              <span>Частично</span>
               <strong>{{ detail.partialCount }}</strong>
               <small>Частично засчитано</small>
             </article>
 
             <article class="surface-card summary-stat">
-              <span>Incorrect</span>
+              <span>Не засчитано</span>
               <strong>{{ detail.incorrectCount }}</strong>
               <small>Не засчитано</small>
             </article>
@@ -297,7 +298,7 @@ void loadHistory();
 
         <div v-else class="empty-state empty-state-panel">
           <p>{{ detailLoading ? 'Загрузка' : 'Сессия не выбрана' }}</p>
-          <span>Выбери тренировку слева, чтобы открыть snapshot результатов.</span>
+          <span>Выбери тренировку слева, чтобы открыть снимок результатов.</span>
         </div>
       </UiPanel>
     </div>

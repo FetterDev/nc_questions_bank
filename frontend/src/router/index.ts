@@ -107,7 +107,7 @@ const router = createRouter({
             strictRoles: ['MANAGER'] satisfies SessionRole[],
             section: 'review',
             title: 'Очередь модерации',
-            subtitle: 'Side-by-side diff по тексту, тегам и сложности с явным approve/reject.',
+            subtitle: 'Сравнение изменений по тексту, тегам и сложности с явным одобрением или отклонением.',
           },
         },
         {
@@ -162,7 +162,7 @@ const router = createRouter({
             strictRoles: ['USER'] satisfies SessionRole[],
             section: 'training-history',
             title: 'История тренировок',
-            subtitle: 'Сохранённые сессии текущего пользователя с деталями результатов и внешним фидбеком.',
+            subtitle: 'Сохранённые сессии текущего пользователя с деталями результатов и внешней обратной связью.',
           },
         },
         {
@@ -173,7 +173,7 @@ const router = createRouter({
             strictRoles: ['USER'] satisfies SessionRole[],
             section: 'training-history',
             title: 'История тренировок',
-            subtitle: 'Snapshot отдельной сохранённой сессии и результата по каждому вопросу.',
+            subtitle: 'Снимок отдельной сохранённой сессии и результата по каждому вопросу.',
           },
         },
         {
@@ -228,7 +228,7 @@ const router = createRouter({
             strictRoles: ['MANAGER'] satisfies SessionRole[],
             section: 'team',
             title: 'История собеседований',
-            subtitle: 'Detail завершённого интервью сотрудника с результатами по критериям.',
+            subtitle: 'Детали завершённого интервью сотрудника с результатами по критериям.',
           },
         },
         {
@@ -239,7 +239,7 @@ const router = createRouter({
             strictRoles: ['MANAGER'] satisfies SessionRole[],
             section: 'interviews',
             title: 'Собеседования',
-            subtitle: 'Weekly cycle, календарь, ручная настройка дат и пресетов.',
+            subtitle: 'Недельный цикл, календарь, ручная настройка дат и пресетов.',
           },
         },
         {
@@ -249,7 +249,7 @@ const router = createRouter({
           meta: {
             strictRoles: ['MANAGER'] satisfies SessionRole[],
             section: 'interviews-dashboard',
-            title: 'Dashboard собеседований',
+            title: 'Дашборд собеседований',
             subtitle: 'План-факт, загрузка интервьюеров и слабые темы.',
           },
         },
@@ -261,7 +261,7 @@ const router = createRouter({
             strictRoles: ['USER'] satisfies SessionRole[],
             section: 'my-interviews',
             title: 'Мои собеседования',
-            subtitle: 'Личный календарь собеседований и запуск runtime как interviewer.',
+            subtitle: 'Личный календарь собеседований и запуск интервью в роли интервьюера.',
           },
         },
         {
@@ -272,7 +272,7 @@ const router = createRouter({
             strictRoles: ['USER'] satisfies SessionRole[],
             section: 'my-interviews-dashboard',
             title: 'Статистика собеседований',
-            subtitle: 'Interview-only результаты, слабые темы и feedback.',
+            subtitle: 'Результаты по интервью, слабые темы и обратная связь.',
           },
         },
         {
@@ -283,7 +283,7 @@ const router = createRouter({
             strictRoles: ['USER'] satisfies SessionRole[],
             section: 'interview-history',
             title: 'История собеседований',
-            subtitle: 'Завершённые интервью, критерии, комментарии и финальный feedback.',
+            subtitle: 'Завершённые интервью, критерии, комментарии и финальная обратная связь.',
           },
         },
         {
@@ -294,7 +294,7 @@ const router = createRouter({
             strictRoles: ['USER'] satisfies SessionRole[],
             section: 'interview-history',
             title: 'История собеседований',
-            subtitle: 'Detail завершённого интервью с результатами по критериям.',
+            subtitle: 'Детали завершённого интервью с результатами по критериям.',
           },
         },
         {
@@ -315,7 +315,7 @@ const router = createRouter({
           meta: {
             strictRoles: ['USER'] satisfies SessionRole[],
             section: 'my-interviews',
-            title: 'Runtime собеседования',
+            title: 'Проведение собеседования',
             subtitle: 'Проведение назначенного интервью и фиксация результатов.',
           },
         },

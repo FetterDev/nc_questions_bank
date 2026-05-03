@@ -12,6 +12,7 @@ import type {
 import { formatDateOnly, formatDateTime } from '../features/interviews/interviews.utils';
 import { toUserErrorMessage } from '../features/system/error.utils';
 import {
+  formatTrainingResultCounts,
   formatTrainingResult,
   trainingResultColor,
 } from '../features/training/training.utils';
@@ -140,7 +141,7 @@ watch(
               <strong>{{ item.interviewer.displayName }}</strong>
               <small>{{ formatDateOnly(item.plannedDate) }}</small>
             </div>
-            <small>{{ item.correctCount }} / {{ item.partialCount }} / {{ item.incorrectCount }}</small>
+            <small>{{ formatTrainingResultCounts(item) }}</small>
           </button>
         </div>
 
@@ -163,7 +164,7 @@ watch(
           </div>
 
           <div v-if="detail.feedback" class="interview-feedback-card">
-            <strong>Финальный feedback</strong>
+            <strong>Финальная обратная связь</strong>
             <p>{{ detail.feedback }}</p>
           </div>
 
@@ -179,7 +180,7 @@ watch(
               class="interview-feedback-card"
             >
               <strong>{{ item.name }}</strong>
-              <small>{{ item.accuracy }}% · {{ item.correctCount }} / {{ item.partialCount }} / {{ item.incorrectCount }}</small>
+              <small>{{ item.accuracy }}% · {{ formatTrainingResultCounts(item) }}</small>
             </article>
           </div>
 

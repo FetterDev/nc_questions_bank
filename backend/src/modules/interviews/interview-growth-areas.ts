@@ -33,8 +33,8 @@ export function buildCriterionGrowthArea(
   const title = formatCriterionTitle(criterion);
   const comment = normalizeText(criterion.comment);
   const text = comment
-    ? `${title} - ${criterion.result}. ${comment}`
-    : `${title} - ${criterion.result}`;
+    ? `${title} - ${formatGrowthAreaResult(criterion.result)}. ${comment}`
+    : `${title} - ${formatGrowthAreaResult(criterion.result)}`;
 
   return truncateText(text, CRITERION_GROWTH_AREA_LENGTH_LIMIT);
 }
@@ -72,6 +72,18 @@ function formatCriterionTitle(criterion: InterviewGrowthAreaCriterionInput) {
   const competencyName = normalizeText(criterion.competencyName);
 
   return competencyName ? `${title} (${competencyName})` : title;
+}
+
+function formatGrowthAreaResult(value: InterviewGrowthAreaResult) {
+  if (value === 'correct') {
+    return 'засчитано';
+  }
+
+  if (value === 'partial') {
+    return 'частично';
+  }
+
+  return 'не засчитано';
 }
 
 function normalizeText(value: string | null | undefined) {

@@ -6,10 +6,10 @@ import type {
 } from './questions.types';
 
 const difficultyLabels: Record<DifficultyValue, string> = {
-  junior: 'Junior',
-  middle: 'Middle',
-  senior: 'Senior',
-  lead: 'Lead',
+  junior: 'Джун',
+  middle: 'Мидл',
+  senior: 'Сеньор',
+  lead: 'Лид',
 };
 
 export const QUESTION_TEXT_PLAIN_LENGTH_LIMIT = 1000;

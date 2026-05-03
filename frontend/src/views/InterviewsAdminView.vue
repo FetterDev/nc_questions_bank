@@ -220,7 +220,7 @@ async function createCycle() {
   } catch (error) {
     errorMessage.value = toUserErrorMessage(
       error,
-      'Не удалось создать weekly cycle.',
+      'Не удалось создать недельный цикл.',
     );
   } finally {
     saving.value = false;
@@ -233,7 +233,7 @@ async function savePair() {
   }
 
   if (!pairDialog.interviewerId || !pairDialog.intervieweeId) {
-    errorMessage.value = 'Нужно выбрать interviewer и interviewee.';
+    errorMessage.value = 'Нужно выбрать интервьюера и кандидата.';
     return;
   }
 
@@ -299,17 +299,17 @@ watch(month, () => {
         <small>Календарный режим</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Draft</span>
+        <span>Черновики</span>
         <strong>{{ monthSummary.draftCount }}</strong>
-        <small>Без даты в active cycle</small>
+        <small>Без даты в активном цикле</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Scheduled</span>
+        <span>Назначено</span>
         <strong>{{ monthSummary.scheduledCount }}</strong>
         <small>Готовы к проведению</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Completed</span>
+        <span>Завершено</span>
         <strong>{{ monthSummary.completedCount }}</strong>
         <small>Закрыты в текущем месяце</small>
       </article>
@@ -336,7 +336,7 @@ watch(month, () => {
             Обновить
           </UiButton>
           <UiButton :icon="mdiCalendarPlus" @click="openCycleDialog">
-            Новый cycle
+            Новый цикл
           </UiButton>
           <UiButton :icon="mdiPlus" tone="secondary" :disabled="!activeCycle" @click="openManualPairDialog">
             Ручная пара
@@ -380,8 +380,8 @@ watch(month, () => {
           </article>
         </div>
         <div v-else class="empty-state empty-state-panel">
-          <p>{{ loading ? 'Загрузка' : 'Draft-пар нет' }}</p>
-          <span>Создай weekly cycle или добавь пару вручную.</span>
+          <p>{{ loading ? 'Загрузка' : 'Черновиков пар нет' }}</p>
+          <span>Создай недельный цикл или добавь пару вручную.</span>
         </div>
       </UiPanel>
 
@@ -432,15 +432,15 @@ watch(month, () => {
           <div class="interview-calendar__legend">
             <span class="interview-status-pill interview-status-pill--planned">
               <span class="interview-status-pill__dot" />
-              planned
+              запланировано
             </span>
             <span class="interview-status-pill interview-status-pill--scheduled">
               <span class="interview-status-pill__dot" />
-              scheduled
+              назначено
             </span>
             <span class="interview-status-pill interview-status-pill--completed">
               <span class="interview-status-pill__dot" />
-              completed
+              завершено
             </span>
           </div>
         </div>
@@ -458,7 +458,7 @@ watch(month, () => {
       <UiPanel class="form-panel" variant="form">
         <div class="panel-header">
           <div class="panel-copy">
-            <h2>Новый weekly cycle</h2>
+            <h2>Новый недельный цикл</h2>
           </div>
         </div>
 
@@ -499,14 +499,14 @@ watch(month, () => {
             :items="userOptions"
             item-title="title"
             item-value="id"
-            label="Interviewer"
+            label="Интервьюер"
           />
           <UiSelect
             v-model="pairDialog.intervieweeId"
             :items="userOptions"
             item-title="title"
             item-value="id"
-            label="Interviewee"
+            label="Кандидат"
           />
         </div>
 
@@ -588,7 +588,7 @@ watch(month, () => {
         <div v-else class="empty-state empty-state-panel">
           <p>На этот день записей нет</p>
           <span v-if="!canCreatePairForSelectedDay">
-            Для ручного создания нужен активный cycle, включающий эту дату.
+            Для ручного создания нужен активный цикл, включающий эту дату.
           </span>
         </div>
       </UiPanel>

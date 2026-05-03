@@ -37,11 +37,11 @@ test('buildInterviewFeedback forms final feedback from criterion results and com
     ],
   });
 
-  assert.match(feedback, /Итог: 1 correct, 1 partial, 1 incorrect из 3/);
+  assert.match(feedback, /Итог: 1 засчитано, 1 частично, 1 не засчитано из 3/);
   assert.match(feedback, /Сильные зоны: Структурирует ответ \(Коммуникация\)/);
   assert.match(
     feedback,
-    /Зоны роста: Называет компромиссы решения \(Архитектура\) - partial; Держит performance budget \(Frontend\) - incorrect/,
+    /Зоны роста: Называет компромиссы решения \(Архитектура\) - частично; Держит performance budget \(Frontend\) - не засчитано/,
   );
   assert.match(
     feedback,
@@ -58,7 +58,7 @@ test('buildInterviewFeedback still forms a compact summary without criteria', ()
     criteria: [],
   });
 
-  assert.equal(feedback, 'Итог: 2 correct, 0 partial, 0 incorrect из 2. Все вопросы закрыты без явных зон роста.');
+  assert.equal(feedback, 'Итог: 2 засчитано, 0 частично, 0 не засчитано из 2. Все вопросы закрыты без явных зон роста.');
 });
 
 test('buildCriterionGrowthArea preserves manual growth point text', () => {
@@ -84,7 +84,7 @@ test('buildCriterionGrowthArea auto-forms text for non-correct criteria', () => 
 
   assert.equal(
     growthArea,
-    'Объясняет tradeoff кеширования (Architecture) - partial. Не связал решение с TTL и invalidation.',
+    'Объясняет tradeoff кеширования (Architecture) - частично. Не связал решение с TTL и invalidation.',
   );
 });
 
@@ -115,6 +115,6 @@ test('buildInterviewGrowthAreas combines explicit and auto growth areas', () => 
     ],
   });
 
-  assert.match(growthAreas, /Проверяет edge cases \(Testing\) - incorrect/);
+  assert.match(growthAreas, /Проверяет edge cases \(Testing\) - не засчитано/);
   assert.match(growthAreas, /Закрепить сравнение вариантов через constraints\./);
 });

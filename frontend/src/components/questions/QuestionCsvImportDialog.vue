@@ -148,7 +148,7 @@ async function runPreview() {
     report.value = null;
     errorMessage.value = toUserErrorMessage(
       error,
-      'Не удалось построить preview импорта.',
+      'Не удалось построить предпросмотр импорта.',
     );
   } finally {
     previewLoading.value = false;
@@ -212,7 +212,7 @@ function rowStatusClass(row: QuestionCsvImportRow) {
         <div class="csv-import-dialog__intro">
           <h2>Импорт банка из CSV</h2>
           <p>
-            Загрузи канонический CSV или legacy-файл. Система построит preview,
+            Загрузи канонический CSV или старый файл. Система построит предпросмотр,
             покажет ошибки и только потом применит изменения.
           </p>
         </div>
@@ -233,7 +233,7 @@ function rowStatusClass(row: QuestionCsvImportRow) {
             tone="secondary"
             @click="runPreview"
           >
-            Обновить preview
+            Обновить предпросмотр
           </UiButton>
         </div>
       </div>
@@ -257,7 +257,7 @@ function rowStatusClass(row: QuestionCsvImportRow) {
           tone="secondary"
           @click="runPreview"
         >
-          Построить preview
+          Построить предпросмотр
         </UiButton>
       </div>
 
@@ -304,7 +304,7 @@ function rowStatusClass(row: QuestionCsvImportRow) {
             padding="compact"
             tone="muted"
           >
-            <h3>Глобальные warning</h3>
+            <h3>Глобальные предупреждения</h3>
             <p
               v-for="warning in report.warnings"
               :key="warning"
@@ -357,7 +357,7 @@ function rowStatusClass(row: QuestionCsvImportRow) {
         <div class="csv-import-rows">
           <div class="csv-import-rows__header">
             <div>
-              <h3>Строки preview</h3>
+              <h3>Строки предпросмотра</h3>
               <p>
                 Показано {{ visibleRows.length }} из {{ report.rows.length }}.
               </p>
@@ -465,7 +465,7 @@ function rowStatusClass(row: QuestionCsvImportRow) {
           tone="secondary"
           @click="runPreview"
         >
-          Preview
+          Предпросмотр
         </UiButton>
 
         <UiButton

@@ -78,7 +78,7 @@ async function loadRuntime() {
   const id = typeof route.params.id === 'string' ? route.params.id : '';
 
   if (!id) {
-    errorMessage.value = 'Interview id отсутствует.';
+    errorMessage.value = 'ID интервью отсутствует.';
     return;
   }
 
@@ -102,7 +102,7 @@ async function loadRuntime() {
   } catch (error) {
     errorMessage.value = toUserErrorMessage(
       error,
-      'Не удалось открыть runtime собеседования.',
+      'Не удалось открыть собеседование.',
     );
   } finally {
     loading.value = false;
@@ -237,7 +237,7 @@ void loadRuntime();
     </v-alert>
 
     <UiPanel v-if="loading || !runtime || !currentItem" class="empty-state empty-state-panel" variant="empty">
-      <p>{{ loading ? 'Загрузка' : 'Runtime недоступен' }}</p>
+      <p>{{ loading ? 'Загрузка' : 'Интервью недоступно' }}</p>
     </UiPanel>
 
     <section v-else class="training-session-shell interview-runtime-shell">
@@ -325,21 +325,21 @@ void loadRuntime();
                   :tone="row.state.result === 'correct' ? 'primary' : 'secondary'"
                   @click="selectCriterionResult(row.criterion.id, 'correct')"
                 >
-                  Correct
+                  Засчитано
                 </UiButton>
                 <UiButton
                   :icon="mdiMinus"
                   :tone="row.state.result === 'partial' ? 'primary' : 'secondary'"
                   @click="selectCriterionResult(row.criterion.id, 'partial')"
                 >
-                  Partial
+                  Частично
                 </UiButton>
                 <UiButton
                   :icon="mdiClose"
                   :tone="row.state.result === 'incorrect' ? 'primary' : 'text'"
                   @click="selectCriterionResult(row.criterion.id, 'incorrect')"
                 >
-                  Incorrect
+                  Не засчитано
                 </UiButton>
               </div>
 
@@ -370,9 +370,9 @@ void loadRuntime();
           </div>
 
           <div v-else class="training-focus-card__actions">
-            <UiButton :icon="mdiCheck" @click="selectResult('correct')">Correct</UiButton>
-            <UiButton :icon="mdiMinus" tone="secondary" @click="selectResult('partial')">Partial</UiButton>
-            <UiButton :icon="mdiClose" tone="text" @click="selectResult('incorrect')">Incorrect</UiButton>
+            <UiButton :icon="mdiCheck" @click="selectResult('correct')">Засчитано</UiButton>
+            <UiButton :icon="mdiMinus" tone="secondary" @click="selectResult('partial')">Частично</UiButton>
+            <UiButton :icon="mdiClose" tone="text" @click="selectResult('incorrect')">Не засчитано</UiButton>
           </div>
         </article>
 
@@ -391,8 +391,8 @@ void loadRuntime();
             v-model="feedback"
             class="interview-runtime-feedback"
             hide-label
-            label="Финальный feedback"
-            placeholder="Финальный feedback по собеседованию"
+            label="Финальная обратная связь"
+            placeholder="Финальная обратная связь по собеседованию"
             textarea
           />
           <UiField

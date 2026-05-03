@@ -58,7 +58,7 @@ function openRoute(routeName: 'question-bank' | 'question-editor-create') {
     <UiPanel v-else-if="focusItems.length" class="content-panel insights-panel" padding="default" variant="detail">
       <div class="panel-header">
         <div class="panel-copy">
-          <h2>Короткая аналитика по текущему published-слою</h2>
+          <h2>Короткая аналитика по текущему опубликованному слою</h2>
         </div>
       </div>
 

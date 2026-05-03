@@ -13,6 +13,7 @@ import type {
   TeamAnalyticsStackLevel,
 } from '../features/analytics/analytics.types';
 import { toUserErrorMessage } from '../features/system/error.utils';
+import { formatTrainingResultCounts } from '../features/training/training.utils';
 import { apiService } from '../services/api.service';
 
 type SortMode = 'growth' | 'name' | 'activity';
@@ -172,7 +173,7 @@ function formatDate(value: string | null) {
 }
 
 function formatGrowthTopic(topic: TeamAnalyticsGrowthTopic) {
-  return `${topic.accuracy}% · ${topic.incorrectCount} incorrect / ${topic.partialCount} partial`;
+  return `${topic.accuracy}% · ${topic.incorrectCount} не засчитано / ${topic.partialCount} частично`;
 }
 
 function formatStackLevel(level: TeamAnalyticsStackLevel) {
@@ -184,7 +185,19 @@ function formatLevel(value: TeamAnalyticsStackLevel['level']) {
     return 'нет оценки';
   }
 
-  return value;
+  if (value === 'junior') {
+    return 'джун';
+  }
+
+  if (value === 'middle') {
+    return 'мидл';
+  }
+
+  if (value === 'senior') {
+    return 'сеньор';
+  }
+
+  return 'лид';
 }
 
 function formatStackList(employee: TeamAnalyticsEmployee) {
@@ -245,7 +258,7 @@ onMounted(() => {
       <article class="surface-card summary-stat">
         <span>Сотрудники</span>
         <strong>{{ summary.employeesCount }}</strong>
-        <small>Активные USER-аккаунты</small>
+        <small>Активные пользовательские аккаунты</small>
       </article>
 
       <article class="surface-card summary-stat">
@@ -257,13 +270,13 @@ onMounted(() => {
       <article class="surface-card summary-stat">
         <span>Ответы</span>
         <strong>{{ summary.totalAnswers }}</strong>
-        <small>Training + completed interviews</small>
+        <small>Тренировки и завершённые интервью</small>
       </article>
 
       <article class="surface-card summary-stat">
-        <span>Success</span>
+        <span>Успешность</span>
         <strong>{{ summary.averageAccuracy }}%</strong>
-        <small>Correct от всех ответов команды</small>
+        <small>Засчитанные ответы команды</small>
       </article>
     </section>
 
@@ -277,7 +290,7 @@ onMounted(() => {
           v-model="searchQuery"
           clearable
           label="Поиск сотрудника"
-          placeholder="Имя, login или стек"
+          placeholder="Имя, логин или стек"
         />
 
         <UiSelect
@@ -386,7 +399,7 @@ onMounted(() => {
           >
             <strong>{{ employee.user.displayName }}</strong>
             <small>{{ formatRole(employee.user.role) }} · {{ employee.user.login }}</small>
-            <span>{{ employee.summary.accuracy }}% success</span>
+            <span>{{ employee.summary.accuracy }}% успешности</span>
             <span>{{ employee.summary.totalAnswers }} ответов</span>
             <small>{{ formatStackList(employee) }}</small>
             <div v-if="employee.stackLevels.length" class="team-level-list">
@@ -424,7 +437,7 @@ onMounted(() => {
             <span>Сотрудник</span>
             <span>Стек</span>
             <span>Ответы</span>
-            <span>Success</span>
+            <span>Успешность</span>
             <span>Точки роста</span>
             <span>История</span>
           </div>
@@ -476,14 +489,12 @@ onMounted(() => {
             <div class="team-answer-cell">
               <strong>{{ employee.summary.totalAnswers }}</strong>
               <small>
-                {{ employee.summary.correctCount }} correct /
-                {{ employee.summary.partialCount }} partial /
-                {{ employee.summary.incorrectCount }} incorrect
+                {{ formatTrainingResultCounts(employee.summary) }}
               </small>
               <small>
-                {{ employee.summary.trainingSessionsCount }} training ·
-                {{ employee.summary.completedInterviewsCount }} interviews ·
-                {{ employee.summary.feedbackCount }} feedback
+                {{ employee.summary.trainingSessionsCount }} тренировок ·
+                {{ employee.summary.completedInterviewsCount }} интервью ·
+                {{ employee.summary.feedbackCount }} отзывов
               </small>
             </div>
 

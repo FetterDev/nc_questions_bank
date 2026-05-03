@@ -240,7 +240,7 @@ function removeCriterion(index: number) {
       </section>
 
       <section class="form-section">
-        <p class="section-label">Live preview</p>
+        <p class="section-label">Предпросмотр</p>
 
         <div class="editor-preview-grid">
           <article class="editor-preview-card">

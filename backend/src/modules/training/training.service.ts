@@ -326,7 +326,7 @@ export class TrainingService {
     if (targetUserId === currentUser.id) {
       if (feedback) {
         throw new BadRequestException(
-          'Feedback is only available when saving training for another user',
+          'Обратная связь доступна только при сохранении тренировки для другого пользователя',
         );
       }
 

@@ -7,6 +7,7 @@ import UiPanel from '../components/ui/UiPanel.vue';
 import type { MyInterviewDashboard } from '../features/interviews/interviews.types';
 import { formatDateOnly, formatDateTime } from '../features/interviews/interviews.utils';
 import { toUserErrorMessage } from '../features/system/error.utils';
+import { formatTrainingResultCounts } from '../features/training/training.utils';
 import { apiService } from '../services/api.service';
 
 const dashboard = ref<MyInterviewDashboard | null>(null);
@@ -41,7 +42,7 @@ const weakTopics = computed(() =>
   (dashboard.value?.weakTopics ?? []).map((item) => ({
     label: item.name,
     value: item.incorrectCount + item.partialCount,
-    meta: `${item.accuracy}% accuracy`,
+    meta: `${item.accuracy}% успешности`,
     color: 'var(--color-danger)',
   })),
 );
@@ -73,20 +74,20 @@ onMounted(() => {
       <article class="surface-card summary-stat">
         <span>Всего</span>
         <strong>{{ summary.totalInterviews }}</strong>
-        <small>Мои интервью как interviewee</small>
+        <small>Мои интервью как кандидат</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Correct</span>
+        <span>Засчитано</span>
         <strong>{{ summary.correctCount }}</strong>
         <small>Полностью засчитанные</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Partial</span>
+        <span>Частично</span>
         <strong>{{ summary.partialCount }}</strong>
         <small>Частично засчитанные</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Incorrect</span>
+        <span>Не засчитано</span>
         <strong>{{ summary.incorrectCount }}</strong>
         <small>Не засчитанные</small>
       </article>
@@ -119,7 +120,7 @@ onMounted(() => {
         <UiPanel class="detail-panel" variant="detail">
           <div class="panel-header">
             <div class="panel-copy">
-              <h2>Комментарии interviewer-ов</h2>
+              <h2>Комментарии интервьюеров</h2>
             </div>
           </div>
 
@@ -129,14 +130,14 @@ onMounted(() => {
               :key="entry.interviewId"
               class="interview-feedback-card"
             >
-              <strong>{{ entry.interviewer?.displayName ?? 'Interviewer' }}</strong>
+              <strong>{{ entry.interviewer?.displayName ?? 'Интервьюер' }}</strong>
               <small>{{ formatDateTime(entry.completedAt) }}</small>
               <p>{{ entry.feedback }}</p>
               <small v-if="entry.growthAreas">Зоны роста: {{ entry.growthAreas }}</small>
             </article>
           </div>
           <div v-else class="empty-state empty-state-panel">
-            <p>Пока нет feedback</p>
+            <p>Пока нет обратной связи</p>
           </div>
         </UiPanel>
 
@@ -157,7 +158,7 @@ onMounted(() => {
                 <strong>{{ item.interviewer.displayName }} - {{ item.interviewee.displayName }}</strong>
                 <small>{{ formatDateOnly(item.plannedDate) }}</small>
               </div>
-              <small>{{ item.correctCount }} / {{ item.partialCount }} / {{ item.incorrectCount }}</small>
+              <small>{{ formatTrainingResultCounts(item) }}</small>
             </article>
           </div>
           <div v-else class="empty-state empty-state-panel">

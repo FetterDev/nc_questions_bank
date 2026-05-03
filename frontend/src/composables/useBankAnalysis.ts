@@ -63,11 +63,11 @@ export function useBankAnalysis() {
     if (seniorShare.value < 22) {
       items.push({
         color: 'accent',
-        actionLabel: 'Добавить senior-вопрос',
-        title: 'Усилить senior-слой',
-        description: 'Доля senior-вопросов в текущем банке слишком низкая.',
+        actionLabel: 'Добавить вопрос уровня «сеньор»',
+        title: 'Усилить слой «сеньор»',
+        description: 'Доля вопросов уровня «сеньор» в текущем банке слишком низкая.',
         routeName: 'question-editor-create',
-        source: `Senior: ${seniorCount} из ${totalQuestions.value} вопросов.`,
+        source: `Сеньор: ${seniorCount} из ${totalQuestions.value} вопросов.`,
       });
     }
 

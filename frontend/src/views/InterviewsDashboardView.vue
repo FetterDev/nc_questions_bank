@@ -12,6 +12,7 @@ import {
   formatInterviewStatus,
 } from '../features/interviews/interviews.utils';
 import { toUserErrorMessage } from '../features/system/error.utils';
+import { formatTrainingResultCounts } from '../features/training/training.utils';
 import { apiService } from '../services/api.service';
 
 const dashboard = ref<AdminInterviewDashboard | null>(null);
@@ -33,7 +34,7 @@ const summary = computed(() => dashboard.value?.summary ?? {
 const scheduleSeries = computed(() =>
   (dashboard.value?.scheduleSeries ?? []).map((item) => ({
     label: item.bucketStart,
-    meta: `${item.completedCount} completed`,
+    meta: `${item.completedCount} завершено`,
     segments: [
       { value: item.draftCount, color: 'var(--color-ink-muted)' },
       { value: item.plannedCount, color: 'var(--color-brass)' },
@@ -48,7 +49,7 @@ const interviewerLoad = computed(() =>
   (dashboard.value?.interviewerLoad ?? []).map((item) => ({
     label: item.interviewer.displayName,
     value: item.assignedCount,
-    meta: `${item.completedCount} completed`,
+    meta: `${item.completedCount} завершено`,
   })),
 );
 
@@ -56,15 +57,15 @@ const weakTopics = computed(() =>
   (dashboard.value?.weakTopics ?? []).map((item) => ({
     label: item.name,
     value: item.incorrectCount + item.partialCount,
-    meta: `${item.accuracy}% accuracy`,
+    meta: `${item.accuracy}% успешности`,
     color: 'var(--color-danger)',
   })),
 );
 
 const donutSegments = computed(() => [
-  { label: 'Correct', value: dashboard.value?.outcomeMix.correctCount ?? 0, color: 'var(--color-success)' },
-  { label: 'Partial', value: dashboard.value?.outcomeMix.partialCount ?? 0, color: 'var(--color-brass)' },
-  { label: 'Incorrect', value: dashboard.value?.outcomeMix.incorrectCount ?? 0, color: 'var(--color-danger)' },
+  { label: 'Засчитано', value: dashboard.value?.outcomeMix.correctCount ?? 0, color: 'var(--color-success)' },
+  { label: 'Частично', value: dashboard.value?.outcomeMix.partialCount ?? 0, color: 'var(--color-brass)' },
+  { label: 'Не засчитано', value: dashboard.value?.outcomeMix.incorrectCount ?? 0, color: 'var(--color-danger)' },
 ]);
 
 async function loadDashboard() {
@@ -76,7 +77,7 @@ async function loadDashboard() {
   } catch (error) {
     errorMessage.value = toUserErrorMessage(
       error,
-      'Не удалось загрузить dashboard собеседований.',
+      'Не удалось загрузить дашборд собеседований.',
     );
   } finally {
     loading.value = false;
@@ -97,17 +98,17 @@ onMounted(() => {
         <small>Интервью в диапазоне</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Scheduled</span>
+        <span>Назначено</span>
         <strong>{{ summary.scheduledCount }}</strong>
         <small>Готовы к запуску</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Completed</span>
+        <span>Завершено</span>
         <strong>{{ summary.completedCount }}</strong>
         <small>Закрытые интервью</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Results</span>
+        <span>Оценки</span>
         <strong>{{ summary.resultsCount }}</strong>
         <small>Всего зафиксированных оценок</small>
       </article>
@@ -185,7 +186,7 @@ onMounted(() => {
                 <strong>{{ item.interviewer.displayName }} - {{ item.interviewee.displayName }}</strong>
                 <small>{{ formatDateOnly(item.plannedDate) }}</small>
               </div>
-              <small>{{ item.correctCount }} / {{ item.partialCount }} / {{ item.incorrectCount }}</small>
+              <small>{{ formatTrainingResultCounts(item) }}</small>
             </article>
           </div>
           <div v-else class="empty-state empty-state-panel">

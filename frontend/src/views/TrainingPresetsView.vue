@@ -236,7 +236,7 @@ onMounted(() => {
       <article class="surface-card summary-stat">
         <span>Связей тем</span>
         <strong>{{ totalLinkedTopics }}</strong>
-        <small>Суммарное количество topic-links во всех пресетах.</small>
+        <small>Суммарное количество связей с темами во всех пресетах.</small>
       </article>
 
       <article class="surface-card summary-stat">

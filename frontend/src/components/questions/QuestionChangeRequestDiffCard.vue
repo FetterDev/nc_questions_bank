@@ -63,7 +63,7 @@ const reviewCommentModel = computed({
         <article class="moderation-meta__item">
           <span>Автор</span>
           <strong>{{ detail.author.displayName }}</strong>
-          <small>{{ detail.author.email ?? 'Email не задан' }}</small>
+          <small>{{ detail.author.email ?? 'Почта не задана' }}</small>
         </article>
 
         <article class="moderation-meta__item">

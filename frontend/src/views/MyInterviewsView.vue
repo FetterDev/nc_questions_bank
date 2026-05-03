@@ -85,17 +85,17 @@ watch(month, () => {
         <small>Мой календарь</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Interviewer</span>
+        <span>Я интервьюер</span>
         <strong>{{ summary.asInterviewer }}</strong>
         <small>Я собеседую</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Interviewee</span>
+        <span>Я кандидат</span>
         <strong>{{ summary.asInterviewee }}</strong>
         <small>Я прохожу</small>
       </article>
       <article class="surface-card summary-stat">
-        <span>Completed</span>
+        <span>Завершено</span>
         <strong>{{ summary.completed }}</strong>
         <small>Завершённые записи</small>
       </article>

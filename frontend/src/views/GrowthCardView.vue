@@ -5,6 +5,7 @@ import QuestionContentRenderer from '../components/questions/QuestionContentRend
 import UiButton from '../components/ui/UiButton.vue';
 import UiPanel from '../components/ui/UiPanel.vue';
 import {
+  formatTrainingResultCounts,
   formatTrainingResultCompact,
   trainingResultColor,
 } from '../features/training/training.utils';
@@ -22,6 +23,22 @@ const {
   summary,
   weakTopics,
 } = useGrowthCard();
+
+function formatRecommendationKind(kind: string) {
+  if (kind === 'topic') {
+    return 'Тема';
+  }
+
+  if (kind === 'question') {
+    return 'Вопрос';
+  }
+
+  return 'Зона роста';
+}
+
+function formatGrowthStatus(value: string) {
+  return value === 'resolved' ? 'закрыто' : 'в работе';
+}
 </script>
 
 <template>
@@ -34,25 +51,25 @@ const {
       </article>
 
       <article class="surface-card summary-stat">
-        <span>Correct</span>
+        <span>Засчитано</span>
         <strong>{{ summary.correctCount }}</strong>
         <small>Полностью засчитанные ответы</small>
       </article>
 
       <article class="surface-card summary-stat">
-        <span>Partial</span>
+        <span>Частично</span>
         <strong>{{ summary.partialCount }}</strong>
         <small>Частично засчитанные ответы</small>
       </article>
 
       <article class="surface-card summary-stat">
-        <span>Incorrect</span>
+        <span>Не засчитано</span>
         <strong>{{ summary.incorrectCount }}</strong>
         <small>Не засчитанные ответы</small>
       </article>
 
       <article class="surface-card summary-stat">
-        <span>Accuracy</span>
+        <span>Успешность</span>
         <strong>{{ summary.accuracy }}%</strong>
         <small>{{ summary.totalResults }} сохранённых результата</small>
       </article>
@@ -101,7 +118,7 @@ const {
               class="growth-topic-row"
             >
               <div>
-                <strong>{{ item.kind }}</strong>
+                <strong>{{ formatRecommendationKind(item.kind) }}</strong>
                 <small>{{ item.text }}</small>
               </div>
               <v-chip color="secondary" rounded="pill" size="small" variant="tonal">
@@ -138,7 +155,7 @@ const {
               <div class="growth-feedback-card__head">
                 <div>
                   <strong>{{ entry.trainer?.displayName ?? 'Внешний тренер' }}</strong>
-                  <small>{{ entry.trainer?.login ?? 'system' }}</small>
+                  <small>{{ entry.trainer?.login ?? 'система' }}</small>
                 </div>
                 <small>{{ new Date(entry.finishedAt).toLocaleString('ru-RU') }}</small>
               </div>
@@ -146,7 +163,7 @@ const {
             </article>
           </div>
           <div v-else class="empty-state empty-state-panel">
-            <p>Пока нет фидбека</p>
+            <p>Пока нет обратной связи</p>
           </div>
         </UiPanel>
 
@@ -174,7 +191,7 @@ const {
               <div>
                 <strong>{{ topic.name }}</strong>
                 <small>
-                  {{ topic.incorrectCount }} incorrect / {{ topic.partialCount }} partial / {{ topic.correctCount }} correct
+                  {{ formatTrainingResultCounts(topic) }}
                 </small>
               </div>
               <v-chip color="secondary" rounded="pill" size="small" variant="tonal">
@@ -213,7 +230,7 @@ const {
                 size="small"
                 variant="tonal"
               >
-                {{ item.currentStatus }}
+                {{ formatGrowthStatus(item.currentStatus) }}
               </v-chip>
             </article>
           </div>
@@ -227,7 +244,7 @@ const {
         <UiPanel class="growth-stack-panel detail-panel" padding="default" variant="detail">
           <div class="growth-stack-panel__head">
             <div>
-              <h2>Последний результат incorrect или partial</h2>
+              <h2>Последний результат: не засчитано или частично</h2>
             </div>
             <UiButton
               :icon="mdiTextBoxSearchOutline"
@@ -274,7 +291,7 @@ const {
               </div>
 
               <small>
-                {{ question.incorrectCount }} incorrect / {{ question.partialCount }} partial / {{ question.correctCount }} correct · {{ new Date(question.lastAnsweredAt).toLocaleString('ru-RU') }}
+                {{ formatTrainingResultCounts(question) }} · {{ new Date(question.lastAnsweredAt).toLocaleString('ru-RU') }}
               </small>
             </article>
           </div>
@@ -286,7 +303,7 @@ const {
         <UiPanel class="growth-stack-panel growth-stack-panel--muted detail-panel" padding="default" variant="detail">
           <div class="growth-stack-panel__head">
             <div>
-              <h2>Последний результат correct</h2>
+              <h2>Последний результат: засчитано</h2>
             </div>
           </div>
 
@@ -325,7 +342,7 @@ const {
               </div>
 
               <small>
-                {{ question.correctCount }} correct / {{ question.partialCount }} partial / {{ question.incorrectCount }} incorrect · {{ new Date(question.lastAnsweredAt).toLocaleString('ru-RU') }}
+                {{ formatTrainingResultCounts(question) }} · {{ new Date(question.lastAnsweredAt).toLocaleString('ru-RU') }}
               </small>
             </article>
           </div>

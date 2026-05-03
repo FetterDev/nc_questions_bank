@@ -137,7 +137,7 @@ const primaryNavItems = computed(() => {
       to: { name: 'interviews-admin' },
     });
     items.push({
-      label: 'Dashboard собеседований',
+      label: 'Дашборд собеседований',
       section: 'interviews-dashboard',
       icon: mdiChartTimelineVariant,
       to: { name: 'interviews-dashboard' },

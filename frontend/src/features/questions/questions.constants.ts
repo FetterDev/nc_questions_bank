@@ -7,10 +7,10 @@ import type {
 import { createQuestionStructuredContent } from './questions.utils';
 
 export const difficultyOptions: DifficultyOption[] = [
-  { title: 'Junior', value: 'junior' },
-  { title: 'Middle', value: 'middle' },
-  { title: 'Senior', value: 'senior' },
-  { title: 'Lead', value: 'lead' },
+  { title: 'Джун', value: 'junior' },
+  { title: 'Мидл', value: 'middle' },
+  { title: 'Сеньор', value: 'senior' },
+  { title: 'Лид', value: 'lead' },
 ];
 
 export const pageSizeOptions: PageSizeOption[] = [

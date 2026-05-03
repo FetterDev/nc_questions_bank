@@ -22,6 +22,7 @@ import type {
 } from '../features/competencies/competencies.types';
 import { toUserErrorMessage } from '../features/system/error.utils';
 import {
+  formatTrainingResultCounts,
   formatTrainingResult,
   trainingResultColor,
 } from '../features/training/training.utils';
@@ -415,7 +416,7 @@ function competencyMeta(item: CompetencyMatrix['competencies'][number]) {
     return 'нет оценок';
   }
 
-  return `${item.accuracy}% · ${item.correctCount} / ${item.partialCount} / ${item.incorrectCount}`;
+  return `${item.accuracy}% · ${formatTrainingResultCounts(item)}`;
 }
 
 function formatStackLevel(level: CompetencyMatrix['stackLevels'][number]) {
@@ -427,7 +428,19 @@ function formatLevel(value: CompetencyMatrix['stackLevels'][number]['level']) {
     return 'нет оценки';
   }
 
-  return value;
+  if (value === 'junior') {
+    return 'джун';
+  }
+
+  if (value === 'middle') {
+    return 'мидл';
+  }
+
+  if (value === 'senior') {
+    return 'сеньор';
+  }
+
+  return 'лид';
 }
 
 function handleDragStart(competencyId: string) {
@@ -633,7 +646,7 @@ onMounted(async () => {
             <div class="competency-table-header">
               <div>
                 <strong>Компетенции стека</strong>
-                <small>Порядок меняется drag/drop или через поле позиции</small>
+                <small>Порядок меняется перетаскиванием или через поле позиции</small>
               </div>
               <UiButton :icon="mdiRefresh" tone="secondary" @click="refreshDirectory">
                 Обновить
@@ -716,8 +729,8 @@ onMounted(async () => {
             <UiField
               v-model="assignmentSearchQuery"
               clearable
-              label="Поиск user"
-              placeholder="Имя или login"
+              label="Поиск пользователя"
+              placeholder="Имя или логин"
             />
             <UiSelect
               v-model="assignmentStackId"

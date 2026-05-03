@@ -18,14 +18,26 @@ export function formatTrainingResult(value: TrainingResultValue) {
 
 export function formatTrainingResultCompact(value: TrainingResultValue) {
   if (value === 'correct') {
-    return 'correct';
+    return 'засчитано';
   }
 
   if (value === 'partial') {
-    return 'partial';
+    return 'частично';
   }
 
-  return 'incorrect';
+  return 'не засчитано';
+}
+
+export function formatTrainingResultCounts(counts: {
+  correctCount: number;
+  partialCount: number;
+  incorrectCount: number;
+}, separator = ' / ') {
+  return [
+    `${counts.correctCount} засчитано`,
+    `${counts.partialCount} частично`,
+    `${counts.incorrectCount} не засчитано`,
+  ].join(separator);
 }
 
 export function trainingResultColor(value: TrainingResultValue) {

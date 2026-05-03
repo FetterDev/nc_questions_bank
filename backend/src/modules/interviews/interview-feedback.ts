@@ -18,7 +18,7 @@ export type InterviewFeedbackInput = {
 const FEEDBACK_LENGTH_LIMIT = 4000;
 
 export function buildInterviewFeedback(input: InterviewFeedbackInput) {
-  const summary = `Итог: ${input.correctCount} correct, ${input.partialCount} partial, ${input.incorrectCount} incorrect из ${input.resultsCount}.`;
+  const summary = `Итог: ${input.correctCount} засчитано, ${input.partialCount} частично, ${input.incorrectCount} не засчитано из ${input.resultsCount}.`;
   const strengths = input.criteria
     .filter((criterion) => criterion.result === 'correct')
     .slice(0, 3)
@@ -26,7 +26,7 @@ export function buildInterviewFeedback(input: InterviewFeedbackInput) {
   const growthAreas = input.criteria
     .filter((criterion) => criterion.result !== 'correct')
     .slice(0, 5)
-    .map((criterion) => `${formatCriterionTitle(criterion)} - ${criterion.result}`);
+    .map((criterion) => `${formatCriterionTitle(criterion)} - ${formatFeedbackResult(criterion.result)}`);
   const comments = input.criteria
     .map((criterion) => ({
       title: criterion.title.trim(),
@@ -44,7 +44,7 @@ export function buildInterviewFeedback(input: InterviewFeedbackInput) {
   if (growthAreas.length > 0) {
     parts.push(`Зоны роста: ${growthAreas.join('; ')}.`);
   } else if (input.partialCount > 0 || input.incorrectCount > 0) {
-    parts.push('Зоны роста: вопросы с partial/incorrect требуют разбора по ответам.');
+    parts.push('Зоны роста: вопросы с частичным или незасчитанным результатом требуют разбора по ответам.');
   } else {
     parts.push('Все вопросы закрыты без явных зон роста.');
   }
@@ -61,6 +61,18 @@ function formatCriterionTitle(criterion: InterviewFeedbackCriterionInput) {
   const competencyName = criterion.competencyName?.trim();
 
   return competencyName ? `${title} (${competencyName})` : title;
+}
+
+function formatFeedbackResult(value: InterviewFeedbackResult) {
+  if (value === 'correct') {
+    return 'засчитано';
+  }
+
+  if (value === 'partial') {
+    return 'частично';
+  }
+
+  return 'не засчитано';
 }
 
 function truncateFeedback(value: string) {

@@ -8,18 +8,18 @@ import type {
 
 export function formatInterviewStatus(status: InterviewStatusValue) {
   if (status === 'DRAFT') {
-    return 'draft';
+    return 'черновик';
   }
 
   if (status === 'PLANNED') {
-    return 'planned';
+    return 'запланировано';
   }
 
   if (status === 'SCHEDULED') {
-    return 'scheduled';
+    return 'назначено';
   }
 
-  return 'completed';
+  return 'завершено';
 }
 
 export function interviewStatusColor(status: InterviewStatusValue) {

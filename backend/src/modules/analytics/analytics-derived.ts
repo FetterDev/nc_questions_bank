@@ -140,7 +140,7 @@ export function buildGrowthRecommendations(
     recommendations.push({
       kind: 'topic',
       priority: 1,
-      text: `Повторить тему ${weakTopic.name}: сейчас ${weakTopic.accuracy}% accuracy, ${weakTopic.incorrectCount} incorrect и ${weakTopic.partialCount} partial.`,
+      text: `Повторить тему ${weakTopic.name}: сейчас ${weakTopic.accuracy}% успешности, ${weakTopic.incorrectCount} не засчитано и ${weakTopic.partialCount} частично.`,
     });
   }
 
@@ -153,7 +153,7 @@ export function buildGrowthRecommendations(
     recommendations.push({
       kind: 'question',
       priority: 2,
-      text: `Разобрать вопрос "${trimForSentence(failedQuestion.text)}" и повторить похожие задачи уровня ${failedQuestion.difficulty}.`,
+      text: `Разобрать вопрос "${trimForSentence(failedQuestion.text)}" и повторить похожие задачи уровня ${formatStackLevel(failedQuestion.difficulty)}.`,
     });
   }
 
@@ -200,7 +200,7 @@ export function buildManagerReport(input: ManagerReportInput) {
     const topic = employee.growthTopics[0];
     const topicText = topic ? `, фокус: ${topic.name}` : '';
 
-    return `${employee.user.displayName}: провести разбор результатов (${employee.accuracy}% accuracy${topicText}).`;
+    return `${employee.user.displayName}: провести разбор результатов (${employee.accuracy}% успешности${topicText}).`;
   });
 
   if (recommendations.length === 0) {
@@ -225,6 +225,30 @@ function growthResultRank(value: string) {
   }
 
   return 0;
+}
+
+function formatStackLevel(value: string) {
+  if (value === 'not_assessed') {
+    return 'без оценки';
+  }
+
+  if (value === 'junior') {
+    return 'джун';
+  }
+
+  if (value === 'middle') {
+    return 'мидл';
+  }
+
+  if (value === 'senior') {
+    return 'сеньор';
+  }
+
+  if (value === 'lead') {
+    return 'лид';
+  }
+
+  return value;
 }
 
 function trimForSentence(value: string) {
