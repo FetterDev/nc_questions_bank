@@ -198,7 +198,7 @@ watch(() => pagination.page, () => {
         </div>
 
         <div v-else-if="companies.length" class="topic-admin-list">
-          <div class="list-head list-head--topics">
+          <div class="list-head list-head--companies">
             <span>Компания</span>
             <span>Вопросов</span>
             <span>Действия</span>
@@ -207,10 +207,10 @@ watch(() => pagination.page, () => {
           <article
             v-for="company in companies"
             :key="company.id"
-            class="list-row list-row--topics"
+            class="list-row company-row"
           >
             <div class="list-cell">
-              <div class="topic-cell">
+              <div class="topic-name-cell">
                 <strong>{{ company.name }}</strong>
                 <small>{{ company.id }}</small>
               </div>

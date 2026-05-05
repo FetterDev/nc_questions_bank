@@ -1,8 +1,10 @@
 .account-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
   gap: var(--frame-gap);
   align-items: start;
+  width: min(940px, 100%);
+  justify-self: center;
 }
 
 .account-card {
@@ -24,7 +26,7 @@
   flex: 0 0 auto;
   border-radius: 999px;
   background: var(--color-cyan);
-  color: var(--color-paper);
+  color: var(--color-surface-primary);
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -43,7 +45,7 @@
   font-size: var(--font-size-h1);
   font-weight: 600;
   line-height: 1.05;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
 }
 
 .account-card__mode-copy {
@@ -62,7 +64,7 @@
   padding: var(--panel-padding-compact);
   border: 1px solid var(--panel-border);
   border-radius: var(--panel-radius);
-  background: color-mix(in srgb, var(--color-paper) 90%, var(--color-ivory));
+  background: var(--color-surface-muted);
 }
 
 .account-fact span {
@@ -102,7 +104,12 @@
 
 @media (max-width: 720px) {
   .account-card__hero {
-    flex-direction: column;
-    align-items: stretch;
+    align-items: center;
+  }
+
+  .account-card__avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 1.2rem;
   }
 }

@@ -1,74 +1,85 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --color-paper: #f8f4ed;
-  --color-ivory: #ece2d0;
-  --color-ink: #0f3c43;
-  --color-ink-muted: #385e61;
-  --color-cyan: #187a82;
-  --color-cyan-light: #2b878e;
-  --color-brass: #c39a5e;
-  --color-danger: #a63c3c;
-  --color-success: #356f55;
-  --color-warning: #8c6532;
-  --color-tag-junior: #4a9a70;
-  --color-tag-middle: #c2a257;
-  --color-tag-senior: #c44545;
-  --color-tag-lead: #7d4cc4;
+  --color-paper: #f6f7f9;
+  --color-ivory: #ffffff;
+  --color-ink: #17212b;
+  --color-ink-muted: #5f6f7f;
+  --color-cyan: #0f7f84;
+  --color-cyan-light: #159aa0;
+  --color-brass: #b7791f;
+  --color-danger: #b42318;
+  --color-success: #067647;
+  --color-warning: #b54708;
+  --color-tag-junior: #067647;
+  --color-tag-middle: #a15c07;
+  --color-tag-senior: #b42318;
+  --color-tag-lead: #6941c6;
+  --color-tag-lead-text: #5f379d;
+  --color-surface-primary: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-surface-subtle: #f3f5f7;
+  --color-surface-selected: rgba(15, 127, 132, 0.1);
+  --color-border-muted: #edf0f3;
+  --color-focus-ring: rgba(15, 127, 132, 0.12);
+  --color-success-soft: #ecfdf3;
+  --color-warning-soft: #fffaeb;
+  --color-danger-soft: #fef3f2;
+  --color-info-soft: #ecfeff;
 
-  --font-display: 'Fraunces', serif;
+  --font-display: 'IBM Plex Sans', sans-serif;
   --font-ui: 'IBM Plex Sans', sans-serif;
   --font-body: 'IBM Plex Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --font-size-display: 32px;
-  --font-size-h1: 28px;
-  --font-size-h2: 24px;
+  --font-size-display: 30px;
+  --font-size-h1: 26px;
+  --font-size-h2: 22px;
   --font-size-body: 16px;
   --font-size-small: 14px;
   --line-height-base: 1.4;
 
-  --shell-padding: 24px;
-  --content-max-width: 1160px;
-  --frame-gap: 20px;
-  --panel-padding: 28px;
-  --panel-padding-compact: 18px;
+  --shell-padding: 20px;
+  --content-max-width: 1180px;
+  --frame-gap: 16px;
+  --panel-padding: 22px;
+  --panel-padding-compact: 16px;
 
-  --panel-radius: 24px;
+  --panel-radius: 8px;
   --control-radius: 8px;
-  --pill-radius: 12px;
+  --pill-radius: 6px;
 
-  --sidebar-width: 292px;
-  --topbar-height: 64px;
+  --sidebar-width: 252px;
+  --topbar-height: 56px;
   --control-height: 48px;
   --icon-button-size: 32px;
   --list-row-min-height: 64px;
   --dialog-max-width: 480px;
   --min-touch-target: 40px;
 
-  --shadow-overlay: 0 6px 12px rgba(15, 60, 67, 0.08);
-  --shadow-floating-card: 0 12px 24px rgba(15, 60, 67, 0.12);
-  --training-backdrop: linear-gradient(180deg, #0f3c43 0%, #163c42 100%);
+  --shadow-overlay: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-floating-card: 0 8px 18px rgba(16, 24, 40, 0.08);
+  --training-backdrop: linear-gradient(180deg, #17212b 0%, #243242 100%);
 
-  --btn-primary-bg: linear-gradient(90deg, var(--color-cyan) 0%, var(--color-cyan-light) 100%);
-  --btn-primary-bg-hover: linear-gradient(90deg, var(--color-ink) 0%, var(--color-cyan) 100%);
+  --btn-primary-bg: var(--color-cyan);
+  --btn-primary-bg-hover: #0c686d;
   --btn-primary-border: var(--color-cyan);
-  --btn-primary-color: var(--color-paper);
+  --btn-primary-color: var(--color-surface-primary);
 
-  --btn-secondary-bg: var(--color-paper);
-  --btn-secondary-bg-hover: var(--color-ivory);
-  --btn-secondary-border: color-mix(in srgb, var(--color-ink-muted) 30%, var(--color-paper));
+  --btn-secondary-bg: var(--color-surface-primary);
+  --btn-secondary-bg-hover: var(--table-header-bg);
+  --btn-secondary-border: #cfd8e3;
   --btn-secondary-border-hover: var(--color-cyan);
   --btn-secondary-color: var(--color-ink);
 
   --btn-text-bg: transparent;
-  --btn-text-bg-hover: var(--color-ivory);
+  --btn-text-bg-hover: var(--table-header-bg);
   --btn-text-border: transparent;
   --btn-text-color: var(--color-ink-muted);
 
-  --field-bg: transparent;
-  --field-border: color-mix(in srgb, var(--color-ink-muted) 26%, var(--color-paper));
+  --field-bg: var(--color-surface-primary);
+  --field-border: #cfd8e3;
   --field-border-focus: var(--color-cyan);
-  --field-placeholder: color-mix(in srgb, var(--color-ink-muted) 74%, var(--color-paper));
-  --panel-border: color-mix(in srgb, var(--color-ink-muted) 16%, var(--color-paper));
-  --table-header-bg: var(--color-ivory);
+  --field-placeholder: #9aa6b2;
+  --panel-border: #d8dee6;
+  --table-header-bg: #eef2f6;
 }

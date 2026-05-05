@@ -64,7 +64,7 @@ const label = computed(() => formatDifficulty(props.difficulty));
 }
 
 .difficulty-tag--lead {
-  color: #5f379d;
+  color: var(--color-tag-lead-text);
   border-color: color-mix(in srgb, var(--color-tag-lead) 28%, var(--color-paper));
   background: color-mix(in srgb, var(--color-tag-lead) 12%, var(--color-paper));
 }

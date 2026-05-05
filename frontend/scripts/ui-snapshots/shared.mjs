@@ -13,6 +13,35 @@ const topicCatalog = [
   { id: 'topic-perf', name: 'Performance', slug: 'performance', questionsCount: 6 },
 ];
 
+const companyCatalog = [
+  { id: 'company-google', name: 'Google', questionsCount: 4 },
+  { id: 'company-yandex', name: 'Yandex', questionsCount: 2 },
+];
+
+const competencyStack = { id: 'stack-backend', name: 'Backend', slug: 'backend', competenciesCount: 2 };
+const frontendStack = { id: 'stack-frontend', name: 'Frontend', slug: 'frontend', competenciesCount: 1 };
+
+const competencyCatalog = [
+  {
+    id: 'competency-sql-query-design',
+    stackId: competencyStack.id,
+    stack: competencyStack,
+    name: 'SQL query design',
+    slug: 'sql-query-design',
+    description: 'Проектирование запросов, индексов и устойчивой пагинации.',
+    position: 1,
+  },
+  {
+    id: 'competency-service-boundaries',
+    stackId: competencyStack.id,
+    stack: competencyStack,
+    name: 'Service boundaries',
+    slug: 'service-boundaries',
+    description: 'Границы бизнес-логики, транзакций и внешних вызовов.',
+    position: 2,
+  },
+];
+
 const questionTopics = (ids) =>
   ids.map((id) => {
     const topic = topicCatalog.find((item) => item.id === id);
@@ -33,32 +62,113 @@ const snapshotTopics = (ids) =>
     };
   });
 
-const content = (text, code, codeLanguage) => ({
-  text,
-  ...(code ? { code } : {}),
-  ...(code && codeLanguage ? { codeLanguage } : {}),
-});
+const questionCompetencies = (ids) =>
+  ids.map((id) => {
+    const competency = competencyCatalog.find((item) => item.id === id);
+    return {
+      id: competency.id,
+      name: competency.name,
+      slug: competency.slug,
+      stack: competency.stack,
+    };
+  });
+
+const evaluationCriteria = (ids) =>
+  questionCompetencies(ids).map((competency, index) => ({
+    id: `criterion-${competency.slug}`,
+    title: index === 0 ? 'Обоснование решения' : 'Границы применения',
+    description: index === 0
+      ? 'Объясняет выбранный подход и его tradeoff.'
+      : 'Отделяет допустимый сценарий от рискованного.',
+    weight: index + 1,
+    position: index + 1,
+    competency,
+  }));
+
+const content = (text, code, codeLanguage) => [
+  { kind: 'text', content: text },
+  ...(code
+    ? [
+        {
+          kind: 'code',
+          content: code,
+          ...(codeLanguage ? { language: codeLanguage } : {}),
+        },
+      ]
+    : []),
+];
 
 const adminProfile = {
   id: 'user-admin',
+  login: 'nord.admin',
   email: 'nord.admin@nord.local',
   displayName: 'Nord Admin',
   role: 'ADMIN',
+  status: 'ACTIVE',
+};
+
+const managerProfile = {
+  id: 'user-manager',
+  login: 'nord.manager',
+  email: 'nord.manager@nord.local',
+  displayName: 'Nord Manager',
+  role: 'MANAGER',
+  status: 'ACTIVE',
 };
 
 const userProfile = {
   id: 'user-growth',
+  login: 'nord.user',
   email: 'nord.user@nord.local',
   displayName: 'Nord User',
   role: 'USER',
+  status: 'ACTIVE',
 };
 
 const reviewAuthor = {
   id: 'user-editor',
+  login: 'editor',
   email: 'editor@nord.local',
   displayName: 'Nord Editor',
   role: 'USER',
+  status: 'ACTIVE',
 };
+
+const peerProfile = {
+  id: 'user-peer',
+  login: 'peer.user',
+  email: 'peer@nord.local',
+  displayName: 'Peer User',
+  role: 'USER',
+  status: 'ACTIVE',
+};
+
+const userRecords = [
+  {
+    ...adminProfile,
+    stacks: [],
+    createdAt: '2026-03-01T08:00:00.000Z',
+    updatedAt: '2026-03-07T08:00:00.000Z',
+  },
+  {
+    ...managerProfile,
+    stacks: [competencyStack],
+    createdAt: '2026-03-01T08:10:00.000Z',
+    updatedAt: '2026-03-07T08:10:00.000Z',
+  },
+  {
+    ...userProfile,
+    stacks: [competencyStack],
+    createdAt: '2026-03-01T08:20:00.000Z',
+    updatedAt: '2026-03-07T08:20:00.000Z',
+  },
+  {
+    ...peerProfile,
+    stacks: [competencyStack, frontendStack],
+    createdAt: '2026-03-01T08:30:00.000Z',
+    updatedAt: '2026-03-07T08:30:00.000Z',
+  },
+];
 
 const questions = [
   {
@@ -68,7 +178,10 @@ const questions = [
     answer: 'Когда запрос стабильно использует один и тот же префикс where/order by и без него план уходит в seq scan или filesort.',
     answerContent: content('Когда запрос стабильно использует один и тот же префикс where/order by и без него план уходит в seq scan или filesort.'),
     difficulty: 'middle',
+    company: companyCatalog[0],
     topics: questionTopics(['topic-postgres', 'topic-perf', 'topic-sql']),
+    competencies: questionCompetencies(['competency-sql-query-design']),
+    evaluationCriteria: evaluationCriteria(['competency-sql-query-design']),
     createdAt: '2026-03-05T08:30:00.000Z',
     updatedAt: '2026-03-06T11:10:00.000Z',
     pendingChangeRequest: {
@@ -91,7 +204,10 @@ const questions = [
     answer: 'Потому что ранжирование, FTS, similarity и explainable ordering должны жить в SearchRepository на raw SQL.',
     answerContent: content('Потому что ранжирование, FTS, similarity и explainable ordering должны жить в SearchRepository на raw SQL.'),
     difficulty: 'senior',
+    company: null,
     topics: questionTopics(['topic-prisma', 'topic-search', 'topic-nest']),
+    competencies: questionCompetencies(['competency-sql-query-design']),
+    evaluationCriteria: evaluationCriteria(['competency-sql-query-design']),
     createdAt: '2026-03-03T10:00:00.000Z',
     updatedAt: '2026-03-06T09:40:00.000Z',
     pendingChangeRequest: {
@@ -114,7 +230,10 @@ const questions = [
     answer: 'Внешние сетевые вызовы. Транзакция должна закрываться локально и быстро.',
     answerContent: content('Внешние сетевые вызовы. Транзакция должна закрываться локально и быстро.'),
     difficulty: 'junior',
+    company: companyCatalog[1],
     topics: questionTopics(['topic-nest', 'topic-prisma']),
+    competencies: questionCompetencies(['competency-service-boundaries']),
+    evaluationCriteria: evaluationCriteria(['competency-service-boundaries']),
     createdAt: '2026-03-02T09:15:00.000Z',
     updatedAt: '2026-03-05T14:05:00.000Z',
     pendingChangeRequest: {
@@ -137,6 +256,16 @@ const trainingPresets = [
     updatedAt: '2026-03-06T08:00:00.000Z',
   },
 ];
+
+const trainingParticipants = {
+  items: [
+    {
+      id: peerProfile.id,
+      login: peerProfile.login,
+      displayName: peerProfile.displayName,
+    },
+  ],
+};
 
 const preparedTraining = {
   items: [
@@ -203,7 +332,8 @@ const growthAnalytics = {
   summary: {
     totalResults: 18,
     correctCount: 9,
-    incorrectCount: 9,
+    partialCount: 3,
+    incorrectCount: 6,
     accuracy: 50,
   },
   weakTopics: [
@@ -212,6 +342,7 @@ const growthAnalytics = {
       name: 'Search',
       slug: 'search',
       correctCount: 1,
+      partialCount: 1,
       incorrectCount: 5,
       accuracy: 17,
     },
@@ -220,6 +351,7 @@ const growthAnalytics = {
       name: 'Prisma',
       slug: 'prisma',
       correctCount: 3,
+      partialCount: 2,
       incorrectCount: 4,
       accuracy: 43,
     },
@@ -228,6 +360,7 @@ const growthAnalytics = {
       name: 'PostgreSQL',
       slug: 'postgresql',
       correctCount: 5,
+      partialCount: 1,
       incorrectCount: 3,
       accuracy: 63,
     },
@@ -244,7 +377,9 @@ const growthAnalytics = {
       difficulty: 'senior',
       topics: snapshotTopics(['topic-search', 'topic-sql']),
       correctCount: 0,
+      partialCount: 1,
       incorrectCount: 4,
+      lastResult: 'incorrect',
       lastAnsweredAt: '2026-03-07T11:54:00.000Z',
     },
     {
@@ -254,7 +389,9 @@ const growthAnalytics = {
       difficulty: 'middle',
       topics: snapshotTopics(['topic-prisma', 'topic-search']),
       correctCount: 1,
+      partialCount: 2,
       incorrectCount: 3,
+      lastResult: 'partial',
       lastAnsweredAt: '2026-03-07T11:40:00.000Z',
     },
   ],
@@ -266,7 +403,9 @@ const growthAnalytics = {
       difficulty: 'junior',
       topics: snapshotTopics(['topic-prisma', 'topic-nest']),
       correctCount: 4,
+      partialCount: 1,
       incorrectCount: 1,
+      lastResult: 'correct',
       lastAnsweredAt: '2026-03-07T10:52:00.000Z',
     },
     {
@@ -276,8 +415,49 @@ const growthAnalytics = {
       difficulty: 'middle',
       topics: snapshotTopics(['topic-postgres', 'topic-sql']),
       correctCount: 3,
+      partialCount: 1,
       incorrectCount: 2,
+      lastResult: 'correct',
       lastAnsweredAt: '2026-03-07T10:11:00.000Z',
+    },
+  ],
+  feedbackEntries: [
+    {
+      sessionId: 'training-session-feedback',
+      trainer: {
+        id: managerProfile.id,
+        displayName: managerProfile.displayName,
+        login: managerProfile.login,
+      },
+      feedback: 'Усилить объяснение tradeoff и проговаривать ограничения выбранного решения.',
+      finishedAt: '2026-03-07T10:20:00.000Z',
+    },
+  ],
+  growthAreaProgress: [
+    {
+      competencyId: 'competency-sql-query-design',
+      name: 'SQL query design',
+      slug: 'sql-query-design',
+      latestGrowthArea: 'Стабилизировать объяснение индексов и pagination tie-breaker.',
+      firstSeenAt: '2026-03-01T10:00:00.000Z',
+      lastSeenAt: '2026-03-07T10:00:00.000Z',
+      totalGrowthPoints: 3,
+      resolvedCount: 1,
+      currentStatus: 'in_progress',
+      accuracy: 44,
+      entries: [],
+    },
+  ],
+  recommendations: [
+    {
+      kind: 'topic',
+      text: 'Повторить Search и Prisma на вопросах с raw SQL и ранжированием.',
+      priority: 1,
+    },
+    {
+      kind: 'growth_area',
+      text: 'На каждом ответе фиксировать tradeoff и ограничение применения.',
+      priority: 2,
     },
   ],
 };
@@ -302,6 +482,489 @@ const bankAnalytics = {
   ],
 };
 
+const teamAnalytics = {
+  summary: {
+    employeesCount: 2,
+    employeesWithAnswersCount: 2,
+    totalAnswers: 54,
+    averageAccuracy: 57,
+  },
+  items: [
+    {
+      user: {
+        id: userProfile.id,
+        login: userProfile.login,
+        displayName: userProfile.displayName,
+        role: userProfile.role,
+      },
+      stacks: [competencyStack],
+      stackLevels: [
+        {
+          stack: competencyStack,
+          assessedCount: 14,
+          accuracy: 58,
+          level: 'middle',
+        },
+      ],
+      summary: {
+        totalAnswers: 24,
+        correctCount: 12,
+        partialCount: 5,
+        incorrectCount: 7,
+        accuracy: 50,
+        trainingSessionsCount: 4,
+        completedInterviewsCount: 2,
+        feedbackCount: 2,
+        lastActivityAt: '2026-03-07T10:20:00.000Z',
+      },
+      growthTopics: [
+        {
+          topicId: 'topic-search',
+          name: 'Search',
+          slug: 'search',
+          correctCount: 1,
+          partialCount: 2,
+          incorrectCount: 5,
+          accuracy: 27,
+        },
+      ],
+    },
+    {
+      user: {
+        id: peerProfile.id,
+        login: peerProfile.login,
+        displayName: peerProfile.displayName,
+        role: peerProfile.role,
+      },
+      stacks: [competencyStack, frontendStack],
+      stackLevels: [
+        {
+          stack: competencyStack,
+          assessedCount: 16,
+          accuracy: 72,
+          level: 'senior',
+        },
+      ],
+      summary: {
+        totalAnswers: 30,
+        correctCount: 19,
+        partialCount: 4,
+        incorrectCount: 7,
+        accuracy: 63,
+        trainingSessionsCount: 3,
+        completedInterviewsCount: 3,
+        feedbackCount: 1,
+        lastActivityAt: '2026-03-06T16:30:00.000Z',
+      },
+      growthTopics: [
+        {
+          topicId: 'topic-prisma',
+          name: 'Prisma',
+          slug: 'prisma',
+          correctCount: 4,
+          partialCount: 1,
+          incorrectCount: 3,
+          accuracy: 56,
+        },
+      ],
+    },
+  ],
+  managerReport: {
+    generatedAt: NOW_ISO,
+    summaryText: '2 сотрудника, оба с данными, средняя успешность 57%.',
+    riskEmployees: [
+      {
+        user: {
+          id: userProfile.id,
+          login: userProfile.login,
+          displayName: userProfile.displayName,
+          role: userProfile.role,
+        },
+        accuracy: 50,
+        totalAnswers: 24,
+        growthTopics: [
+          {
+            topicId: 'topic-search',
+            name: 'Search',
+            slug: 'search',
+            correctCount: 1,
+            partialCount: 2,
+            incorrectCount: 5,
+            accuracy: 27,
+          },
+        ],
+        stackLevels: [
+          {
+            stack: competencyStack,
+            assessedCount: 14,
+            accuracy: 58,
+            level: 'middle',
+          },
+        ],
+      },
+    ],
+    recommendations: [
+      'Назначить тренировку по Search и SQL pagination.',
+      'Проверить объяснение tradeoff на следующем интервью.',
+    ],
+  },
+};
+
+const trainingHistorySessions = [
+  {
+    id: 'training-history-1',
+    status: 'COMPLETED',
+    resultsCount: 3,
+    correctCount: 1,
+    partialCount: 1,
+    incorrectCount: 1,
+    feedback: 'Хорошая структура, но не хватает явного tie-breaker в объяснении.',
+    trainer: {
+      id: managerProfile.id,
+      login: managerProfile.login,
+      displayName: managerProfile.displayName,
+    },
+    finishedAt: '2026-03-07T10:20:00.000Z',
+  },
+  {
+    id: 'training-history-2',
+    status: 'ABANDONED_SAVED',
+    resultsCount: 2,
+    correctCount: 1,
+    partialCount: 0,
+    incorrectCount: 1,
+    feedback: null,
+    trainer: null,
+    finishedAt: '2026-03-06T13:40:00.000Z',
+  },
+];
+
+const trainingHistoryDetail = {
+  ...trainingHistorySessions[0],
+  results: [
+    {
+      questionId: 'training-card-1',
+      text: preparedTraining.items[0].text,
+      textContent: preparedTraining.items[0].textContent,
+      difficulty: preparedTraining.items[0].difficulty,
+      result: 'correct',
+      position: 0,
+      topics: preparedTraining.items[0].topics,
+    },
+    {
+      questionId: 'training-card-2',
+      text: preparedTraining.items[1].text,
+      textContent: preparedTraining.items[1].textContent,
+      difficulty: preparedTraining.items[1].difficulty,
+      result: 'partial',
+      position: 1,
+      topics: preparedTraining.items[1].topics,
+    },
+    {
+      questionId: 'training-card-3',
+      text: preparedTraining.items[2].text,
+      textContent: preparedTraining.items[2].textContent,
+      difficulty: preparedTraining.items[2].difficulty,
+      result: 'incorrect',
+      position: 2,
+      topics: preparedTraining.items[2].topics,
+    },
+  ],
+};
+
+const monthDays = Array.from({ length: 31 }, (_, index) => ({
+  date: `2026-03-${String(index + 1).padStart(2, '0')}`,
+}));
+
+const interviewPreset = {
+  id: trainingPresets[0].id,
+  name: trainingPresets[0].name,
+};
+
+const interviewUsers = {
+  interviewer: {
+    id: userProfile.id,
+    login: userProfile.login,
+    displayName: userProfile.displayName,
+  },
+  interviewee: {
+    id: peerProfile.id,
+    login: peerProfile.login,
+    displayName: peerProfile.displayName,
+  },
+};
+
+const interviewItems = [
+  {
+    id: 'interview-draft-1',
+    status: 'DRAFT',
+    plannedDate: null,
+    preset: null,
+    interviewer: interviewUsers.interviewer,
+    interviewee: interviewUsers.interviewee,
+    completedAt: null,
+    resultsCount: 0,
+    correctCount: 0,
+    partialCount: 0,
+    incorrectCount: 0,
+  },
+  {
+    id: 'interview-scheduled-1',
+    status: 'SCHEDULED',
+    plannedDate: '2026-03-11',
+    preset: interviewPreset,
+    interviewer: interviewUsers.interviewer,
+    interviewee: interviewUsers.interviewee,
+    completedAt: null,
+    resultsCount: 0,
+    correctCount: 0,
+    partialCount: 0,
+    incorrectCount: 0,
+  },
+  {
+    id: 'interview-completed-1',
+    status: 'COMPLETED',
+    plannedDate: '2026-03-06',
+    preset: interviewPreset,
+    interviewer: interviewUsers.interviewer,
+    interviewee: interviewUsers.interviewee,
+    completedAt: '2026-03-06T15:00:00.000Z',
+    resultsCount: 3,
+    correctCount: 1,
+    partialCount: 1,
+    incorrectCount: 1,
+  },
+];
+
+const adminInterviewCalendar = {
+  month: '2026-03',
+  days: monthDays,
+  items: interviewItems.slice(1),
+  activeCycle: {
+    id: 'cycle-march-week',
+    mode: 'AUTO',
+    periodStart: '2026-03-09',
+    periodEnd: '2026-03-15',
+    createdByAdmin: {
+      id: managerProfile.id,
+      login: managerProfile.login,
+      displayName: managerProfile.displayName,
+    },
+    interviews: interviewItems,
+  },
+};
+
+const myInterviewCalendar = {
+  month: '2026-03',
+  days: monthDays,
+  items: interviewItems.slice(1).map((item) => ({
+    ...item,
+    myRole: item.id === 'interview-scheduled-1' ? 'interviewer' : 'interviewee',
+  })),
+};
+
+const runtimeCriteria = evaluationCriteria(['competency-sql-query-design']).map((criterion, index) => ({
+  id: `runtime-${criterion.id}`,
+  sourceCriterionId: criterion.id,
+  competency: {
+    id: criterion.competency.id,
+    name: criterion.competency.name,
+    slug: criterion.competency.slug,
+  },
+  title: criterion.title,
+  description: criterion.description,
+  weight: criterion.weight,
+  position: index,
+}));
+
+const interviewRuntime = {
+  interview: interviewItems[1],
+  counterpart: interviewUsers.interviewee,
+  items: [
+    {
+      id: 'runtime-question-1',
+      questionId: questions[0].id,
+      questionText: questions[0].text,
+      questionTextContent: questions[0].textContent,
+      answer: questions[0].answer,
+      answerContent: questions[0].answerContent,
+      difficulty: questions[0].difficulty,
+      position: 0,
+      topics: questions[0].topics,
+      criteria: runtimeCriteria,
+    },
+  ],
+};
+
+const interviewDashboard = {
+  summary: {
+    totalInterviews: 8,
+    draftCount: 1,
+    plannedCount: 2,
+    scheduledCount: 3,
+    completedCount: 2,
+    resultsCount: 12,
+    correctCount: 5,
+    partialCount: 4,
+    incorrectCount: 3,
+  },
+  scheduleSeries: [
+    {
+      bucketStart: '2026-03-02',
+      draftCount: 1,
+      plannedCount: 1,
+      scheduledCount: 1,
+      completedCount: 1,
+      overdueCount: 0,
+    },
+    {
+      bucketStart: '2026-03-09',
+      draftCount: 0,
+      plannedCount: 1,
+      scheduledCount: 2,
+      completedCount: 1,
+      overdueCount: 0,
+    },
+  ],
+  outcomeMix: {
+    correctCount: 5,
+    partialCount: 4,
+    incorrectCount: 3,
+  },
+  interviewerLoad: [
+    {
+      interviewer: interviewUsers.interviewer,
+      assignedCount: 4,
+      completedCount: 2,
+    },
+  ],
+  weakTopics: [
+    {
+      topicId: 'topic-search',
+      name: 'Search',
+      correctCount: 1,
+      partialCount: 2,
+      incorrectCount: 3,
+      accuracy: 33,
+    },
+  ],
+  upcoming: [interviewItems[1]],
+  recentCompleted: [interviewItems[2]],
+};
+
+const myInterviewDashboard = {
+  summary: interviewDashboard.summary,
+  outcomeSeries: [
+    {
+      bucketStart: '2026-03-02',
+      correctCount: 2,
+      partialCount: 1,
+      incorrectCount: 1,
+    },
+    {
+      bucketStart: '2026-03-09',
+      correctCount: 3,
+      partialCount: 3,
+      incorrectCount: 2,
+    },
+  ],
+  weakTopics: interviewDashboard.weakTopics,
+  feedbackEntries: [
+    {
+      interviewId: 'interview-completed-1',
+      interviewer: interviewUsers.interviewer,
+      feedback: 'Ответы структурные, но нужно сильнее фиксировать ограничения решения.',
+      growthAreas: 'Tradeoff, edge cases, индексы',
+      completedAt: '2026-03-06T15:00:00.000Z',
+    },
+  ],
+  recentInterviews: [interviewItems[2]],
+};
+
+const interviewDetail = {
+  interview: interviewItems[2],
+  interviewer: interviewUsers.interviewer,
+  interviewee: interviewUsers.interviewee,
+  feedback: 'Ответы структурные, но нужно сильнее фиксировать ограничения решения.',
+  growthAreas: 'Tradeoff, edge cases, индексы',
+  questions: [
+    {
+      id: 'history-question-1',
+      questionId: questions[0].id,
+      questionText: questions[0].text,
+      questionTextContent: questions[0].textContent,
+      answer: questions[0].answer,
+      answerContent: questions[0].answerContent,
+      difficulty: questions[0].difficulty,
+      result: 'partial',
+      position: 0,
+      topics: questions[0].topics,
+      criteria: runtimeCriteria.map((criterion) => ({
+        ...criterion,
+        id: `history-${criterion.id}`,
+        result: 'partial',
+        comment: 'Компромисс назван, но без привязки к ограничениям.',
+        isGrowthPoint: true,
+        growthArea: 'Привязывать tradeoff к ограничению задачи.',
+      })),
+    },
+  ],
+  competencySummary: [
+    {
+      competencyId: 'competency-sql-query-design',
+      name: 'SQL query design',
+      slug: 'sql-query-design',
+      correctCount: 1,
+      partialCount: 1,
+      incorrectCount: 1,
+      accuracy: 50,
+    },
+  ],
+};
+
+const matrixCompetencies = competencyCatalog.map((competency, index) => ({
+  id: competency.id,
+  stack: competency.stack,
+  name: competency.name,
+  slug: competency.slug,
+  description: competency.description,
+  position: competency.position,
+  totalCount: index === 0 ? 9 : 5,
+  correctCount: index === 0 ? 4 : 2,
+  partialCount: index === 0 ? 2 : 1,
+  incorrectCount: index === 0 ? 3 : 2,
+  accuracy: index === 0 ? 56 : 50,
+  lastResult: index === 0 ? 'partial' : 'incorrect',
+  lastAssessedAt: '2026-03-06T15:00:00.000Z',
+}));
+
+const competencyMatrixUser = {
+  user: {
+    id: userProfile.id,
+    login: userProfile.login,
+    displayName: userProfile.displayName,
+  },
+  stacks: [competencyStack],
+  competencies: matrixCompetencies,
+  stackLevels: [
+    {
+      stack: competencyStack,
+      assessedCount: 14,
+      accuracy: 54,
+      level: 'middle',
+    },
+  ],
+};
+
+const competencyMatrixPeer = {
+  ...competencyMatrixUser,
+  user: {
+    id: peerProfile.id,
+    login: peerProfile.login,
+    displayName: peerProfile.displayName,
+  },
+};
+
 const reviewDetail = {
   id: 'request-update-postgres',
   type: 'UPDATE',
@@ -320,7 +983,10 @@ const reviewDetail = {
     answer: 'Когда хватает селективности и planner не уходит в seq scan.',
     answerContent: content('Когда хватает селективности и planner не уходит в seq scan.'),
     difficulty: 'middle',
+    company: null,
     topics: snapshotTopics(['topic-postgres', 'topic-sql']),
+    competencies: questionCompetencies(['competency-sql-query-design']),
+    evaluationCriteria: evaluationCriteria(['competency-sql-query-design']),
   },
   after: {
     text: 'Когда в PostgreSQL для фильтрации и сортировки нужен составной индекс?',
@@ -332,7 +998,10 @@ const reviewDetail = {
     answer: 'Когда where/order by используют устойчивый префикс и это снимает лишний seq scan.',
     answerContent: content('Когда where/order by используют устойчивый префикс и это снимает лишний seq scan.'),
     difficulty: 'senior',
+    company: companyCatalog[0],
     topics: snapshotTopics(['topic-postgres', 'topic-sql', 'topic-perf']),
+    competencies: questionCompetencies(['competency-sql-query-design']),
+    evaluationCriteria: evaluationCriteria(['competency-sql-query-design']),
   },
   fieldDiffs: {
     text: {
@@ -349,6 +1018,11 @@ const reviewDetail = {
       changed: true,
       before: 'middle',
       after: 'senior',
+    },
+    company: {
+      changed: true,
+      before: null,
+      after: companyCatalog[0],
     },
     topics: {
       changed: true,
@@ -395,15 +1069,58 @@ const reviewQueue = [
 ];
 
 function resolveActor(scenario) {
-  if (scenario === 'growth-user' || scenario === 'training-active' || scenario === 'training-exit') {
+  if (scenario === 'login') {
+    return null;
+  }
+
+  if (
+    scenario === 'growth-user' ||
+    scenario === 'training-setup' ||
+    scenario === 'training-active' ||
+    scenario === 'training-exit' ||
+    scenario === 'training-history' ||
+    scenario === 'question-details-user' ||
+    scenario === 'my-requests' ||
+    scenario === 'my-interviews' ||
+    scenario === 'my-interviews-dashboard' ||
+    scenario === 'interview-history' ||
+    scenario === 'interview-runtime' ||
+    scenario === 'competency-matrix-user'
+  ) {
     return 'user';
+  }
+
+  if (
+    scenario === 'editor-create' ||
+    scenario === 'editor-edit' ||
+    scenario === 'review-filled' ||
+    scenario === 'review-empty' ||
+    scenario === 'bank-analysis' ||
+    scenario === 'topics-admin' ||
+    scenario === 'companies-admin' ||
+    scenario === 'training-presets' ||
+    scenario === 'team-dashboard' ||
+    scenario === 'employee-interview-history' ||
+    scenario === 'interviews-admin' ||
+    scenario === 'interviews-dashboard' ||
+    scenario === 'competency-matrix-manager'
+  ) {
+    return 'manager';
   }
 
   return 'admin';
 }
 
 function profileByActor(actor) {
-  return actor === 'user' ? userProfile : adminProfile;
+  if (actor === 'user') {
+    return userProfile;
+  }
+
+  if (actor === 'manager') {
+    return managerProfile;
+  }
+
+  return adminProfile;
 }
 
 export const snapshotViewports = [
@@ -423,14 +1140,34 @@ export const snapshotViewports = [
 
 export const snapshotCases = [
   {
+    name: 'login',
+    path: '/login',
+    scenario: 'login',
+  },
+  {
     name: 'bank',
     path: '/bank',
     scenario: 'bank',
   },
   {
+    name: 'question-details-user',
+    path: '/question/question-postgres-indexes',
+    scenario: 'question-details-user',
+  },
+  {
+    name: 'editor-create',
+    path: '/editor',
+    scenario: 'editor-create',
+  },
+  {
     name: 'editor-edit',
     path: '/editor/question-postgres-indexes',
     scenario: 'editor-edit',
+  },
+  {
+    name: 'my-requests',
+    path: '/requests?selected=request-update-postgres',
+    scenario: 'my-requests',
   },
   {
     name: 'review-filled',
@@ -448,6 +1185,26 @@ export const snapshotCases = [
     scenario: 'account',
   },
   {
+    name: 'topics-admin',
+    path: '/topics',
+    scenario: 'topics-admin',
+  },
+  {
+    name: 'companies-admin',
+    path: '/companies',
+    scenario: 'companies-admin',
+  },
+  {
+    name: 'users-admin',
+    path: '/users',
+    scenario: 'users-admin',
+  },
+  {
+    name: 'training-setup',
+    path: '/training',
+    scenario: 'training-setup',
+  },
+  {
     name: 'training-active',
     path: '/training',
     scenario: 'training-active',
@@ -463,9 +1220,69 @@ export const snapshotCases = [
     scenario: 'growth-user',
   },
   {
+    name: 'training-history',
+    path: '/training-history/training-history-1',
+    scenario: 'training-history',
+  },
+  {
+    name: 'training-presets',
+    path: '/training-presets',
+    scenario: 'training-presets',
+  },
+  {
     name: 'bank-analysis',
     path: '/bank-analysis',
     scenario: 'bank-analysis',
+  },
+  {
+    name: 'team-dashboard',
+    path: '/team',
+    scenario: 'team-dashboard',
+  },
+  {
+    name: 'employee-interview-history',
+    path: '/team/user-growth/interview-history/interview-completed-1',
+    scenario: 'employee-interview-history',
+  },
+  {
+    name: 'interviews-admin',
+    path: '/interviews',
+    scenario: 'interviews-admin',
+  },
+  {
+    name: 'interviews-dashboard',
+    path: '/interviews-dashboard',
+    scenario: 'interviews-dashboard',
+  },
+  {
+    name: 'my-interviews',
+    path: '/my-interviews',
+    scenario: 'my-interviews',
+  },
+  {
+    name: 'my-interviews-dashboard',
+    path: '/my-interviews-dashboard',
+    scenario: 'my-interviews-dashboard',
+  },
+  {
+    name: 'interview-history',
+    path: '/interview-history/interview-completed-1',
+    scenario: 'interview-history',
+  },
+  {
+    name: 'interview-runtime',
+    path: '/interviews/interview-scheduled-1/run',
+    scenario: 'interview-runtime',
+  },
+  {
+    name: 'competency-matrix-user',
+    path: '/competency-matrix',
+    scenario: 'competency-matrix-user',
+  },
+  {
+    name: 'competency-matrix-manager',
+    path: '/competency-matrix',
+    scenario: 'competency-matrix-manager',
   },
 ];
 
@@ -500,12 +1317,20 @@ function pickReviewDetail(id) {
       answer: 'Нужен deterministic order с tie-breaker, например score desc, id desc.',
       answerContent: content('Нужен deterministic order с tie-breaker, например score desc, id desc.'),
       difficulty: 'middle',
+      company: null,
       topics: snapshotTopics(['topic-search', 'topic-sql']),
+      competencies: questionCompetencies(['competency-sql-query-design']),
+      evaluationCriteria: evaluationCriteria(['competency-sql-query-design']),
     },
     fieldDiffs: {
       text: { changed: true, before: null, after: 'Как стабилизировать пагинацию в search endpoint?' },
       answer: { changed: true, before: null, after: 'Нужен deterministic order с tie-breaker, например score desc, id desc.' },
       difficulty: { changed: true, before: null, after: 'middle' },
+      company: {
+        changed: false,
+        before: null,
+        after: null,
+      },
       topics: {
         changed: true,
         before: [],
@@ -524,8 +1349,14 @@ export async function installUiSnapshotMocking(page, scenario) {
     ({ now, actor: currentActor }) => {
       const fixedNow = new Date(now).valueOf();
       Date.now = () => fixedNow;
-      window.localStorage.setItem('nord.dev.actor', currentActor);
-      window.localStorage.setItem('nord.access.token', `ui-snapshot-${currentActor}`);
+
+      if (currentActor) {
+        window.localStorage.setItem('nord.dev.actor', currentActor);
+        window.localStorage.setItem('nord.access.token', `ui-snapshot-${currentActor}`);
+      } else {
+        window.localStorage.removeItem('nord.dev.actor');
+        window.localStorage.removeItem('nord.access.token');
+      }
 
       const OriginalDate = Date;
       class FixedDate extends OriginalDate {
@@ -597,6 +1428,62 @@ export async function installUiSnapshotMocking(page, scenario) {
       return;
     }
 
+    if (pathname === '/api/analytics/team') {
+      await route.fulfill(json(teamAnalytics));
+      return;
+    }
+
+    if (pathname === '/api/users') {
+      const role = searchParams.get('role');
+      const status = searchParams.get('status');
+      const q = (searchParams.get('q') ?? '').toLocaleLowerCase('ru-RU');
+      const limit = Number(searchParams.get('limit') ?? userRecords.length);
+      const offset = Number(searchParams.get('offset') ?? 0);
+      const filtered = userRecords.filter((item) => {
+        const matchesRole = !role || item.role === role;
+        const matchesStatus = !status || item.status === status;
+        const matchesSearch =
+          !q ||
+          `${item.login} ${item.displayName} ${item.email ?? ''}`
+            .toLocaleLowerCase('ru-RU')
+            .includes(q);
+
+        return matchesRole && matchesStatus && matchesSearch;
+      });
+
+      await route.fulfill(
+        json({
+          items: filtered.slice(offset, offset + limit),
+          total: filtered.length,
+          meta: {
+            tookMs: 7,
+            appliedFilters: {
+              q: searchParams.get('q'),
+              role,
+              status,
+            },
+          },
+        }),
+      );
+      return;
+    }
+
+    if (pathname === '/api/stacks') {
+      await route.fulfill(
+        json({
+          items: [competencyStack, frontendStack],
+          total: 2,
+          meta: {
+            tookMs: 6,
+            appliedFilters: {
+              q: searchParams.get('q'),
+            },
+          },
+        }),
+      );
+      return;
+    }
+
     if (pathname === '/api/topics') {
       const usedOnly = searchParams.get('usedOnly') === 'true';
       const limit = Number(searchParams.get('limit') ?? topicCatalog.length);
@@ -620,8 +1507,60 @@ export async function installUiSnapshotMocking(page, scenario) {
       return;
     }
 
+    if (pathname === '/api/companies') {
+      await route.fulfill(
+        json({
+          items: companyCatalog,
+          total: companyCatalog.length,
+          meta: {
+            tookMs: 8,
+            appliedFilters: {
+              q: searchParams.get('q'),
+            },
+          },
+        }),
+      );
+      return;
+    }
+
+    if (pathname === '/api/competencies') {
+      await route.fulfill(
+        json({
+          items: competencyCatalog,
+          total: competencyCatalog.length,
+          meta: {
+            tookMs: 9,
+            appliedFilters: {
+              q: searchParams.get('q'),
+              stackId: searchParams.get('stackId'),
+            },
+          },
+        }),
+      );
+      return;
+    }
+
     if (pathname === '/api/training/presets') {
       await route.fulfill(json(trainingPresets));
+      return;
+    }
+
+    if (pathname === '/api/training/history') {
+      await route.fulfill(
+        json({
+          items: trainingHistorySessions,
+        }),
+      );
+      return;
+    }
+
+    if (pathname.startsWith('/api/training/history/')) {
+      await route.fulfill(json(trainingHistoryDetail));
+      return;
+    }
+
+    if (pathname === '/api/training/participants') {
+      await route.fulfill(json(trainingParticipants));
       return;
     }
 
@@ -667,6 +1606,11 @@ export async function installUiSnapshotMocking(page, scenario) {
       return;
     }
 
+    if (pathname === '/api/question-change-requests/my') {
+      await route.fulfill(json(scenario === 'my-requests' ? reviewQueue : []));
+      return;
+    }
+
     if (pathname === '/api/question-change-requests/review') {
       await route.fulfill(json(scenario === 'review-empty' ? [] : reviewQueue));
       return;
@@ -678,8 +1622,70 @@ export async function installUiSnapshotMocking(page, scenario) {
       return;
     }
 
-    if (pathname === '/api/question-change-requests/my') {
-      await route.fulfill(json([]));
+    if (pathname === '/api/interviews/admin-calendar') {
+      await route.fulfill(json(adminInterviewCalendar));
+      return;
+    }
+
+    if (pathname === '/api/interviews/my-calendar') {
+      await route.fulfill(json(myInterviewCalendar));
+      return;
+    }
+
+    if (pathname === '/api/interviews/admin-dashboard') {
+      await route.fulfill(json(interviewDashboard));
+      return;
+    }
+
+    if (pathname === '/api/interviews/my-dashboard') {
+      await route.fulfill(json(myInterviewDashboard));
+      return;
+    }
+
+    if (pathname === '/api/interviews/my-history') {
+      await route.fulfill(
+        json({
+          items: [interviewItems[2]],
+        }),
+      );
+      return;
+    }
+
+    if (pathname.startsWith('/api/interviews/users/') && pathname.endsWith('/history')) {
+      await route.fulfill(
+        json({
+          items: [interviewItems[2]],
+        }),
+      );
+      return;
+    }
+
+    if (pathname.startsWith('/api/interviews/') && pathname.endsWith('/runtime')) {
+      await route.fulfill(json(interviewRuntime));
+      return;
+    }
+
+    if (pathname.startsWith('/api/interviews/') && pathname.endsWith('/detail')) {
+      await route.fulfill(json(interviewDetail));
+      return;
+    }
+
+    if (pathname === '/api/competency-matrix/me') {
+      await route.fulfill(json(competencyMatrixUser));
+      return;
+    }
+
+    if (pathname === '/api/competency-matrix') {
+      await route.fulfill(
+        json({
+          items: [competencyMatrixUser, competencyMatrixPeer],
+        }),
+      );
+      return;
+    }
+
+    if (pathname.startsWith('/api/competency-matrix/users/')) {
+      await route.fulfill(json(competencyMatrixUser));
       return;
     }
 

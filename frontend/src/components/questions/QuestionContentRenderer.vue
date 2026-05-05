@@ -104,10 +104,11 @@ async function renderCodeBlock(block: QuestionCodeContentBlock) {
 .question-content-renderer {
   display: grid;
   gap: 12px;
+  min-width: 0;
   --question-content-text-color: var(--color-ink);
   --question-content-muted-color: var(--color-ink-muted);
-  --question-content-code-border: color-mix(in srgb, var(--panel-border) 88%, var(--color-paper));
-  --question-content-code-bg: color-mix(in srgb, var(--color-paper) 92%, var(--color-ivory));
+  --question-content-code-border: var(--panel-border);
+  --question-content-code-bg: var(--color-surface-muted);
   --question-content-code-color: var(--color-ink);
 }
 
@@ -133,9 +134,12 @@ async function renderCodeBlock(block: QuestionCodeContentBlock) {
 .question-content-renderer__code {
   display: grid;
   gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   padding: 12px;
   border: 1px solid var(--question-content-code-border);
-  border-radius: calc(var(--panel-radius) - 10px);
+  border-radius: var(--panel-radius);
   background: var(--question-content-code-bg);
 }
 
@@ -148,11 +152,15 @@ async function renderCodeBlock(block: QuestionCodeContentBlock) {
 }
 
 .question-content-renderer__code-body {
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
+  overflow-y: auto;
 }
 
 .question-content-renderer__code-body :deep(pre.shiki) {
   margin: 0;
+  width: max-content;
   min-width: 100%;
   background: transparent !important;
   color: var(--question-content-code-color) !important;
@@ -182,7 +190,7 @@ async function renderCodeBlock(block: QuestionCodeContentBlock) {
   left: 0;
   width: 2.8rem;
   padding-right: 0.75rem;
-  border-right: 1px solid color-mix(in srgb, var(--panel-border) 80%, transparent);
+  border-right: 1px solid var(--color-border-muted);
   color: var(--question-content-muted-color);
   text-align: right;
   user-select: none;

@@ -15,7 +15,7 @@
 }
 
 .v-pagination .v-btn--active {
-  background: var(--color-ivory);
+  background: var(--table-header-bg);
   color: var(--color-ink);
 }
 
@@ -42,15 +42,15 @@
 }
 
 .v-chip.v-chip--variant-tonal {
-  border: 1px solid color-mix(in srgb, var(--color-ink-muted) 18%, var(--color-paper));
-  background: color-mix(in srgb, var(--color-ivory) 68%, var(--color-paper));
+  border: 1px solid var(--panel-border);
+  background: var(--table-header-bg);
   color: var(--color-ink);
 }
 
 .v-overlay__content .v-list {
   border: 1px solid var(--panel-border);
   border-radius: var(--control-radius);
-  background: var(--color-paper);
+  background: var(--color-surface-primary);
   box-shadow: var(--shadow-floating-card);
   padding: 8px;
 }
@@ -63,6 +63,6 @@
 
 .v-overlay__content .v-list-item--active,
 .v-overlay__content .v-list-item--selected {
-  background: color-mix(in srgb, var(--color-cyan) 10%, var(--color-paper));
+  background: var(--color-surface-selected);
   color: var(--color-ink);
 }

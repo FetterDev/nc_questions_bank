@@ -91,6 +91,7 @@ function formatEncounterCount(count: number) {
               />
               <v-chip
                 v-if="question.company"
+                class="company-chip"
                 color="primary"
                 size="small"
                 variant="tonal"

@@ -312,7 +312,7 @@ void loadHistory();
 
 .training-history-list-card,
 .training-history-detail-card {
-  min-height: 640px;
+  min-height: 520px;
 }
 
 .training-history-list {
@@ -325,19 +325,19 @@ void loadHistory();
   gap: 8px;
   padding: 16px;
   border: 1px solid var(--panel-border);
-  border-radius: calc(var(--panel-radius) - 4px);
-  background: color-mix(in srgb, var(--color-paper) 92%, var(--color-ivory));
+  border-radius: var(--panel-radius);
+  background: var(--color-surface-muted);
   text-align: left;
   transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
 
 .training-history-list__item:hover {
-  border-color: color-mix(in srgb, var(--color-accent-cyan) 42%, var(--panel-border));
-  transform: translateY(-1px);
+  border-color: var(--color-cyan);
 }
 
 .training-history-list__item--active {
-  border-color: color-mix(in srgb, var(--color-accent-cyan) 58%, var(--panel-border));
+  border-color: var(--color-cyan);
+  background: var(--color-surface-selected);
   box-shadow: var(--shadow-overlay);
 }
 
@@ -366,8 +366,8 @@ void loadHistory();
   gap: 12px;
   padding: 16px;
   border: 1px solid var(--panel-border);
-  border-radius: calc(var(--panel-radius) - 4px);
-  background: color-mix(in srgb, var(--color-paper) 94%, var(--color-ivory));
+  border-radius: var(--panel-radius);
+  background: var(--color-surface-muted);
 }
 
 .training-history-result-card__meta {

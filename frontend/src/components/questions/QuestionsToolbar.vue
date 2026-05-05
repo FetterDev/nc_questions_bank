@@ -127,10 +127,8 @@ const pageSizeModel = computed({
         :items="pageSizeOptions"
         label="Строк на страницу"
       />
-    </div>
 
-    <div class="action-footer action-footer--end">
-      <div class="action-footer__group">
+      <div class="questions-toolbar-actions">
         <UiButton
           :icon="mdiRefresh"
           tone="secondary"

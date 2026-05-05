@@ -11,9 +11,9 @@ export const buttonStateMap = {
       border: 'var(--btn-primary-border)',
     },
     disabled: {
-      background: 'color-mix(in srgb, var(--color-ink-muted) 40%, var(--color-paper))',
-      color: 'var(--color-paper)',
-      border: 'transparent',
+      background: 'var(--panel-border)',
+      color: '#7b8794',
+      border: 'var(--panel-border)',
     },
   },
   secondary: {
@@ -28,9 +28,9 @@ export const buttonStateMap = {
       border: 'var(--btn-secondary-border-hover)',
     },
     disabled: {
-      background: 'var(--color-paper)',
-      color: 'color-mix(in srgb, var(--color-ink-muted) 70%, var(--color-paper))',
-      border: 'color-mix(in srgb, var(--color-ink-muted) 28%, var(--color-paper))',
+      background: 'var(--color-surface-subtle)',
+      color: '#9aa6b2',
+      border: 'var(--panel-border)',
     },
   },
   text: {
@@ -46,7 +46,7 @@ export const buttonStateMap = {
     },
     disabled: {
       background: 'transparent',
-      color: 'color-mix(in srgb, var(--color-ink-muted) 68%, var(--color-paper))',
+      color: '#9aa6b2',
       border: 'transparent',
     },
   },
@@ -57,31 +57,31 @@ export const buttonStateMap = {
       border: 'transparent',
     },
     hover: {
-      background: 'var(--color-ivory)',
+      background: 'var(--table-header-bg)',
       color: 'var(--color-ink)',
       border: 'transparent',
     },
     disabled: {
       background: 'transparent',
-      color: 'color-mix(in srgb, var(--color-ink-muted) 68%, var(--color-paper))',
+      color: '#9aa6b2',
       border: 'transparent',
     },
   },
   danger: {
     default: {
-      background: 'var(--color-paper)',
+      background: 'var(--color-surface-primary)',
       color: 'var(--color-danger)',
-      border: 'color-mix(in srgb, var(--color-danger) 38%, var(--color-paper))',
+      border: '#f1a29b',
     },
     hover: {
-      background: 'color-mix(in srgb, var(--color-danger) 10%, var(--color-paper))',
+      background: 'var(--color-danger-soft)',
       color: 'var(--color-danger)',
       border: 'var(--color-danger)',
     },
     disabled: {
-      background: 'var(--color-paper)',
-      color: 'color-mix(in srgb, var(--color-danger) 45%, var(--color-paper))',
-      border: 'color-mix(in srgb, var(--color-danger) 24%, var(--color-paper))',
+      background: 'var(--color-surface-primary)',
+      color: '#d92d20',
+      border: '#fecdca',
     },
   },
 } as const;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mdiClose, mdiCodeTags } from '@mdi/js';
+import { mdiClose, mdiCodeTags, mdiTextBoxPlusOutline } from '@mdi/js';
 import UiButton from '../ui/UiButton.vue';
 import UiField from '../ui/UiField.vue';
 import UiSelect from '../ui/UiSelect.vue';
@@ -119,6 +119,7 @@ function removeBlock(index: number) {
       <div class="structured-editor__actions">
         <UiButton
           :disabled="disabled"
+          :icon="mdiTextBoxPlusOutline"
           size="sm"
           tone="secondary"
           @click="addTextBlock"
@@ -231,15 +232,18 @@ function removeBlock(index: number) {
 }
 
 .structured-editor__actions {
-  grid-auto-flow: column;
+  display: flex;
   align-content: start;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .structured-editor__block {
   padding: 14px;
-  border: 1px solid color-mix(in srgb, var(--panel-border) 88%, transparent);
-  border-radius: calc(var(--panel-radius) - 10px);
-  background: color-mix(in srgb, var(--color-paper) 94%, var(--color-ivory));
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  background: var(--color-surface-muted);
 }
 
 @media (max-width: 900px) {
@@ -249,7 +253,12 @@ function removeBlock(index: number) {
   }
 
   .structured-editor__actions {
-    grid-auto-flow: row;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .structured-editor__actions .v-btn {
+    flex: 1 1 140px;
   }
 }
 </style>

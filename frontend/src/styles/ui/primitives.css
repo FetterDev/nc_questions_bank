@@ -1,12 +1,12 @@
 .surface-card {
   border: 1px solid var(--panel-border);
   border-radius: var(--panel-radius);
-  background: color-mix(in srgb, var(--color-paper) 94%, var(--color-ivory));
+  background: var(--color-surface-primary);
   box-shadow: var(--shadow-overlay);
 }
 
 .surface-card.v-alert {
-  background: var(--color-paper);
+  background: var(--color-surface-primary);
 }
 
 .ui-panel {
@@ -15,7 +15,7 @@
 }
 
 .ui-panel--muted {
-  background: color-mix(in srgb, var(--color-paper) 84%, var(--color-ivory));
+  background: var(--color-surface-subtle);
 }
 
 .ui-panel--variant-default,
@@ -30,27 +30,27 @@
 }
 
 .ui-panel--variant-toolbar {
-  background: color-mix(in srgb, var(--color-paper) 92%, var(--color-ivory));
+  background: var(--color-surface-primary);
 }
 
 .ui-panel--variant-table,
 .ui-panel--variant-detail {
-  background: color-mix(in srgb, var(--color-paper) 95%, var(--color-ivory));
+  background: var(--color-surface-primary);
 }
 
 .ui-panel--variant-form {
-  background: var(--color-paper);
+  background: var(--color-surface-primary);
 }
 
 .ui-panel--variant-detail,
 .ui-panel--variant-form {
-  border-color: color-mix(in srgb, var(--panel-border) 76%, var(--color-ink-muted) 24%);
+  border-color: var(--panel-border);
   box-shadow: var(--shadow-floating-card);
 }
 
 .ui-panel--variant-empty {
   align-content: center;
-  min-height: 220px;
+  min-height: 150px;
 }
 
 .ui-panel--variant-compact {
@@ -95,7 +95,7 @@
   border-color: var(--ui-button-hover-border);
   background: var(--ui-button-hover-bg);
   color: var(--ui-button-hover-color);
-  box-shadow: var(--shadow-overlay) !important;
+  box-shadow: none !important;
 }
 
 .ui-button--block {
@@ -191,13 +191,13 @@
 }
 
 .ui-control .v-field:hover {
-  border-color: color-mix(in srgb, var(--color-cyan) 36%, var(--color-paper));
-  background: transparent;
+  border-color: #a8b5c2;
+  background: var(--color-surface-primary);
 }
 
 .ui-control .v-field--focused {
   border-color: var(--field-border-focus);
-  box-shadow: var(--shadow-overlay);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .ui-control .v-field--error {
@@ -258,9 +258,9 @@
 }
 
 .ui-control .v-chip {
-  border: 1px solid color-mix(in srgb, var(--color-ink-muted) 16%, var(--color-paper));
+  border: 1px solid var(--panel-border);
   border-radius: var(--pill-radius) !important;
-  background: color-mix(in srgb, var(--color-ivory) 72%, var(--color-paper));
+  background: var(--table-header-bg);
 }
 
 .table-card__caption {
@@ -274,9 +274,9 @@
 .list-head {
   display: grid;
   gap: 12px;
-  min-height: 44px;
-  padding: 12px var(--panel-padding-compact);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-ink-muted) 12%, var(--color-paper));
+  min-height: 40px;
+  padding: 10px var(--panel-padding-compact);
+  border-bottom: 1px solid var(--panel-border);
   background: var(--table-header-bg);
   color: var(--color-ink-muted);
   font-family: var(--font-mono);
@@ -289,8 +289,8 @@
   display: grid;
   gap: 12px;
   min-height: var(--list-row-min-height);
-  padding: var(--panel-padding-compact);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-ivory) 68%, var(--color-paper));
+  padding: 14px var(--panel-padding-compact);
+  border-bottom: 1px solid var(--color-border-muted);
 }
 
 .list-row:last-child {
@@ -298,7 +298,7 @@
 }
 
 .list-row:hover {
-  background: color-mix(in srgb, var(--color-paper) 72%, var(--color-ivory));
+  background: var(--color-surface-muted);
 }
 
 .list-cell {
@@ -361,28 +361,28 @@
 }
 
 .status-badge--pending {
-  background: color-mix(in srgb, var(--color-brass) 22%, var(--color-paper));
-  color: var(--color-ink);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
 }
 
 .status-badge--ready {
-  background: color-mix(in srgb, var(--color-ivory) 72%, var(--color-paper));
+  background: var(--table-header-bg);
   color: var(--color-ink);
 }
 
 .status-badge--danger {
   background: var(--color-danger);
-  color: var(--color-paper);
+  color: var(--color-surface-primary);
 }
 
 .status-badge--success {
   background: var(--color-success);
-  color: var(--color-paper);
+  color: var(--color-surface-primary);
 }
 
 .status-badge--warning {
-  background: color-mix(in srgb, var(--color-brass) 82%, var(--color-paper));
-  color: var(--color-ink);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
 }
 
 .date-cell {
@@ -440,7 +440,7 @@
   font-size: var(--font-size-h1);
   font-weight: 600;
   line-height: 1.05;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
 }
 
 @media (max-width: 900px) {
@@ -450,12 +450,14 @@
 
   .question-row,
   .topic-row,
+  .company-row,
   .preset-row {
     grid-template-columns: 1fr;
   }
 
   .question-row .row-actions,
   .topic-row .row-actions,
+  .company-row .row-actions,
   .preset-row .row-actions {
     justify-content: flex-start;
   }

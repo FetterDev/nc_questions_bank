@@ -59,4 +59,13 @@
   .users-controls-card {
     grid-template-columns: 1fr;
   }
+
+  .list-head--users,
+  .user-row {
+    grid-template-columns: 1fr;
+  }
+
+  .user-row .row-actions {
+    justify-content: flex-start;
+  }
 }

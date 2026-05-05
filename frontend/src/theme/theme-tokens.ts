@@ -13,25 +13,27 @@ export interface ThemeTokens {
     tagJunior: string;
     tagMiddle: string;
     tagSenior: string;
+    tagLead: string;
     backdrop: string;
   };
 }
 
 export const themeTokens: ThemeTokens = {
   colors: {
-    paper: '#F8F4ED',
-    ivory: '#ECE2D0',
-    ink: '#0F3C43',
-    inkMuted: '#385E61',
-    cyan: '#187A82',
-    cyanLight: '#2B878E',
-    brass: '#C39A5E',
-    danger: '#A63C3C',
-    success: '#356F55',
-    warning: '#8C6532',
-    tagJunior: '#4A9A70',
-    tagMiddle: '#C2A257',
-    tagSenior: '#C44545',
-    backdrop: 'linear-gradient(180deg,#0F3C43 0%,#163C42 100%)',
+    paper: '#F6F7F9',
+    ivory: '#FFFFFF',
+    ink: '#17212B',
+    inkMuted: '#5F6F7F',
+    cyan: '#0F7F84',
+    cyanLight: '#159AA0',
+    brass: '#B7791F',
+    danger: '#B42318',
+    success: '#067647',
+    warning: '#B54708',
+    tagJunior: '#067647',
+    tagMiddle: '#A15C07',
+    tagSenior: '#B42318',
+    tagLead: '#6941C6',
+    backdrop: 'linear-gradient(180deg,#17212B 0%,#243242 100%)',
   },
 };

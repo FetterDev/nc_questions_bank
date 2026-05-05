@@ -53,8 +53,8 @@ function createEditorTheme() {
     '&': {
       minHeight: '15rem',
       border: '1px solid var(--panel-border)',
-      borderRadius: 'calc(var(--panel-radius) - 8px)',
-      backgroundColor: 'color-mix(in srgb, var(--color-paper) 92%, var(--color-ivory))',
+      borderRadius: 'var(--panel-radius)',
+      backgroundColor: 'var(--color-surface-muted)',
       color: 'var(--color-ink)',
       fontFamily: 'var(--font-mono)',
       fontSize: '0.95rem',
@@ -74,8 +74,8 @@ function createEditorTheme() {
     },
     '.cm-gutters': {
       border: 'none',
-      borderRight: '1px solid color-mix(in srgb, var(--panel-border) 80%, transparent)',
-      backgroundColor: 'color-mix(in srgb, var(--color-paper) 86%, var(--color-ivory))',
+      borderRight: '1px solid var(--color-border-muted)',
+      backgroundColor: 'var(--table-header-bg)',
       color: 'var(--color-ink-muted)',
       minWidth: '3rem',
     },
@@ -84,27 +84,27 @@ function createEditorTheme() {
       fontFamily: 'inherit',
     },
     '.cm-activeLine': {
-      backgroundColor: 'color-mix(in srgb, var(--color-brand) 6%, transparent)',
+      backgroundColor: 'var(--color-info-soft)',
     },
     '.cm-activeLineGutter': {
-      backgroundColor: 'color-mix(in srgb, var(--color-brand) 8%, transparent)',
+      backgroundColor: 'var(--color-info-soft)',
     },
     '.cm-selectionBackground, &.cm-focused .cm-selectionBackground, ::selection': {
-      backgroundColor: 'color-mix(in srgb, var(--color-brand) 18%, transparent)',
+      backgroundColor: 'var(--color-focus-ring)',
     },
     '&.cm-focused': {
-      outline: '2px solid color-mix(in srgb, var(--color-brand) 18%, transparent)',
+      outline: '2px solid var(--color-focus-ring)',
       outlineOffset: '0',
     },
     '.cm-cursor, .cm-dropCursor': {
-      borderLeftColor: 'var(--color-brand)',
+      borderLeftColor: 'var(--color-cyan)',
     },
     '.cm-placeholder': {
       color: 'var(--color-ink-muted)',
       fontStyle: 'italic',
     },
     '.cm-panels': {
-      backgroundColor: 'color-mix(in srgb, var(--color-paper) 94%, var(--color-ivory))',
+      backgroundColor: 'var(--color-surface-primary)',
       color: 'var(--color-ink)',
     },
   });

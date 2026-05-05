@@ -5,7 +5,7 @@ export const lightTheme: ThemeDefinition = {
   dark: false,
   colors: {
     background: themeTokens.colors.paper,
-    surface: themeTokens.colors.paper,
+    surface: themeTokens.colors.ivory,
     primary: themeTokens.colors.cyan,
     secondary: themeTokens.colors.ink,
     accent: themeTokens.colors.cyanLight,
@@ -23,8 +23,9 @@ export const lightTheme: ThemeDefinition = {
     danger: themeTokens.colors.danger,
     'on-background': themeTokens.colors.ink,
     'on-surface': themeTokens.colors.ink,
-    'on-primary': themeTokens.colors.paper,
-    'on-secondary': themeTokens.colors.paper,
-    'surface-variant': themeTokens.colors.ivory,
+    'on-primary': '#FFFFFF',
+    'on-secondary': '#FFFFFF',
+    'surface-variant': '#EEF2F6',
+    'tag-lead': themeTokens.colors.tagLead,
   },
 };

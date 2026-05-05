@@ -21,3 +21,4 @@ coverage/
 
 # Git metadata backups
 .git-backups/
+.superpowers/
