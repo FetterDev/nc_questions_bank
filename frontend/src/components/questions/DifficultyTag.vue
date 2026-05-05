@@ -33,11 +33,11 @@ const label = computed(() => formatDifficulty(props.difficulty));
   border-radius: var(--pill-radius);
   font-family: var(--font-ui);
   font-size: var(--font-size-small);
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 800;
+  letter-spacing: 0;
   line-height: 1;
-  text-transform: uppercase;
   white-space: nowrap;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.86) inset;
 }
 
 .difficulty-tag[data-size='small'] {

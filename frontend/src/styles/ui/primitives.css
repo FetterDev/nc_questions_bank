@@ -1,7 +1,7 @@
 .surface-card {
   border: 1px solid var(--panel-border);
   border-radius: var(--panel-radius);
-  background: var(--color-surface-primary);
+  background: rgba(255, 255, 255, 0.9);
   box-shadow: var(--shadow-overlay);
 }
 
@@ -15,7 +15,7 @@
 }
 
 .ui-panel--muted {
-  background: var(--color-surface-subtle);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .ui-panel--variant-default,
@@ -30,7 +30,7 @@
 }
 
 .ui-panel--variant-toolbar {
-  background: var(--color-surface-primary);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .ui-panel--variant-table,
@@ -45,7 +45,7 @@
 .ui-panel--variant-detail,
 .ui-panel--variant-form {
   border-color: var(--panel-border);
-  box-shadow: var(--shadow-floating-card);
+  box-shadow: var(--shadow-overlay);
 }
 
 .ui-panel--variant-empty {
@@ -66,7 +66,7 @@
 }
 
 .ui-button.v-btn {
-  min-height: 44px;
+  min-height: 42px;
   min-width: var(--min-touch-target);
   padding-inline: 16px;
   border: 1px solid var(--ui-button-border);
@@ -77,8 +77,8 @@
   text-transform: none;
   font-family: var(--font-ui);
   font-size: var(--font-size-small);
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-weight: 800;
+  letter-spacing: 0;
   transition:
     border-color 160ms ease,
     background-color 160ms ease,
@@ -95,7 +95,7 @@
   border-color: var(--ui-button-hover-border);
   background: var(--ui-button-hover-bg);
   color: var(--ui-button-hover-color);
-  box-shadow: none !important;
+  box-shadow: 0 10px 22px rgba(16, 24, 40, 0.08) !important;
 }
 
 .ui-button--block {
@@ -137,8 +137,9 @@
   margin: 0;
   color: var(--color-ink-muted);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -183,7 +184,7 @@
   border: 1px solid var(--field-border);
   border-radius: var(--control-radius);
   background: var(--field-bg);
-  box-shadow: none;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease,
@@ -191,13 +192,13 @@
 }
 
 .ui-control .v-field:hover {
-  border-color: #a8b5c2;
+  border-color: #94a3b8;
   background: var(--color-surface-primary);
 }
 
 .ui-control .v-field--focused {
   border-color: var(--field-border-focus);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  box-shadow: 0 0 0 3px var(--color-focus-ring), 0 8px 18px rgba(0, 143, 140, 0.08);
 }
 
 .ui-control .v-field--error {
@@ -260,7 +261,8 @@
 .ui-control .v-chip {
   border: 1px solid var(--panel-border);
   border-radius: var(--pill-radius) !important;
-  background: var(--table-header-bg);
+  background: var(--color-surface-subtle);
+  font-weight: 700;
 }
 
 .table-card__caption {
@@ -277,7 +279,7 @@
   min-height: 40px;
   padding: 10px var(--panel-padding-compact);
   border-bottom: 1px solid var(--panel-border);
-  background: var(--table-header-bg);
+  background: linear-gradient(180deg, #eef4fa, #e6edf5);
   color: var(--color-ink-muted);
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -291,6 +293,11 @@
   min-height: var(--list-row-min-height);
   padding: 14px var(--panel-padding-compact);
   border-bottom: 1px solid var(--color-border-muted);
+  background: rgba(255, 255, 255, 0.78);
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 .list-row:last-child {
@@ -298,7 +305,9 @@
 }
 
 .list-row:hover {
-  background: var(--color-surface-muted);
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
+  transform: translateY(-1px);
 }
 
 .list-cell {
@@ -356,12 +365,12 @@
   border-radius: var(--pill-radius);
   font-family: var(--font-ui);
   font-size: 0.76rem;
-  font-weight: 600;
+  font-weight: 800;
   line-height: 1;
 }
 
 .status-badge--pending {
-  background: var(--color-warning-soft);
+  background: linear-gradient(135deg, #fff3df, #ffe2b8);
   color: var(--color-warning);
 }
 
@@ -394,7 +403,7 @@
   display: grid;
   place-items: center;
   gap: 6px;
-  padding: 40px 16px;
+  padding: 36px 16px;
   text-align: center;
 }
 
@@ -402,7 +411,8 @@
   margin: 0;
   color: var(--color-ink);
   font-family: var(--font-display);
-  font-size: var(--font-size-h2);
+  font-size: 1.15rem;
+  font-weight: 800;
   line-height: 1.1;
 }
 

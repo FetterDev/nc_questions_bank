@@ -25,7 +25,7 @@ export const lightTheme: ThemeDefinition = {
     'on-surface': themeTokens.colors.ink,
     'on-primary': '#FFFFFF',
     'on-secondary': '#FFFFFF',
-    'surface-variant': '#EEF2F6',
+    'surface-variant': '#E8EEF5',
     'tag-lead': themeTokens.colors.tagLead,
   },
 };

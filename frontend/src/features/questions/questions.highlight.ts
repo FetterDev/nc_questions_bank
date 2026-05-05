@@ -31,7 +31,7 @@ async function getQuestionHighlighter() {
   highlighterPromise ??= Promise.all([
     import('shiki/core'),
     import('shiki/engine/javascript'),
-    import('shiki/themes/github-light.mjs'),
+    import('shiki/themes/github-dark.mjs'),
     import('shiki/langs/javascript.mjs'),
     import('shiki/langs/jsx.mjs'),
     import('shiki/langs/typescript.mjs'),
@@ -40,7 +40,7 @@ async function getQuestionHighlighter() {
     ([
       { createHighlighterCore },
       { createJavaScriptRegexEngine },
-      { default: githubLight },
+      { default: githubDark },
       { default: javascript },
       { default: jsx },
       { default: typescript },
@@ -48,7 +48,7 @@ async function getQuestionHighlighter() {
     ]) =>
       createHighlighterCore({
         engine: createJavaScriptRegexEngine(),
-        themes: [githubLight],
+        themes: [githubDark],
         langs: [javascript, jsx, typescript, tsx],
       }),
   );
@@ -77,7 +77,7 @@ export async function renderQuestionCodeToHtml(
   const rendered = getQuestionHighlighter().then((highlighter) =>
     highlighter.codeToHtml(code, {
       lang: normalizedLanguage,
-      theme: 'github-light',
+      theme: 'github-dark',
     }),
   );
 

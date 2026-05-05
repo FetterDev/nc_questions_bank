@@ -108,7 +108,7 @@ async function renderCodeBlock(block: QuestionCodeContentBlock) {
   --question-content-text-color: var(--color-ink);
   --question-content-muted-color: var(--color-ink-muted);
   --question-content-code-border: var(--panel-border);
-  --question-content-code-bg: var(--color-surface-muted);
+  --question-content-code-bg: #101820;
   --question-content-code-color: var(--color-ink);
 }
 
@@ -141,13 +141,15 @@ async function renderCodeBlock(block: QuestionCodeContentBlock) {
   border: 1px solid var(--question-content-code-border);
   border-radius: var(--panel-radius);
   background: var(--question-content-code-bg);
+  box-shadow: 0 16px 38px rgba(16, 24, 40, 0.1);
 }
 
 .question-content-renderer__language {
-  color: var(--question-content-muted-color);
+  color: rgba(255, 255, 255, 0.62);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -163,7 +165,7 @@ async function renderCodeBlock(block: QuestionCodeContentBlock) {
   width: max-content;
   min-width: 100%;
   background: transparent !important;
-  color: var(--question-content-code-color) !important;
+  color: #e6edf3 !important;
   font-family: var(--font-mono) !important;
   font-size: var(--question-content-code-size, 0.92rem) !important;
   line-height: var(--question-content-code-line-height, 1.6) !important;
@@ -191,7 +193,7 @@ async function renderCodeBlock(block: QuestionCodeContentBlock) {
   width: 2.8rem;
   padding-right: 0.75rem;
   border-right: 1px solid var(--color-border-muted);
-  color: var(--question-content-muted-color);
+  color: rgba(255, 255, 255, 0.38);
   text-align: right;
   user-select: none;
 }

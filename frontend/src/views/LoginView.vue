@@ -41,6 +41,22 @@ async function submitLogin() {
     <div class="login-shell__backdrop" aria-hidden="true" />
 
     <div class="login-shell__grid">
+      <aside class="login-card login-card--accent" aria-label="Nord">
+        <svg
+          aria-hidden="true"
+          class="login-card__mark"
+          viewBox="0 0 161.641 77.311"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <polygon fill="#E8F4F5" points="2.000,18.555 39.664,53.633 56.080,45.497" />
+          <polygon fill="#12B8B0" points="159.641,2.000 45.104,58.860 62.772,75.311" />
+        </svg>
+        <div>
+          <h1>Nord</h1>
+          <p>Оценка, интервью, рост.</p>
+        </div>
+      </aside>
+
       <UiPanel class="login-card login-card--form form-panel" variant="form">
         <div class="panel-copy">
           <h2>Вход</h2>

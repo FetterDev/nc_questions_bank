@@ -1,7 +1,7 @@
 .v-alert {
   border-radius: var(--control-radius) !important;
   border: 1px solid var(--panel-border);
-  box-shadow: none !important;
+  box-shadow: var(--shadow-overlay) !important;
 }
 
 .v-alert .v-alert__content {
@@ -15,8 +15,8 @@
 }
 
 .v-pagination .v-btn--active {
-  background: var(--table-header-bg);
-  color: var(--color-ink);
+  background: var(--color-graphite);
+  color: #ffffff;
 }
 
 .v-snackbar .v-overlay__content {
@@ -37,13 +37,13 @@
 .v-chip {
   font-family: var(--font-ui);
   font-size: var(--font-size-small);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0;
 }
 
 .v-chip.v-chip--variant-tonal {
   border: 1px solid var(--panel-border);
-  background: var(--table-header-bg);
+  background: linear-gradient(180deg, #ffffff, var(--table-header-bg));
   color: var(--color-ink);
 }
 
@@ -65,4 +65,5 @@
 .v-overlay__content .v-list-item--selected {
   background: var(--color-surface-selected);
   color: var(--color-ink);
+  font-weight: 800;
 }

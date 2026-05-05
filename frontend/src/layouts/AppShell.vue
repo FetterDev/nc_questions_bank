@@ -206,6 +206,11 @@ const topbarEyebrow = computed(() =>
 
         <div class="workspace">
           <UiPanel class="workspace-bar" padding="default" tag="header" variant="toolbar">
+            <div class="workspace-bar__title">
+              <span>{{ topbarEyebrow }}</span>
+              <strong>{{ topbarTitle }}</strong>
+            </div>
+
             <div class="workspace-bar__tools">
               <div class="workspace-account">
                 <UiButton
