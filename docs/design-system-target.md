@@ -98,17 +98,19 @@
 
 Текущая база:
 
-- Shell padding: 20px.
-- Frame gap: 16px.
-- Panel padding: 22px.
-- Compact padding: 16px.
+- Shell padding: 28px на desktop, минимум 16px на mobile.
+- Frame gap: 24px на desktop, 16-18px на mobile.
+- Panel padding: 28px на desktop, 20px на mobile.
+- Compact padding: 20px на desktop, 16px на mobile.
 - Control height: 48px.
-- Sidebar width: 252px.
+- Sidebar width: 276px.
 - Min touch target: 40px.
 
 Цель:
 
-- Рабочие desktop-экраны используют ритм 16px.
+- Рабочие desktop-экраны используют ритм 20/24/28px: 20px между близкими элементами, 24px между секциями, 28px внутри основных панелей.
+- Mobile не может иметь внешний gutter меньше 16px. Контент не должен начинаться у края viewport, даже если экран плотный.
+- `UiPanel` с `padding="default"` обязан реально давать panel padding. Панели без padding допустимы только как намеренные table/content shells с внутренней surface.
 - Компактные строки таблиц/списков не ниже 64px, если в строке есть rich content.
 - Forms сохраняют 48px controls, но секции не должны становиться слишком высокими из-за лишних wrappers.
 - Empty states в feature panels: 140-170px, не 220px по умолчанию, если блок не является главным экранным состоянием.
@@ -249,8 +251,8 @@
 
 Цель:
 
-- Сделать login частью той же DS: neutral page, white auth panel, teal primary, clear field states.
-- Без marketing hero и декоративных фонов.
+- Сделать login частью той же DS: compact brand panel + white auth panel, teal primary, clear field states.
+- Brand panel должен работать как входной знак продукта, а не как marketing hero. На mobile он не должен отталкивать форму ниже первого экрана.
 - Error state и loading state должны совпадать с общими alert/button rules.
 
 Нужно сделать:

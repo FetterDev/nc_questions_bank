@@ -3,7 +3,7 @@ import { useAttrs } from 'vue';
 
 defineOptions({ inheritAttrs: false });
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   padding?: 'compact' | 'default' | 'none';
   tone?: 'default' | 'muted';
   variant?: 'compact' | 'default' | 'detail' | 'empty' | 'form' | 'table' | 'toolbar';
@@ -22,9 +22,9 @@ const attrs = useAttrs();
     :class="[
       'surface-card',
       'ui-panel',
-      `ui-panel--variant-${variant}`,
-      `ui-panel--${tone}`,
-      `ui-panel--${padding}`,
+      `ui-panel--variant-${props.variant}`,
+      `ui-panel--${props.tone}`,
+      `ui-panel--${props.padding}`,
     ]"
     flat
   >

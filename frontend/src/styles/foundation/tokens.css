@@ -43,18 +43,18 @@
   --font-size-small: 14px;
   --line-height-base: 1.4;
 
-  --shell-padding: 18px;
-  --content-max-width: 1216px;
-  --frame-gap: 18px;
-  --panel-padding: 24px;
-  --panel-padding-compact: 16px;
+  --shell-padding: 28px;
+  --content-max-width: 1184px;
+  --frame-gap: 24px;
+  --panel-padding: 28px;
+  --panel-padding-compact: 20px;
 
   --panel-radius: 8px;
   --control-radius: 8px;
   --pill-radius: 6px;
 
-  --sidebar-width: 264px;
-  --topbar-height: 68px;
+  --sidebar-width: 276px;
+  --topbar-height: 76px;
   --control-height: 48px;
   --icon-button-size: 32px;
   --list-row-min-height: 64px;

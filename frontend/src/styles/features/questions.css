@@ -6,7 +6,7 @@
     minmax(260px, 1fr)
     minmax(180px, 0.5fr);
   align-items: end;
-  gap: 12px;
+  gap: 16px;
 }
 
 .questions-toolbar-actions {
@@ -15,14 +15,14 @@
   align-items: center;
   justify-content: flex-end;
   align-self: end;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
   flex-wrap: wrap;
 }
 
 .questions-list {
   display: grid;
-  gap: 10px;
+  gap: 0;
 }
 
 .list-row--pending {
@@ -100,25 +100,25 @@
 
 .editor-layout {
   display: grid;
-  gap: var(--frame-gap);
+  gap: 24px;
   width: min(960px, 100%);
   justify-self: center;
 }
 
 .editor-panel {
-  padding: clamp(18px, 2.5vw, var(--panel-padding));
+  padding: clamp(24px, 3vw, 34px) !important;
 }
 
 .editor-form {
   display: grid;
-  gap: var(--panel-padding-compact);
-  margin-top: var(--panel-padding-compact);
+  gap: 24px;
+  margin-top: 22px;
 }
 
 .editor-preview-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--panel-padding-compact);
+  gap: 18px;
 }
 
 .editor-preview-card {
@@ -145,8 +145,8 @@
 
 .criteria-editor__row {
   display: grid;
-  gap: 12px;
-  padding: var(--panel-padding-compact);
+  gap: 16px;
+  padding: 20px;
   border: 1px solid var(--panel-border);
   border-radius: var(--panel-radius);
   background: linear-gradient(180deg, #ffffff, var(--color-surface-muted));
@@ -155,21 +155,21 @@
 .criteria-editor__main {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.8fr) minmax(96px, 0.28fr);
-  gap: 12px;
+  gap: 16px;
   align-items: start;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1.2fr);
-  gap: var(--panel-padding-compact);
+  gap: 18px;
 }
 
 .difficulty-toggle {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  padding: 8px;
+  gap: 10px;
+  padding: 10px;
   border: 1px solid var(--panel-border);
   border-radius: var(--control-radius);
   background: var(--color-graphite);
@@ -470,11 +470,11 @@
   }
 
   .editor-layout {
-    gap: 14px;
+    gap: 18px;
   }
 
   .editor-form {
-    gap: 18px;
+    gap: 22px;
   }
 
   .questions-toolbar-actions .v-btn {

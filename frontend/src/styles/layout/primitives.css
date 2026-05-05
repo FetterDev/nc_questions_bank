@@ -3,11 +3,12 @@
   display: grid;
   gap: var(--frame-gap);
   width: min(var(--content-max-width), 100%);
+  justify-self: center;
   min-width: 0;
 }
 
 .page-frame--narrow {
-  width: min(960px, 100%);
+  width: min(1000px, 100%);
 }
 
 .page-section,
@@ -30,7 +31,7 @@
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--panel-padding-compact);
+  gap: 20px;
 }
 
 .metrics-grid > *,
@@ -46,7 +47,7 @@
 .insight-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--panel-padding-compact);
+  gap: 20px;
 }
 
 .split-workspace {
@@ -62,8 +63,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 6px;
+  gap: 16px;
+  margin-bottom: 0;
 }
 
 .panel-copy {
@@ -94,7 +95,7 @@
   overflow: hidden;
   border: 1px solid var(--panel-border);
   border-radius: var(--panel-radius);
-  background: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.88);
   box-shadow: var(--shadow-overlay);
 }
 
@@ -105,7 +106,7 @@
 }
 
 .action-footer {
-  padding-top: var(--panel-padding-compact);
+  padding-top: 4px;
 }
 
 .action-footer--end {
@@ -121,11 +122,11 @@
 
 .form-section {
   display: grid;
-  gap: 12px;
+  gap: 16px;
 }
 
 .form-section + .form-section {
-  padding-top: var(--panel-padding-compact);
+  padding-top: 24px;
 }
 
 .detail-stack {
@@ -135,7 +136,7 @@
 
 .toolbar-panel__filters {
   display: grid;
-  gap: 12px;
+  gap: 16px;
 }
 
 .toolbar-panel__copy {
@@ -144,8 +145,8 @@
 
 .summary-stat {
   display: grid;
-  gap: 6px;
-  padding: var(--panel-padding-compact);
+  gap: 8px;
+  padding: 22px;
   border: 1px solid var(--panel-border);
   border-radius: var(--panel-radius);
   background:
@@ -216,16 +217,30 @@
 }
 
 @media (max-width: 720px) {
+  .page-frame,
+  .page-stack {
+    gap: 18px;
+  }
+
   .metrics-grid,
   .insight-grid {
     grid-template-columns: 1fr;
   }
 
   .summary-stat {
-    padding: 14px;
+    padding: 18px;
   }
 
   .summary-stat strong {
     font-size: 1.28rem;
+  }
+
+  .action-footer__group {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .action-footer__group .v-btn {
+    width: 100%;
   }
 }

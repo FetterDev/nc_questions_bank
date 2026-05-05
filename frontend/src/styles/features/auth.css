@@ -3,7 +3,7 @@
   display: grid;
   place-items: center;
   min-height: 100vh;
-  padding: 28px;
+  padding: 32px;
   overflow: hidden;
 }
 
@@ -19,19 +19,19 @@
 .login-shell__grid {
   position: relative;
   z-index: 1;
-  width: min(980px, 100%);
+  width: min(1040px, 100%);
   min-height: calc(100vh - 48px);
   margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.92fr);
-  gap: var(--frame-gap);
+  gap: 24px;
   align-items: center;
 }
 
 .login-card {
   display: grid;
-  gap: var(--panel-padding-compact);
-  padding: clamp(24px, 3vw, 36px);
+  gap: 22px;
+  padding: clamp(28px, 3.2vw, 44px);
   border-radius: var(--panel-radius);
 }
 
@@ -109,6 +109,8 @@
 @media (max-width: 960px) {
   .login-shell__grid {
     grid-template-columns: 1fr;
+    align-content: center;
+    min-height: calc(100vh - 40px);
   }
 
   .login-card--accent {
@@ -122,11 +124,23 @@
 
 @media (max-width: 640px) {
   .login-shell {
-    padding: 12px;
+    display: block;
+    min-height: 100vh;
+    padding: 18px;
+    overflow: auto;
+  }
+
+  .login-shell__grid {
+    gap: 18px;
+    min-height: auto;
   }
 
   .login-card--accent {
-    min-height: 180px;
+    min-height: 220px;
+  }
+
+  .login-card.login-card--form {
+    padding: 24px !important;
   }
 
   .login-card__mark {

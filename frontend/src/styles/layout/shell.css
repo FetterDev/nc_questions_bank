@@ -1,7 +1,8 @@
 .app-shell {
-  width: min(1480px, calc(100vw - (var(--shell-padding) * 2)));
+  width: 100%;
+  max-width: 1504px;
   margin: 0 auto;
-  padding: var(--shell-padding) 0 56px;
+  padding: var(--shell-padding) var(--shell-padding) 72px;
 }
 
 .app-frame {
@@ -11,14 +12,14 @@
   align-items: start;
 }
 
-.app-sidebar.surface-card {
+.app-sidebar.surface-card.ui-panel {
   position: sticky;
-  top: var(--frame-gap);
+  top: var(--shell-padding);
   display: grid;
-  gap: 16px;
+  gap: 20px;
   min-height: calc(100vh - (var(--shell-padding) * 2));
   align-content: start;
-  padding: 18px;
+  padding: 22px;
   border-color: rgba(255, 255, 255, 0.1);
   background:
     linear-gradient(160deg, rgba(0, 143, 140, 0.26), transparent 38%),
@@ -33,7 +34,7 @@
   align-items: center;
   height: 48px;
   width: 100%;
-  padding-inline: 10px;
+  padding-inline: 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--panel-radius);
   background: rgba(255, 255, 255, 0.08);
@@ -139,20 +140,20 @@
 
 .workspace {
   display: grid;
-  gap: var(--frame-gap);
+  gap: 22px;
   min-width: 0;
 }
 
-.workspace-bar.surface-card {
+.workspace-bar.surface-card.ui-panel {
   position: sticky;
-  top: var(--frame-gap);
+  top: var(--shell-padding);
   z-index: 6;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--frame-gap);
   min-height: var(--topbar-height);
-  padding: 16px 18px;
+  padding: 18px 22px;
   border-color: rgba(255, 255, 255, 0.72);
   background: rgba(255, 255, 255, 0.78);
   box-shadow: var(--shadow-overlay);
@@ -236,24 +237,31 @@
 
 .workspace-content {
   display: grid;
+  width: 100%;
   justify-items: center;
   min-width: 0;
 }
 
 @media (max-width: 1080px) {
-  .app-frame {
-    grid-template-columns: 1fr;
+  .app-shell {
+    max-width: 980px;
+    padding: 22px 22px 56px;
   }
 
-  .app-sidebar.surface-card,
-  .workspace-bar.surface-card {
+  .app-frame {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .app-sidebar.surface-card.ui-panel,
+  .workspace-bar.surface-card.ui-panel {
     position: static;
     min-height: auto;
   }
 
-  .app-sidebar.surface-card {
-    gap: 10px;
-    padding: 12px;
+  .app-sidebar.surface-card.ui-panel {
+    gap: 14px;
+    padding: 16px;
   }
 
   .sidebar-nav {
@@ -277,12 +285,15 @@
 
 @media (max-width: 900px) {
   .app-shell {
-    width: min(100vw - 16px, 100%);
-    padding-top: 12px;
+    padding: 18px 18px 48px;
   }
 
-  .app-sidebar.surface-card {
-    padding: 14px;
+  .workspace {
+    gap: 18px;
+  }
+
+  .app-sidebar.surface-card.ui-panel {
+    padding: 16px;
   }
 
   .sidebar-brand {
@@ -293,7 +304,7 @@
     height: 34px;
   }
 
-  .workspace-bar.surface-card {
+  .workspace-bar.surface-card.ui-panel {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
@@ -321,7 +332,16 @@
 
 @media (max-width: 720px) {
   .app-shell {
-    width: min(100vw - 12px, 100%);
+    padding: 16px 16px 44px;
+  }
+
+  .app-frame,
+  .workspace {
+    gap: 16px;
+  }
+
+  .app-sidebar.surface-card.ui-panel {
+    border-radius: 10px;
   }
 
   .ui-shell-nav-item.v-btn {

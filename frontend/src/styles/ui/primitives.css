@@ -57,18 +57,32 @@
   gap: 12px;
 }
 
-.ui-panel--compact {
+.ui-panel.ui-panel--default {
+  padding: var(--panel-padding);
+}
+
+.ui-panel.ui-panel--compact {
   padding: var(--panel-padding-compact) !important;
 }
 
-.ui-panel--none {
+.ui-panel.ui-panel--none {
   padding: 0 !important;
+}
+
+@media (max-width: 720px) {
+  .ui-panel.ui-panel--default {
+    padding: 20px;
+  }
+
+  .ui-panel.ui-panel--compact {
+    padding: 16px !important;
+  }
 }
 
 .ui-button.v-btn {
   min-height: 42px;
   min-width: var(--min-touch-target);
-  padding-inline: 16px;
+  padding-inline: 18px;
   border: 1px solid var(--ui-button-border);
   border-radius: var(--control-radius) !important;
   background: var(--ui-button-bg);
@@ -277,7 +291,7 @@
   display: grid;
   gap: 12px;
   min-height: 40px;
-  padding: 10px var(--panel-padding-compact);
+  padding: 12px var(--panel-padding);
   border-bottom: 1px solid var(--panel-border);
   background: linear-gradient(180deg, #eef4fa, #e6edf5);
   color: var(--color-ink-muted);
@@ -289,9 +303,9 @@
 
 .list-row {
   display: grid;
-  gap: 12px;
+  gap: 16px;
   min-height: var(--list-row-min-height);
-  padding: 14px var(--panel-padding-compact);
+  padding: 18px var(--panel-padding);
   border-bottom: 1px solid var(--color-border-muted);
   background: rgba(255, 255, 255, 0.78);
   transition:
